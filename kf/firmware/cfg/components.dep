@@ -1,0 +1,12 @@
+src kf_isolation.vhd
+src kf_top.vhd
+src kf_node.vhd
+src kf_updater.vhd
+src kf_residual.vhd
+src kf_format.vhd
+src kf_fit.vhd
+src kf_delay.vhd
+src kf_associator.vhd
+src kf_accumulator.vhd
+src kf_data_types.vhd
+src kf_data_formats.vhd

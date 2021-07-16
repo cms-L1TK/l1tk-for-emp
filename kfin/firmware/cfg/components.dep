@@ -1,0 +1,15 @@
+src kfin_isolation.vhd
+
+src kfin_format.vhd
+src kfin_router.vhd
+src kfin_low.vhd
+src kfin_sector.vhd
+src kfin_high.vhd
+src kfin_unify.vhd
+src kfin_top.vhd
+src kfin_layerEncoding.vhd
+src kfin_data_types.vhd
+src kfin_data_formats.vhd
+src kfin_config.vhd
+
+src ../luts/layerEncoding.mem
