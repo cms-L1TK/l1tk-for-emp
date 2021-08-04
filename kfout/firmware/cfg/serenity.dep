@@ -1,0 +1,17 @@
+include payload.dep
+
+src -c emp-fwk:components/datapath emp_data_types.vhd
+src -c ipbus-firmware:components/ipbus_core ipbus_package.vhd 
+
+src -c emp-fwk:components/payload ../ucf/emp_simple_payload.tcl
+src -c ipbus-firmware:components/ipbus_slaves ipbus_dpram.vhd
+src -c ipbus-firmware:components/ipbus_slaves ipbus_reg_v.vhd
+src -c ipbus-firmware:components/ipbus_slaves ipbus_ctrlreg_v.vhd
+src -c ipbus-firmware:components/ipbus_slaves ipbus_reg_types.vhd
+src -c ipbus-firmware:components/ipbus_core ipbus_dc_node.vhd
+src -c ipbus-firmware:components/ipbus_core ipbus_dc_fabric_sel.vhd
+
+addrtab -c emp-fwk:components/payload emp_payload.xml
+include -c emp-fwk:boards/serenity/dc_ku15p dc_ku15p_so1_v1.dep
+
+src top/emp_project_decl.vhd

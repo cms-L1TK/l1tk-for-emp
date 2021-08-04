@@ -1,0 +1,6 @@
+src emp_payload.vhd
+src kfout_isolation.vhd
+
+include components.dep
+
+include -c hybrid:common components.dep
