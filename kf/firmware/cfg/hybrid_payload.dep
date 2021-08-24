@@ -1,0 +1,20 @@
+src emp_payload.vhd
+
+src kf_top.vhd
+src kf_isolation.vhd
+
+src kf_updater.vhd
+src kf_residual.vhd
+src kf_node.vhd
+src kf_format.vhd
+src kf_fit.vhd
+src kf_delay.vhd
+src kf_associator.vhd
+src kf_accumulator.vhd
+src kf_data_types.vhd
+src hybrid_data_formats.vhd
+
+src -c tfp:top tfp_data_types.vhd
+src -c tfp:top hybrid_tfp_data_formats.vhd
+src -c tfp:top hybrid_config.vhd
+src -c tfp:top tfp_tools.vhd

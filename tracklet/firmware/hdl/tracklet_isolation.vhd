@@ -245,7 +245,7 @@ out_dout <= dout;
 
 track_packet <= out_packet( 0 );
 track_din <= out_din.track;
-dout( 0 + outputOffset ) <= track_dout;
+dout( 0 ) <= track_dout;
 
 cTrack: hybrid_format_out_track port map ( clk, track_packet, track_din, track_dout );
 
@@ -259,7 +259,7 @@ begin
 
 stub_packet <= out_packet( k + 1 );
 stub_din <= out_din.stubs( k );
-dout( k + 1 +  + outputOffset ) <= stub_dout;
+dout( k + 1 ) <= stub_dout;
 
 cStub: hybrid_format_out_stub port map ( clk, stub_packet, stub_din, stub_dout );
 
@@ -288,7 +288,7 @@ end;
 
 architecture rtl of hybrid_format_out_track is
 
-constant widthTrack: natural := 1 + widthSeedType + widthInv2R + widthPhi0 + widthZ0 + widthCot;
+constant widthTrack: natural := 1 + widthTrackletSeedType + widthTrackletInv2R + widthTrackletPhi0 + widthTrackletZ0 + widthTrackletCot;
 -- sr
 signal sr: std_logic_vector( PAYLOAD_LATENCY - 1 downto 0 ) := ( others => '0' );
 
@@ -350,7 +350,7 @@ end;
 
 architecture rtl of hybrid_format_out_stub is
 
-constant widthStub: natural := 1 + widthTrackId + widthStubId + widthR + widthPhi + widthZ;
+constant widthStub: natural := 1 + widthTrackletTrackId + widthTrackletStubId + widthTrackletR + widthTrackletPhi + widthTrackletZ;
 -- sr
 signal sr: std_logic_vector( PAYLOAD_LATENCY - 1 downto 0 ) := ( others => '0' );
 

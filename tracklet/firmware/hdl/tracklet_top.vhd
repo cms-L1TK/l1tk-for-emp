@@ -90,21 +90,21 @@ function conv( bw: t_arr_BW_46_DATA; tw: t_arr_TW_84_DATA ) return t_candTrackle
 begin
   for k in 0 to numStubsTracklet - 1 loop
     b := bw( enum_BW_46'val( k ) );
-    s.valid   := b( 1 + widthTrackId + widthStubId + widthR + widthPhi + widthZ - 1 );
-    s.trackId := b(     widthTrackId + widthStubId + widthR + widthPhi + widthZ - 1 downto widthStubId + widthR + widthPhi + widthZ );
-    s.stubId  := b(                    widthStubId + widthR + widthPhi + widthZ - 1 downto               widthR + widthPhi + widthZ );
-    s.r       := b(                                  widthR + widthPhi + widthZ - 1 downto                        widthPhi + widthZ );
-    s.phi     := b(                                           widthPhi + widthZ - 1 downto                                   widthZ );
-    s.z       := b(                                                      widthZ - 1 downto                                        0 );
+    s.valid   := b( 1 + widthTrackletTrackId + widthTrackletStubId + widthTrackletR + widthTrackletPhi + widthTrackletZ - 1 );
+    s.trackId := b(     widthTrackletTrackId + widthTrackletStubId + widthTrackletR + widthTrackletPhi + widthTrackletZ - 1 downto widthTrackletStubId + widthTrackletR + widthTrackletPhi + widthTrackletZ );
+    s.stubId  := b(                            widthTrackletStubId + widthTrackletR + widthTrackletPhi + widthTrackletZ - 1 downto                       widthTrackletR + widthTrackletPhi + widthTrackletZ );
+    s.r       := b(                                                  widthTrackletR + widthTrackletPhi + widthTrackletZ - 1 downto                                        widthTrackletPhi + widthTrackletZ );
+    s.phi     := b(                                                                   widthTrackletPhi + widthTrackletZ - 1 downto                                                           widthTrackletZ );
+    s.z       := b(                                                                                      widthTrackletZ - 1 downto                                                                        0 );
     c.stubs( k ) := s;
   end loop;
   t := tw( enum_TW_84'val( 0 ) );
-  c.track.valid    := t( 1 + widthSeedType + widthInv2R + widthPhi0 + widthZ0 + widthCot - 1 );
-  c.track.seedtype := t(     widthSeedType + widthInv2R + widthPhi0 + widthZ0 + widthCot - 1 downto widthInv2R + widthPhi0 + widthZ0 + widthCot );
-  c.track.inv2R    := t(                     widthInv2R + widthPhi0 + widthZ0 + widthCot - 1 downto              widthPhi0 + widthZ0 + widthCot );
-  c.track.phi0     := t(                                  widthPhi0 + widthZ0 + widthCot - 1 downto                          widthZ0 + widthCot );
-  c.track.z0       := t(                                              widthZ0 + widthCot - 1 downto                                    widthCot );
-  c.track.cot      := t(                                                        widthCot - 1 downto                                           0 );
+  c.track.valid    := t( 1 + widthTrackletSeedType + widthTrackletInv2R + widthTrackletPhi0 + widthTrackletZ0 + widthTrackletCot - 1 );
+  c.track.seedtype := t(     widthTrackletSeedType + widthTrackletInv2R + widthTrackletPhi0 + widthTrackletZ0 + widthTrackletCot - 1 downto widthTrackletInv2R + widthTrackletPhi0 + widthTrackletZ0 + widthTrackletCot );
+  c.track.inv2R    := t(                             widthTrackletInv2R + widthTrackletPhi0 + widthTrackletZ0 + widthTrackletCot - 1 downto                      widthTrackletPhi0 + widthTrackletZ0 + widthTrackletCot );
+  c.track.phi0     := t(                                                  widthTrackletPhi0 + widthTrackletZ0 + widthTrackletCot - 1 downto                                          widthTrackletZ0 + widthTrackletCot );
+  c.track.z0       := t(                                                                      widthTrackletZ0 + widthTrackletCot - 1 downto                                                            widthTrackletCot );
+  c.track.cot      := t(                                                                                        widthTrackletCot - 1 downto                                                                           0 );
   return c;
 end function;
 

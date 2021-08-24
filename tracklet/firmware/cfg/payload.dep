@@ -1,3 +1,8 @@
 src emp_payload.vhd
 
-include -c hybrid: components.dep
+#setup -f makeIPs.tcl
+
+include components.dep
+include -c hybrid:common components.dep
+
+include hls.dep

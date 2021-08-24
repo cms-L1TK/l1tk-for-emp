@@ -1,6 +1,6 @@
-# Building/Simulating the Hybrid Sommer Chain #
+# Building/Simulating the Hybrid Summer Chain #
 
-This repository contains the payload project for the Hybrid Sommer Chain - compatible with the extensible, modular firmware framework for phase-2 upgrades.
+This repository contains the payload project for the Hybrid Summer Chain - compatible with the extensible, modular firmware framework for phase-2 upgrades.
 
 The project can be built against multiple boards, but has so far been implemented for the VCU118 (VU9P).
 
@@ -29,20 +29,20 @@ There is currently six available projects
 
 | Description                                              | `.dep` file name                  |
 | -------------------------------------------------------- | --------------------------------- |
-| Hybrid Sommer Chain                                      | `vcu118.dep`                      |
+| Hybrid Summer Chain                                      | `vcu118.dep`                      |
 
-The project area for Hybrid Sommer Chain can be created as follows.
+The project area for Hybrid Summer Chain can be created as follows.
 
 For implementation:
 ```
-ipbb proj create vivado hybridV hybrid: 'vcu118.dep'
-cd proj/hybrid
+ipbb proj create vivado tracklet hybrid:tracklet 'vcu118.dep'
+cd proj/tracklet
 ```
 
 For simulation testbench:
 ```
-ipbb proj create sim hybridS hybrid: 'sim.dep'
-cd proj/hybrid
+ipbb proj create sim sim hybrid:tracklet 'sim.dep'
+cd proj/sim
 ```
 
 ##### Step 3: Implementation and simulation
@@ -55,11 +55,13 @@ ipbb vivado generate-project synth -j8 impl -j8 package
 
 For simulation testbench:
 ```
+ipbb sim setup-simlibs
 ipbb sim generate-project
 
 ./vsim -c work.top -Gsourcefile=<input.txt> -Gsinkfile=<out.txt> 
 ```
-where `input.txt` follows the standard pattern file convention
+where `input.txt` follows the standard pattern file convention.
+*N.B.* The Xilinx simulation libraries can be shared between different ipbb projects and work areas. By default they are written to `${HOME}/.xilinx_sim_libs`, but they can be written to another directory by defining the environment variable `IPBB_SIMLIB_BASE` before running these two commands, or by adding the `-x` option to end of each command (e.g. `-x /path/to/simlib_directory`).
 
 ## Prerequisites ##
 

@@ -1,0 +1,8 @@
+src emp_payload.vhd
+
+src kf_top.vhd
+src kf_isolation.vhd
+
+include -c tfp:kf components.dep
+
+include -c tfp:top components.dep
