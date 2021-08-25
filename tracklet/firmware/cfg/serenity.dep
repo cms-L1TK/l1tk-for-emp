@@ -1,4 +1,5 @@
-#src ../ucf/vcu118.tcl
+setup ../ucf/settings.tcl
+src ../ucf/vu7p.tcl
 
 include payload.dep
 
@@ -9,6 +10,4 @@ src -c ipbus-firmware:components/ipbus_slaves ipbus_reg_v.vhd ipbus_ctrlreg_v.vh
 src -c ipbus-firmware:components/ipbus_core ipbus_fabric_sel.vhd ipbus_package.vhd 
 
 addrtab -c emp-fwk:components/payload emp_payload.xml
-include -c emp-fwk:boards/vcu118 vcu118.dep
-
-setup settings.tcl
+include -c emp-fwk:boards/serenity/dc_vu7p dc_vu7p_so1_v1_0.dep

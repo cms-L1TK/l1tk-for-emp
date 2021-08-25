@@ -72,6 +72,8 @@ signal mem : mem_array := (
     1982 to 1983=> "111100", 1984 to 1985=> "111111", 1986 to 1993=> "111110", 1994 to 1999=> "111101", 2000 to 2005=> "111111", 
     2006 to 2013=> "111110", 2014 to 2015=> "111101", 2016 to 2025=> "111111", 2026 to 2031=> "111110", 2032 to 2045=> "111111", 
     2046 to 2047=> "111110" );
+    attribute ram_style: string;
+    attribute ram_style of mem: signal is "register";
 
 
 begin 

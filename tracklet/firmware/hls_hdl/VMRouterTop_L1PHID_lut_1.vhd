@@ -293,6 +293,8 @@ signal mem : mem_array := (
     1808 to 1819=> "11111111111", 1820 to 1822=> "00001110111", 1823 => "00011110110", 
     1824 to 1837=> "11111111111", 1838 to 1839=> "00001110111", 1840 to 1854=> "11111111111", 
     1855 => "00001110111", 1856 to 2047=> "11111111111" );
+    attribute ram_style: string;
+    attribute ram_style of mem: signal is "register";
 
 
 begin 
