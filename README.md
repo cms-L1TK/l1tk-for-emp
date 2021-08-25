@@ -2,7 +2,7 @@
 
 This repository contains the payload project for the Hybrid Summer Chain - compatible with the extensible, modular firmware framework for phase-2 upgrades.
 
-The project can be built against multiple boards, but has so far been implemented for the VCU118 (VU9P).
+The project can be built against multiple boards, but has so far been implemented for the Serenity (VU7P) and VCU118 (VU9P).
 
 ## Quick start instructions for developers ##
 
@@ -30,12 +30,14 @@ There is currently six available projects
 | Description                                              | `.dep` file name                  |
 | -------------------------------------------------------- | --------------------------------- |
 | Hybrid Summer Chain                                      | `vcu118.dep`                      |
+| Hybrid Summer Chain                                      | `serenity.dep`                    |
+| Hybrid Summer Chain                                      | `apollo.dep`                      |
 
 The project area for Hybrid Summer Chain can be created as follows.
 
 For implementation:
 ```
-ipbb proj create vivado tracklet hybrid:tracklet 'vcu118.dep'
+ipbb proj create vivado tracklet hybrid:tracklet 'serenity.dep'
 cd proj/tracklet
 ```
 
