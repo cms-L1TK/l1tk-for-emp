@@ -1,4 +1,5 @@
-#src ../ucf/vu7p.tcl
+setup ../ucf/settings.tcl
+src ../ucf/apollo.tcl
 
 include payload.dep
 
@@ -10,5 +11,3 @@ src -c ipbus-firmware:components/ipbus_core ipbus_fabric_sel.vhd ipbus_package.v
 
 addrtab -c emp-fwk:components/payload emp_payload.xml
 include -c emp-fwk:boards/apollo/cm_v1/vu7p cm_v1.dep
-
-setup settings.tcl

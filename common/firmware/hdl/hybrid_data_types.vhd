@@ -9,6 +9,14 @@ use work.emp_data_types.all;
 package hybrid_data_types is
 
 
+type t_reset is
+record
+  reset: std_logic;
+  start: std_logic;
+end record;
+function nulll return t_reset;
+type t_resets is array ( natural range <> ) of t_reset;
+
 type t_stubDTCPS is
 record
   reset: std_logic;
@@ -119,6 +127,7 @@ end;
 package body hybrid_data_types is
 
 
+function nulll return t_reset is begin return ( others => '0' ); end function;
 function nulll return t_stubDTCPS is begin return ( '0', '0', others => ( others => '0' ) ); end function;
 function nulll return t_stubDTC2S is begin return ( '0', '0', others => ( others => '0' ) ); end function;
 function nulll return t_stubsDTC is begin return ( ( others => nulll ), ( others => nulll ) ); end function;

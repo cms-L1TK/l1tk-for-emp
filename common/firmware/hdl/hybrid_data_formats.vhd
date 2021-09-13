@@ -1,5 +1,7 @@
 library ieee;
 use ieee.std_logic_1164.all;
+use work.hybrid_config.all;
+use work.hybrid_tools.all;
 
 
 package hybrid_data_formats is
@@ -46,6 +48,9 @@ constant widthKFsector: natural := 5;
 constant widthKFr     : natural := 12;
 constant widthKFdPhi  : natural := 9;
 constant widthKFdZ    : natural := 10;
+
+constant numFrames  : natural := tmp * integer( freqHyrbid / freqLHC ); -- number of clk ticks per TMP
+constant widthFrames: natural := width( numFrames );                    -- number of bits used to represent frame number within one TMP
 
 
 end;

@@ -1,15 +1,16 @@
 library ieee;
 use ieee.std_logic_1164.all;
-
+use work.hybrid_tools.all;
 use work.hybrid_config.all;
-use work.hybrid_data_formats.all;
 use work.hybrid_data_types.all;
-use work.memUtil_pkg.all;
+use work.tracklet_config.all;
+use work.tracklet_data_types.all;
 
 
 entity hybrid_tracklet is
 port (
     clk: in std_logic;
+    tracklet_reset: in t_resets( numQuads - 1 downto 0 );
     tracklet_din: in t_stubsDTC;
     tracklet_dout: out t_candTracklet
 );
@@ -18,112 +19,205 @@ end;
 
 architecture rtl of hybrid_tracklet is
 
-signal reset: std_logic := '1';
-signal IR_start: std_logic := '0';
-signal IR_bx_in: std_logic_vector(2 downto 0) := ( others => '0' );
-signal FT_bx_out: std_logic_vector(2 downto 0) := ( others => '0' );
-signal FT_bx_out_vld: std_logic := '0';
-signal FT_done: std_logic := '0';
-signal DL_39_link_AV_dout: t_arr_DL_39_DATA := ( others => ( others => '0' ) );
-signal DL_39_link_empty_neg: t_arr_DL_39_1b := ( others => '0' );
-signal DL_39_link_read: t_arr_DL_39_1b := ( others => '0' );
-signal BW_46_stream_AV_din: t_arr_BW_46_DATA := ( others => ( others => '0' ) );
-signal BW_46_stream_A_full_neg: t_arr_BW_46_1b := ( others => '1' );
-signal BW_46_stream_A_write: t_arr_BW_46_1b := ( others => '0' );
-signal TW_84_stream_AV_din: t_arr_TW_84_DATA := ( others => ( others => '0' ) );
-signal TW_84_stream_A_full_neg: t_arr_TW_84_1b := ( others => '1' );
-signal TW_84_stream_A_write: t_arr_TW_84_1b := ( others => '0' );
-component SectorProcessor
-port(
+
+signal in_reset: t_resets( numQuads - 1 downto 0 ) := ( others => nulll );
+signal in_din: t_stubsDTC := nulll;
+signal in_dout: t_datas( numInputsIR  - 1 downto 0 ) := ( others => nulll );
+component tracklet_format_in
+port (
   clk: in std_logic;
-  reset: in std_logic;
-  IR_start: in std_logic;
-  IR_bx_in: in std_logic_vector(2 downto 0);
-  FT_bx_out: out std_logic_vector(2 downto 0);
-  FT_bx_out_vld: out std_logic;
-  FT_done: out std_logic;
-  DL_39_link_AV_dout: in t_arr_DL_39_DATA;
-  DL_39_link_empty_neg: in t_arr_DL_39_1b;
-  DL_39_link_read: out t_arr_DL_39_1b;
-  BW_46_stream_AV_din: out t_arr_BW_46_DATA;
-  BW_46_stream_A_full_neg: in t_arr_BW_46_1b;
-  BW_46_stream_A_write: out t_arr_BW_46_1b;
-  TW_84_stream_AV_din: out t_arr_TW_84_DATA;
-  TW_84_stream_A_full_neg: in t_arr_TW_84_1b;
-  TW_84_stream_A_write: out t_arr_TW_84_1b
+  in_reset: in t_resets( numQuads - 1 downto 0 );
+  in_din: in t_stubsDTC;
+  in_dout: out t_datas( numInputsIR  - 1 downto 0 )
 );
 end component;
 
-function conv( dtc: t_stubsDTC ) return t_arr_DL_39_DATA is
-  variable ps: t_stubDTCPS;
-  variable ss: t_stubDTC2S;
-  variable a: t_arr_DL_39_DATA := ( others => ( others => '0' ) );
-begin
-  for k in 0 to numDTCPS - 1 loop
-    ps := dtc.ps( k );
-    a( enum_DL_39'val( k ) ) := ps.r & ps.z & ps.phi & ps.bend & ps.layer & ps.valid;
-  end loop;
-  for k in 0 to numDTC2S - 1 loop
-    ss := dtc.ss( k );
-    a( enum_DL_39'val( k + numDTCPS ) ) := ss.r & ss.z & ss.phi & ss.bend & ss.layer & ss.valid;
-  end loop;
-  return a;
-end function;
-
-function conv( dtc: t_stubsDTC ) return t_arr_DL_39_1b is
-  variable a: t_arr_DL_39_1b := ( others => '0' );
-begin
-  for k in 0 to numDTCPS - 1 loop
-    a( enum_DL_39'val( k ) ) := dtc.ps( k ).valid;
-  end loop;
-  for k in 0 to numDTC2S - 1 loop
-    a( enum_DL_39'val( k + numDTCPS ) ) := dtc.ss( k ).valid;
-  end loop;
-  return a;
-end function;
-
-function conv( bw: t_arr_BW_46_DATA; tw: t_arr_TW_84_DATA ) return t_candTracklet is
-  variable c: t_candTracklet := nulll;
-  variable s: t_stubTracklet := nulll;
-  variable b: std_logic_vector( 46 - 1 downto 0 );
-  variable t: std_logic_vector( 84 - 1 downto 0 );
-begin
-  for k in 0 to numStubsTracklet - 1 loop
-    b := bw( enum_BW_46'val( k ) );
-    s.valid   := b( 1 + widthTrackletTrackId + widthTrackletStubId + widthTrackletR + widthTrackletPhi + widthTrackletZ - 1 );
-    s.trackId := b(     widthTrackletTrackId + widthTrackletStubId + widthTrackletR + widthTrackletPhi + widthTrackletZ - 1 downto widthTrackletStubId + widthTrackletR + widthTrackletPhi + widthTrackletZ );
-    s.stubId  := b(                            widthTrackletStubId + widthTrackletR + widthTrackletPhi + widthTrackletZ - 1 downto                       widthTrackletR + widthTrackletPhi + widthTrackletZ );
-    s.r       := b(                                                  widthTrackletR + widthTrackletPhi + widthTrackletZ - 1 downto                                        widthTrackletPhi + widthTrackletZ );
-    s.phi     := b(                                                                   widthTrackletPhi + widthTrackletZ - 1 downto                                                           widthTrackletZ );
-    s.z       := b(                                                                                      widthTrackletZ - 1 downto                                                                        0 );
-    c.stubs( k ) := s;
-  end loop;
-  t := tw( enum_TW_84'val( 0 ) );
-  c.track.valid    := t( 1 + widthTrackletSeedType + widthTrackletInv2R + widthTrackletPhi0 + widthTrackletZ0 + widthTrackletCot - 1 );
-  c.track.seedtype := t(     widthTrackletSeedType + widthTrackletInv2R + widthTrackletPhi0 + widthTrackletZ0 + widthTrackletCot - 1 downto widthTrackletInv2R + widthTrackletPhi0 + widthTrackletZ0 + widthTrackletCot );
-  c.track.inv2R    := t(                             widthTrackletInv2R + widthTrackletPhi0 + widthTrackletZ0 + widthTrackletCot - 1 downto                      widthTrackletPhi0 + widthTrackletZ0 + widthTrackletCot );
-  c.track.phi0     := t(                                                  widthTrackletPhi0 + widthTrackletZ0 + widthTrackletCot - 1 downto                                          widthTrackletZ0 + widthTrackletCot );
-  c.track.z0       := t(                                                                      widthTrackletZ0 + widthTrackletCot - 1 downto                                                            widthTrackletCot );
-  c.track.cot      := t(                                                                                        widthTrackletCot - 1 downto                                                                           0 );
-  return c;
-end function;
-
-
-begin
-
-
-reset <= '0' after 12.5 ns;
-IR_start <= '1' after 25 ns;
-IR_bx_in <= tracklet_din.ps( 0 ).bx;
-DL_39_link_AV_dout <= conv( tracklet_din );
-DL_39_link_empty_neg <= conv( tracklet_din );
-tracklet_dout <= conv( BW_46_stream_AV_din, TW_84_stream_AV_din );
-
-c: SectorProcessor port map (
-  clk, reset, IR_start, IR_bx_in, FT_bx_out, FT_bx_out_vld, FT_done, DL_39_link_AV_dout,
-  DL_39_link_empty_neg, DL_39_link_read, BW_46_stream_AV_din, BW_46_stream_A_full_neg, BW_46_stream_A_write,
-  TW_84_stream_AV_din, TW_84_stream_A_full_neg, TW_84_stream_A_write
+signal ir_din: t_datas( numInputsIR  - 1 downto 0 ) := ( others => nulll );
+signal ir_rin: t_reads( numOutputsIR  - 1 downto 0 ) := ( others => nulll );
+signal ir_rout: t_reads( numInputsIR  - 1 downto 0 ) := ( others => nulll );
+signal ir_dout: t_datas( numOutputsIR  - 1 downto 0 ) := ( others => nulll );
+component tracklet_IR
+port (
+  clk: in std_logic;
+  ir_din: in t_datas( numInputsIR  - 1 downto 0 );
+  ir_rin: in t_reads( numOutputsIR  - 1 downto 0 );
+  ir_rout: out t_reads( numInputsIR  - 1 downto 0 );
+  ir_dout: out t_datas( numOutputsIR  - 1 downto 0 )
 );
+end component;
+
+signal vmr_din: t_datas( numInputsVMR  - 1 downto 0 ) := ( others => nulll );
+signal vmr_rin: t_reads( numOutputsVMR  - 1 downto 0 ) := ( others => nulll );
+signal vmr_rout: t_reads( numInputsVMR  - 1 downto 0 ) := ( others => nulll );
+signal vmr_dout: t_datas( numOutputsVMR  - 1 downto 0 ) := ( others => nulll );
+component tracklet_VMR
+port (
+  clk: in std_logic;
+  vmr_din: in t_datas( numInputsVMR  - 1 downto 0 );
+  vmr_rin: in t_reads( numOutputsVMR  - 1 downto 0 );
+  vmr_rout: out t_reads( numInputsVMR  - 1 downto 0 );
+  vmr_dout: out t_datas( numOutputsVMR  - 1 downto 0 )
+);
+end component;
+
+signal te_din: t_datas( numInputsTE  - 1 downto 0 ) := ( others => nulll );
+signal te_rin: t_reads( numOutputsTE  - 1 downto 0 ) := ( others => nulll );
+signal te_rout: t_reads( numInputsTE  - 1 downto 0 ) := ( others => nulll );
+signal te_dout: t_datas( numOutputsTE  - 1 downto 0 ) := ( others => nulll );
+component tracklet_TE
+port (
+  clk: in std_logic;
+  te_din: in t_datas( numInputsTE - 1 downto 0 );
+  te_rin: in t_reads( numOutputsTE - 1 downto 0 );
+  te_rout: out t_reads( numInputsTE - 1 downto 0 );
+  te_dout: out t_datas( numOutputsTE - 1 downto 0 )
+);
+end component;
+
+signal tc_din: t_datas( numInputsTC  - 1 downto 0 ) := ( others => nulll );
+signal tc_rin: t_reads( numOutputsTC  - 1 downto 0 ) := ( others => nulll );
+signal tc_rout: t_reads( numInputsTC  - 1 downto 0 ) := ( others => nulll );
+signal tc_dout: t_datas( numOutputsTC  - 1 downto 0 ) := ( others => nulll );
+component tracklet_TC
+port (
+  clk: in std_logic;
+  tc_din: in t_datas( numInputsTC - 1 downto 0 );
+  tc_rin: in t_reads( numOutputsTC - 1 downto 0 );
+  tc_rout: out t_reads( numInputsTC - 1 downto 0 );
+  tc_dout: out t_datas( numOutputsTC - 1 downto 0 )
+);
+end component;
+
+signal pr_din: t_datas( numInputsPR  - 1 downto 0 ) := ( others => nulll );
+signal pr_rin: t_reads( numOutputsPR  - 1 downto 0 ) := ( others => nulll );
+signal pr_rout: t_reads( numInputsPR  - 1 downto 0 ) := ( others => nulll );
+signal pr_dout: t_datas( numOutputsPR  - 1 downto 0 ) := ( others => nulll );
+component tracklet_PR
+port (
+  clk: in std_logic;
+  pr_din: in t_datas( numInputsPR - 1 downto 0 );
+  pr_rin: in t_reads( numOutputsPR - 1 downto 0 );
+  pr_rout: out t_reads( numInputsPR - 1 downto 0 );
+  pr_dout: out t_datas( numOutputsPR - 1 downto 0 )
+);
+end component;
+
+signal me_din: t_datas( numInputsME  - 1 downto 0 ) := ( others => nulll );
+signal me_rin: t_reads( numOutputsME  - 1 downto 0 ) := ( others => nulll );
+signal me_rout: t_reads( numInputsME  - 1 downto 0 ) := ( others => nulll );
+signal me_dout: t_datas( numOutputsME  - 1 downto 0 ) := ( others => nulll );
+component tracklet_ME
+port (
+  clk: in std_logic;
+  me_din: in t_datas( numInputsME - 1 downto 0 );
+  me_rin: in t_reads( numOutputsME - 1 downto 0 );
+  me_rout: out t_reads( numInputsME - 1 downto 0 );
+  me_dout: out t_datas( numOutputsME - 1 downto 0 )
+);
+end component;
+
+signal mc_din: t_datas( numInputsMC  - 1 downto 0 ) := ( others => nulll );
+signal mc_rin: t_reads( numOutputsMC  - 1 downto 0 ) := ( others => nulll );
+signal mc_rout: t_reads( numInputsMC  - 1 downto 0 ) := ( others => nulll );
+signal mc_dout: t_datas( numOutputsMC  - 1 downto 0 ) := ( others => nulll );
+component tracklet_MC
+port (
+  clk: in std_logic;
+  mc_din: in t_datas( numInputsMC - 1 downto 0 );
+  mc_rin: in t_reads( numOutputsMC - 1 downto 0 );
+  mc_rout: out t_reads( numInputsMC - 1 downto 0 );
+  mc_dout: out t_datas( numOutputsMC - 1 downto 0 )
+);
+end component;
+
+signal ft_din: t_datas( numInputsFT  - 1 downto 0 ) := ( others => nulll );
+signal ft_rin: t_reads( numOutputsFT  - 1 downto 0 ) := ( others => nulll );
+signal ft_rout: t_reads( numInputsFT  - 1 downto 0 ) := ( others => nulll );
+signal ft_dout: t_datas( numOutputsFT  - 1 downto 0 ) := ( others => nulll );
+component tracklet_FT
+port (
+  clk: in std_logic;
+  ft_din: in t_datas( numInputsFT - 1 downto 0 );
+  ft_rin: in t_reads( numOutputsFT - 1 downto 0 );
+  ft_rout: out t_reads( numInputsFT - 1 downto 0 );
+  ft_dout: out t_datas( numOutputsFT - 1 downto 0 )
+);
+end component;
+
+signal out_din: t_datas( numOutputsFT - 1 downto 0 ) := ( others => nulll );
+signal out_dout: t_candTracklet := nulll;
+component tracklet_format_out
+port (
+  clk: in std_logic;
+  out_din: in t_datas( numOutputsFT - 1 downto 0 );
+  out_dout: out t_candTracklet
+);
+end component;
+
+signal readsOut: t_reads( numMemories - 1 downto 0 ) := ( others => nulll );
+signal readsIn: t_reads( numMemories - 1 downto 0 ) := ( others => nulll );
+signal datasOut: t_datas( numMemories - 1 downto 0 ) := ( others => nulll );
+signal datasIn: t_datas( numMemories - 1 downto 0 ) := ( others => nulll );
+
+
+begin
+
+
+datasOut <= MC_dout & ME_dout & PR_dout & TC_dout & TE_dout & VMR_dout & IR_dout;
+readsOut <= FT_rout & MC_rout & ME_rout & PR_rout & TC_rout & TE_rout & VMR_rout;
+
+readsIn <= f_map( readsOut );
+datasIn <= f_map( datasOut );
+
+in_reset <= tracklet_reset;
+in_din   <= tracklet_din;
+
+ir_din  <= in_dout;
+ir_rin  <= readsIn(                numOutputsIR  - 1 downto 0            );
+
+vmr_din <= datasIn(                numInputsVMR  - 1 downto 0            );
+vmr_rin <= readsIn( sumMemOutIR  + numOutputsVMR - 1 downto sumMemOutIR  );
+
+te_din  <= datasIn( sumMemInVMR  + numInputsTE   - 1 downto sumMemInVMR  );
+te_rin  <= readsIn( sumMemOutVMR + numOutputsTE  - 1 downto sumMemOutVMR );
+
+tc_din  <= datasIn( sumMemInTE   + numInputsTC   - 1 downto sumMemInTE   );
+tc_rin  <= readsIn( sumMemOutTE  + numOutputsTC  - 1 downto sumMemOutTE  );
+
+pr_din  <= datasIn( sumMemInTC   + numInputsPR   - 1 downto sumMemInTC   );
+pr_rin  <= readsIn( sumMemOutTC  + numOutputsPR  - 1 downto sumMemOutTC  );
+
+me_din  <= datasIn( sumMemInPR   + numInputsME   - 1 downto sumMemInPR   );
+me_rin  <= readsIn( sumMemOutPR  + numOutputsME  - 1 downto sumMemOutPR  );
+
+mc_din  <= datasIn( sumMemInME   + numInputsMC   - 1 downto sumMemInME   );
+mc_rin  <= readsIn( sumMemOutME  + numOutputsMC  - 1 downto sumMemOutME  );
+
+ft_din  <= datasIn( sumMemInMC   + numInputsFT   - 1 downto sumMemInMC   );
+
+out_din <= ft_dout;
+
+tracklet_dout <= out_dout;
+
+Fin: tracklet_format_in port map ( clk, in_reset, in_din, in_dout );
+
+IR:  tracklet_IR  port map ( clk, ir_din,  ir_rin,  ir_rout,  ir_dout );
+
+VMR: tracklet_VMR port map ( clk, vmr_din, vmr_rin, vmr_rout, vmr_dout );
+
+TE:  tracklet_TE  port map ( clk, te_din,  te_rin,  te_rout,  te_dout );
+
+TC:  tracklet_TC  port map ( clk, tc_din,  tc_rin,  tc_rout,  tc_dout );
+
+PR:  tracklet_PR  port map ( clk, pr_din,  pr_rin,  pr_rout,  pr_dout );
+
+ME:  tracklet_ME  port map ( clk, me_din,  me_rin,  me_rout,  me_dout );
+
+MC:  tracklet_MC  port map ( clk, mc_din,  mc_rin,  mc_rout,  mc_dout );
+
+FT:  tracklet_FT  port map ( clk, ft_din,  ft_rin,  ft_rout,  ft_dout );
+
+Fout: tracklet_format_out port map ( clk, out_din, out_dout );
 
 
 end;

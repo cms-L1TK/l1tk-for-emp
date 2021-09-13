@@ -1,9 +1,24 @@
 src tracklet_top.vhd
 src tracklet_isolation.vhd
 
-src SectorProcessor.vhd
+
+src tracklet_FT.vhd
+src tracklet_MC.vhd
+src tracklet_ME.vhd
+src tracklet_PR.vhd
+src tracklet_TC.vhd
+src tracklet_TE.vhd
+src tracklet_VMR.vhd
+src tracklet_IR.vhd
+src tracklet_format.vhd
+src tracklet_memory.vhd
+
 src --vhdl2008 tf_mem.vhd
 src --vhdl2008 tf_lut.vhd
 src --vhdl2008 tf_mem_bin.vhd
-src memUtil_pkg.vhd
+
+src tracklet_config_memory.vhd
+src tracklet_data_types.vhd
+src tracklet_config.vhd
+
 src tf_pkg.vhd

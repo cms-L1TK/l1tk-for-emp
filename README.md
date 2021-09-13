@@ -2,13 +2,13 @@
 
 This repository contains the payload project for the Hybrid Summer Chain - compatible with the extensible, modular firmware framework for phase-2 upgrades.
 
-The project can be built against multiple boards, but has so far been implemented for the Serenity (VU7P) and VCU118 (VU9P).
+The project can be built against multiple boards, but has so far been implemented for the Apollo (VU7P), Serenity (VU7P) and VCU118 (VU9P).
 
 ## Quick start instructions for developers ##
 
 Make sure that the [Prerequisites](#prerequisites) are satisfied.
 
-##### Step 1: Setup the work area
+##### Step 1: Setup the work area for Serenity and VCU118
 
 ```
 ipbb init work
@@ -16,6 +16,21 @@ cd work
 ipbb add git https://:@gitlab.cern.ch:8443/p2-xware/firmware/emp-fwk.git -b v0.5.6
 ipbb add git https://gitlab.cern.ch/ttc/legacy_ttc.git -b v2.1
 ipbb add git https://:@gitlab.cern.ch:8443/cms-tcds/cms-tcds2-firmware.git -b v0_1_1
+ipbb add git https://gitlab.cern.ch/HPTD/tclink.git -r fda0bcf
+ipbb add git https://github.com/ipbus/ipbus-firmware -b v1.9
+ipbb add git https://:@gitlab.cern.ch:8443/cms-uk-tracktrigger/firmware/hybrid.git
+```
+
+##### Step 1: Setup the work area for Apollo
+
+```
+ipbb init work
+cd work
+ipbb add git https://:@gitlab.cern.ch:8443/p2-xware/firmware/emp-fwk.git -b feature/apollo
+ipbb add git https://github.com/apollo-lhc/CM_FPGA_FW -b v1.2
+cd src/CM_FPGA_FW; make init; cd -
+ipbb add git https://gitlab.cern.ch/ttc/legacy_ttc.git -b v2.1
+ipbb add git https://:@gitlab.cern.ch:8443/khahn/cms-tcds2-firmware.git 
 ipbb add git https://gitlab.cern.ch/HPTD/tclink.git -r fda0bcf
 ipbb add git https://github.com/ipbus/ipbus-firmware -b v1.9
 ipbb add git https://:@gitlab.cern.ch:8443/cms-uk-tracktrigger/firmware/hybrid.git
@@ -37,7 +52,7 @@ The project area for Hybrid Summer Chain can be created as follows.
 
 For implementation:
 ```
-ipbb proj create vivado tracklet hybrid:tracklet 'serenity.dep'
+ipbb proj create vivado tracklet hybrid:tracklet 'apollo.dep'
 cd proj/tracklet
 ```
 

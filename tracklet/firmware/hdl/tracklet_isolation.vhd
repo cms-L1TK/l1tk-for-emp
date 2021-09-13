@@ -1,21 +1,31 @@
 library ieee;
 use ieee.std_logic_1164.all;
-
 use work.emp_device_decl.all;
 use work.emp_data_types.all;
-
+use work.emp_ttc_decl.all;
 use work.hybrid_config.all;
 use work.hybrid_data_types.all;
 
 entity hybrid_format_in is
 port (
   clk: in std_logic;
+  in_ttc: in ttc_stuff_array( N_REGION - 1 downto 0 );
   in_din: in ldata( 4 * N_REGION - 1 downto 0 );
+  in_reset: out t_resets( numQuads - 1 downto 0 );
   in_dout: out t_stubsDTC
 );
 end;
 
 architecture rtl of hybrid_format_in is
+
+component hybrid_format_in_quad
+port (
+  clk: in std_logic;
+  quad_link: in std_logic;
+  quad_ttc: in ttc_stuff_t;
+  quad_reset: out t_reset
+);
+end component;
 
 component hybrid_format_in_nodePS
 port (
@@ -34,6 +44,22 @@ port (
 end component;
 
 begin
+
+g: for k in 0 to numQuads - 1 generate
+
+signal quad_link: std_logic := '0';
+signal quad_ttc: ttc_stuff_t := TTC_STUFF_NULL;
+signal quad_reset: t_reset := nulll;
+
+begin
+
+quad_link <= in_din( 4 * k ).valid;
+quad_ttc <= in_ttc( k );
+in_reset( k ) <= quad_reset;
+
+c: hybrid_format_in_quad port map ( clk, quad_link, quad_ttc, quad_reset );
+
+end generate;
 
 gPS: for k in 0 to numDTCPS - 1 generate
 
@@ -59,7 +85,7 @@ begin
 node_din <= in_din( k + numDTCPS );
 in_dout.ss( k ) <= node_dout;
 
-cPS: hybrid_format_in_node2S port map ( clk, node_din, node_dout );
+c2S: hybrid_format_in_node2S port map ( clk, node_din, node_dout );
 
 end generate;
 
@@ -68,9 +94,59 @@ end;
 
 library ieee;
 use ieee.std_logic_1164.all;
+use work.emp_ttc_decl.all;
+use work.hybrid_tools.all;
+use work.hybrid_data_types.all;
+use work.hybrid_data_formats.all;
 
+entity hybrid_format_in_quad is
+port (
+  clk: in std_logic;
+  quad_link: in std_logic;
+  quad_ttc: in ttc_stuff_t;
+  quad_reset: out t_reset
+);
+end;
+
+architecture rtl of hybrid_format_in_quad is
+
+signal link, ready: std_logic := '0';
+signal reset: t_reset := nulll;
+signal counter: std_logic_vector( widthFrames - 1 downto 0 ) := ( others => '0' );
+
+begin
+
+quad_reset <= reset;
+
+process ( clk ) is
+begin
+if rising_edge( clk ) then
+
+  link <= quad_link;
+  reset.reset <= '0';
+  counter <= incr( counter );
+  if ready = '1' and quad_link = '1' and link = '0' then
+    reset.start <= '1';
+    ready <= '0';
+    counter <= ( others => '0' );
+  end if;
+  if reset.start = '1' and uint( counter ) = numFrames + 1 - 1 then
+    reset.start <= '0';
+  end if;
+  if uint( quad_ttc.bctr ) = 0 and uint( quad_ttc.pctr ) = 0 and ready = '0' then
+    reset.reset <= '1';
+    ready <= '1';
+  end if;
+
+end if;
+end process;
+
+end;
+
+
+library ieee;
+use ieee.std_logic_1164.all;
 use work.emp_data_types.all;
-
 use work.hybrid_data_types.all;
 use work.hybrid_data_formats.all;
 

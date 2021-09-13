@@ -3,7 +3,7 @@ library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
 
-entity TrackletCalculator_L1L2F_mul_mul_17s_16ns_31_1_1_DSP48_10 is
+entity TrackletCalculator_L1L2F_mul_mul_17s_16ns_31_1_1_DSP48_13 is
 port (
     a: in std_logic_vector(17 - 1 downto 0);
     b: in std_logic_vector(16 - 1 downto 0);
@@ -11,7 +11,7 @@ port (
 
 end entity;
 
-architecture behav of TrackletCalculator_L1L2F_mul_mul_17s_16ns_31_1_1_DSP48_10 is
+architecture behav of TrackletCalculator_L1L2F_mul_mul_17s_16ns_31_1_1_DSP48_13 is
     signal a_cvt: signed(17 - 1 downto 0);
     signal b_cvt: unsigned(16 - 1 downto 0);
     signal p_cvt: signed(31 - 1 downto 0);
@@ -42,7 +42,7 @@ entity TrackletCalculator_L1L2F_mul_mul_17s_16ns_31_1_1 is
 end entity;
 
 architecture arch of TrackletCalculator_L1L2F_mul_mul_17s_16ns_31_1_1 is
-    component TrackletCalculator_L1L2F_mul_mul_17s_16ns_31_1_1_DSP48_10 is
+    component TrackletCalculator_L1L2F_mul_mul_17s_16ns_31_1_1_DSP48_13 is
         port (
             a : IN STD_LOGIC_VECTOR;
             b : IN STD_LOGIC_VECTOR;
@@ -52,7 +52,7 @@ architecture arch of TrackletCalculator_L1L2F_mul_mul_17s_16ns_31_1_1 is
 
 
 begin
-    TrackletCalculator_L1L2F_mul_mul_17s_16ns_31_1_1_DSP48_10_U :  component TrackletCalculator_L1L2F_mul_mul_17s_16ns_31_1_1_DSP48_10
+    TrackletCalculator_L1L2F_mul_mul_17s_16ns_31_1_1_DSP48_13_U :  component TrackletCalculator_L1L2F_mul_mul_17s_16ns_31_1_1_DSP48_13
     port map (
         a => din0,
         b => din1,

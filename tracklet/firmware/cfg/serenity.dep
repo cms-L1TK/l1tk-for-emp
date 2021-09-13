@@ -1,5 +1,5 @@
 setup ../ucf/settings.tcl
-src ../ucf/vu7p.tcl
+src ../ucf/serenity.tcl
 
 include payload.dep
 

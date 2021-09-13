@@ -56,6 +56,8 @@ function width( x: real    ) return integer;
 function max( v: reals    ) return real;
 function max( v: naturals ) return natural;
 function sum( v: naturals ) return natural;
+function sum( v: naturals; low, high: natural ) return natural;
+function nota( w, v: natural ) return naturals;
 
 function isElement( x: natural; v: naturals ) return boolean;
 
@@ -214,13 +216,24 @@ begin
     return res;
 end function;
 
-function sum( v: naturals ) return natural is
+function sum( v: naturals ) return natural is begin return sum( v, v'low, v'high ); end function;
+
+function sum( v: naturals; low, high: natural ) return natural is
     variable s: natural := 0;
 begin
-    for k in v'range loop
+    for k in low to high loop
         s := s + v( k );
     end loop;
     return s;
+end function;
+
+function nota( w, v: natural ) return naturals is
+  variable n: naturals( 0 to w - 1 );
+begin
+  for k in n'range loop
+    n( k ) := v + k;
+  end loop;
+  return n;
 end function;
 
 function isElement( x: natural; v: naturals ) return boolean is
