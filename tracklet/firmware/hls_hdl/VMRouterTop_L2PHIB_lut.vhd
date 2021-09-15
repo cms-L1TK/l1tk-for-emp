@@ -123,12 +123,22 @@ signal mem : mem_array := (
     1995 to 1997=> "111100", 1998 to 1999=> "111011", 2000 to 2006=> "111111", 2007 to 2009=> "111110", 2010 to 2012=> "111101", 
     2013 to 2015=> "111100", 2016 to 2024=> "111111", 2025 to 2026=> "111110", 2027 to 2029=> "111101", 2030 to 2031=> "111100", 
     2032 to 2041=> "111111", 2042 to 2044=> "111110", 2045 to 2047=> "111101" );
-    attribute ram_style: string;
-    attribute ram_style of mem: signal is "register";
 
 
+signal q0_t0 : std_logic_vector(DWIDTH-1 downto 0);
+signal q0_t1 : std_logic_vector(DWIDTH-1 downto 0);
 begin 
 
+q0 <= q0_t1;
+
+p_IO_pipeline_reg : process (clk)  
+begin
+    if (clk'event and clk = '1') then
+      if (ce0 = '1') then 
+        q0_t1 <= q0_t0;
+      end if;
+    end if;
+end process;
 
 memory_access_guard_0: process (addr0) 
 begin
@@ -146,7 +156,7 @@ p_rom_access: process (clk)
 begin 
     if (clk'event and clk = '1') then
         if (ce0 = '1') then 
-            q0 <= mem(CONV_INTEGER(addr0_tmp)); 
+            q0_t0 <= mem(CONV_INTEGER(addr0_tmp)); 
         end if;
     end if;
 end process;

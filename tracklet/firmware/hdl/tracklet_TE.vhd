@@ -54,6 +54,7 @@ port (
 end component;
 
 signal bx: std_logic_vector ( widthBX - 1 downto 0 ) := ( others => '0' );
+signal writesAll: t_writes( numOutputsTE - 1 downto 0 ) := ( others => nulll );
 
 
 begin
@@ -84,6 +85,7 @@ begin
 
 din <= te_din( offsetIn + numInputs - 1 downto offsetIn );
 te_rout( offsetIn + numInputs - 1 downto offsetIn ) <= rout;
+writesAll( offsetOut + numOutputs - 1 downto offsetOut ) <= writes;
 
 start <= te_din( offsetIn ).start;
 

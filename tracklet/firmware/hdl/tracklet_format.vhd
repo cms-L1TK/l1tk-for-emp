@@ -62,6 +62,7 @@ end;
 library ieee;
 use ieee.std_logic_1164.all;
 use work.hybrid_data_types.all;
+use work.hybrid_data_formats.all;
 use work.tracklet_config.all;
 use work.tracklet_data_types.all;
 
@@ -85,7 +86,23 @@ process ( clk ) is
 begin
 if rising_edge( clk ) then
 
-  dout <= conv( out_din );
+  dout <= nulll;
+  if out_din( 0 ).valid = '1' then
+    dout.track.valid    <= out_din( 0 ).data( 1 + widthTrackletSeedType + widthTrackletInv2R + widthTrackletPhi0 + widthTrackletZ0 + widthTrackletCot + widthTrackletLmap - 1 );
+    dout.track.seedtype <= out_din( 0 ).data(     widthTrackletSeedType + widthTrackletInv2R + widthTrackletPhi0 + widthTrackletZ0 + widthTrackletCot + widthTrackletLmap - 1 downto widthTrackletInv2R + widthTrackletPhi0 + widthTrackletZ0 + widthTrackletCot + widthTrackletLmap );
+    dout.track.inv2R    <= out_din( 0 ).data(                             widthTrackletInv2R + widthTrackletPhi0 + widthTrackletZ0 + widthTrackletCot + widthTrackletLmap - 1 downto                      widthTrackletPhi0 + widthTrackletZ0 + widthTrackletCot + widthTrackletLmap );
+    dout.track.phi0     <= out_din( 0 ).data(                                                  widthTrackletPhi0 + widthTrackletZ0 + widthTrackletCot + widthTrackletLmap - 1 downto                                          widthTrackletZ0 + widthTrackletCot + widthTrackletLmap );
+    dout.track.z0       <= out_din( 0 ).data(                                                                      widthTrackletZ0 + widthTrackletCot + widthTrackletLmap - 1 downto                                                            widthTrackletCot + widthTrackletLmap );
+    dout.track.cot      <= out_din( 0 ).data(                                                                                        widthTrackletCot + widthTrackletLmap - 1 downto                                                                               widthTrackletLmap );
+    for k in 1 to numOutputsFT - 1 loop
+      dout.stubs( k - 1 ).valid   <= out_din( k ).data( 1 + widthTrackletTrackId + widthTrackletStubId + widthTrackletR + widthTrackletPhi + widthTrackletZ - 1 );
+      dout.stubs( k - 1 ).trackId <= out_din( k ).data(     widthTrackletTrackId + widthTrackletStubId + widthTrackletR + widthTrackletPhi + widthTrackletZ - 1 downto widthTrackletStubId + widthTrackletR + widthTrackletPhi + widthTrackletZ );
+      dout.stubs( k - 1 ).stubId  <= out_din( k ).data(                            widthTrackletStubId + widthTrackletR + widthTrackletPhi + widthTrackletZ - 1 downto                       widthTrackletR + widthTrackletPhi + widthTrackletZ );
+      dout.stubs( k - 1 ).r       <= out_din( k ).data(                                                  widthTrackletR + widthTrackletPhi + widthTrackletZ - 1 downto                                        widthTrackletPhi + widthTrackletZ );
+      dout.stubs( k - 1 ).phi     <= out_din( k ).data(                                                                   widthTrackletPhi + widthTrackletZ - 1 downto                                                           widthTrackletZ );
+      dout.stubs( k - 1 ).z       <= out_din( k ).data(                                                                                      widthTrackletZ - 1 downto                                                                        0 );
+    end loop;
+  end if;
 
 end if;
 end process;

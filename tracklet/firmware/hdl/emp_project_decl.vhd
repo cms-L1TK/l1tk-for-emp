@@ -12,11 +12,13 @@ constant PAYLOAD_REV: std_logic_vector(31 downto 0) := X"12345678";
 
 constant LB_ADDR_WIDTH  : integer := 10;
 
+type clock_divisor_array_t is array(2 downto 0) of integer;
+constant CLOCK_AUX_DIV      : clock_divisor_array_t := (18, 9, 4); -- Dividers of CLOCK_COMMON_RATIO * 40 MHz
 constant CLOCK_COMMON_RATIO: integer               := 36;
 constant CLOCK_RATIO       : integer               :=  6;
 constant CLOCK_AUX_RATIO   : clock_ratio_array_t := (6, 6, 6);
 
-constant PAYLOAD_LATENCY: integer := 1066;
+constant PAYLOAD_LATENCY: integer := 828;
 
 -- mgt -> chk -> buf -> fmt -> (algo) -> (fmt) -> buf -> chk -> mgt -> clk -> altclk
 constant REGION_CONF : region_conf_array_t := (

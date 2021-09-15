@@ -30,6 +30,7 @@ constant widthTrackletInv2R   : natural := 14;
 constant widthTrackletPhi0    : natural := 18;
 constant widthTrackletZ0      : natural := 10;
 constant widthTrackletCot     : natural := 14;
+constant widthTrackletLmap    : natural := 24;
 
 constant widthTrackletTrackId: natural :=  7;
 constant widthTrackletStubId : natural := 10;
