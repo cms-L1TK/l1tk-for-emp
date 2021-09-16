@@ -18,7 +18,7 @@ ipbb add git https://gitlab.cern.ch/ttc/legacy_ttc.git -b v2.1
 ipbb add git https://:@gitlab.cern.ch:8443/cms-tcds/cms-tcds2-firmware.git -b v0_1_1
 ipbb add git https://gitlab.cern.ch/HPTD/tclink.git -r fda0bcf
 ipbb add git https://github.com/ipbus/ipbus-firmware -b v1.9
-ipbb add git https://:@gitlab.cern.ch:8443/cms-uk-tracktrigger/firmware/hybrid.git
+ipbb add git https://github.com/cms-L1TK/firmware-emp.git
 ```
 
 ##### Step 1: Setup the work area for Apollo
@@ -33,7 +33,7 @@ ipbb add git https://gitlab.cern.ch/ttc/legacy_ttc.git -b v2.1
 ipbb add git https://:@gitlab.cern.ch:8443/khahn/cms-tcds2-firmware.git 
 ipbb add git https://gitlab.cern.ch/HPTD/tclink.git -r fda0bcf
 ipbb add git https://github.com/ipbus/ipbus-firmware -b v1.9
-ipbb add git https://:@gitlab.cern.ch:8443/cms-uk-tracktrigger/firmware/hybrid.git
+ipbb add git https://github.com/cms-L1TK/firmware-emp.git
 ```
 
 *Note: You need to be a member of the `cms-tcds2-users` egroup in order to clone the `cms-tcds2-firmware` repository. In order to add yourself to that egroup, go to the "Members" tab of [this page](https://e-groups.cern.ch/e-groups/Egroup.do?egroupId=10380295), and click on the "Add me" button; you may need to wait ~ 24 hours to get access to the GitLab repo.*
