@@ -18,6 +18,8 @@ constant widthDouble:    natural := 1 + widthDoubleExp + widthDoubleMan;
 constant baseDoubleMan: real    := 2.0 ** widthDoubleMan - 1.0;
 constant biasDoubleExp: natural := 2 ** ( widthDoubleExp - 1 ) - 1;
 
+function to_string( std: std_logic_vector ) return string;
+
 function uint ( s: std_logic_vector ) return integer;
 function sint ( s: std_logic_vector ) return integer;
 function int ( val, base: real ) return integer;
@@ -94,6 +96,13 @@ end;
 
 package body hybrid_tools is
 
+
+
+function to_string( std: std_logic_vector ) return string is
+  variable s: string( std'range ) := ( others => NUL );
+begin
+  for i in std'range loop s( i ) := std_logic'image( std( i ) )( 2 ); end loop; return s;
+end function;
 
 function uint( s: std_logic_vector ) return integer is begin return to_integer( unsigned( s ) ); end function;
 function sint( s: std_logic_vector ) return integer is begin return to_integer( signed( s ) ); end function;

@@ -35,6 +35,7 @@ constant RAM_PERFORMANCE: string := work.tracklet_config_memory.RAM_PERFORMANCE;
 
 signal clka: std_logic := '0';
 signal clkb: std_logic := '0';
+signal rsta: std_logic := '0';
 signal wea: std_logic := '0';
 signal enb: std_logic := '0';
 signal rstb: std_logic := '0';
@@ -57,6 +58,7 @@ generic (
 port (
   clka: in std_logic;
   clkb: in std_logic;
+  rsta: in std_logic;
   wea: in std_logic;
   enb: in std_logic;
   rstb: in std_logic;
@@ -84,6 +86,7 @@ generic (
 port (
   clka: in std_logic;
   clkb: in std_logic;
+  rsta: in std_logic;
   wea: in std_logic;
   enb: in std_logic;
   rstb: in std_logic;
@@ -105,9 +108,10 @@ begin
 
 clka <= clk ;
 clkb <= clk ;
+rsta <= memory_din.reset;
 wea <= memory_din.valid;
 enb <= memory_read.valid;
-rstb <= '0';
+rstb <= not memory_read.valid;
 regceb <= '1';
 addra <= memory_din.addr( addra'range );
 dina <= memory_din.data( dina'range );
@@ -125,7 +129,7 @@ signal nent_o: t_arr_7b( 0 to NUM_PAGES - 1 ) := ( others => ( others => '0' ) )
 begin
 dout.nents( nent_o'range ) <= conv( nent_o );
 c: tf_mem generic map ( RAM_WIDTH, NUM_PAGES, RAM_DEPTH, INIT_FILE, INIT_HEX, RAM_PERFORMANCE )
-  port map ( clka, clkb, wea, enb, rstb, regceb, addra, dina, addrb, doutb, sync_nent, nent_o );
+  port map ( clka, clkb, rsta, wea, enb, rstb, regceb, addra, dina, addrb, doutb, sync_nent, nent_o );
 end generate;
 
 gMemBin: if config_memory.name = work.tracklet_data_types.tf_mem_bin generate
@@ -133,7 +137,7 @@ signal nent_o: t_arr_8_5b( 0 to NUM_PAGES - 1 ) := ( others => ( others => ( oth
 begin
 dout.nents( 0 to nent_o'length * t_arr8_5b'length - 1 ) <= conv( nent_o );
 c: tf_mem_bin generic map ( RAM_WIDTH, NUM_PAGES, RAM_DEPTH, NUM_MEM_BINS, NUM_ENTRIES_PER_MEM_BINS, INIT_FILE, INIT_HEX, RAM_PERFORMANCE )
-  port map ( clka, clkb, wea, enb, rstb, regceb, addra, dina, addrb, doutb, sync_nent, nent_o );
+  port map ( clka, clkb, rsta, wea, enb, rstb, regceb, addra, dina, addrb, doutb, sync_nent, nent_o );
 end generate;
 
 

@@ -41,6 +41,7 @@ entity tf_mem_bin is
   port (
     clka      : in  std_logic;                                      --! Write clock
     clkb      : in  std_logic;                                      --! Read clock
+    rsta      : in  std_logic;                                      --! reset counters
     wea       : in  std_logic;                                      --! Write enable
     enb       : in  std_logic;                                      --! Read Enable, for additional power savings, disable when not in use
     rstb      : in  std_logic;                                      --! Output reset (does not affect memory contents)
@@ -118,36 +119,44 @@ process(clka)
   --variable v_line_out   : line;          -- Line for debug
 begin
   if rising_edge(clka) then
-    if (sync_nent='1') and vi_clk_cnt=-1 then
-      vi_clk_cnt := 0;
-    end if;
-    if (vi_clk_cnt >=0) and (vi_clk_cnt < MAX_ENTRIES-1) then -- ####### Counter nent
-      vi_clk_cnt := vi_clk_cnt+1;
-    elsif (vi_clk_cnt >= MAX_ENTRIES-1) then -- -1 not included
-      vi_clk_cnt := 0;
-      nent_o(vi_page_cnt) <= (others => (others => '0'));    
-      assert (vi_page_cnt < NUM_PAGES) report "vi_page_cnt out of range" severity error;
-      if (vi_page_cnt < NUM_PAGES-1) then -- Assuming linear continuous page access
-        vi_page_cnt := vi_page_cnt +1;
-      else
-        vi_page_cnt := 0;
+    if rsta = '1' then
+      vi_clk_cnt := -1;
+      vi_page_cnt := 0;
+      page := 0;
+      addr_in_page := 0;
+      nent_o <= (others => (others => (others => '0')));
+    else
+      if (sync_nent='1') and vi_clk_cnt=-1 then
+        vi_clk_cnt := 0;
       end if;
+      if (vi_clk_cnt >=0) and (vi_clk_cnt < MAX_ENTRIES-1) then -- ####### Counter nent
+        vi_clk_cnt := vi_clk_cnt+1;
+      elsif (vi_clk_cnt >= MAX_ENTRIES-1) then -- -1 not included
+        vi_clk_cnt := 0;
+        nent_o(vi_page_cnt) <= (others => (others => '0'));    
+        assert (vi_page_cnt < NUM_PAGES) report "vi_page_cnt out of range" severity error;
+        if (vi_page_cnt < NUM_PAGES-1) then -- Assuming linear continuous page access
+          vi_page_cnt := vi_page_cnt +1;
+        else
+          vi_page_cnt := 0;
+        end if;
+      end if;
+      if (wea='1') then
+        sa_RAM_data(to_integer(unsigned(addra))) <= dina; -- Write data
+        -- Count entries
+        vi_nent_idx := to_integer(shift_right(unsigned(addra), clogb2(NUM_ENTRIES_PER_MEM_BINS))) mod NUM_MEM_BINS; -- Calculate bin index
+        --if DEBUG=true then write(v_line_out, string'("vi_nent_idx: ")); write(v_line_out, vi_nent_idx); writeline(output, v_line_out); end if;
+    
+        page := to_integer(unsigned(addra(clogb2(RAM_DEPTH)-1 downto clogb2(PAGE_LENGTH))));
+        addr_in_page := to_integer(unsigned(addra(clogb2(PAGE_LENGTH)-1 downto 0)));
+        assert (page < NUM_PAGES) report "page out of range" severity error;
+        if (addr_in_page = 0) then
+          nent_o(page)(vi_nent_idx) <= std_logic_vector(to_unsigned(1, nent_o(page)(vi_nent_idx)'length)); -- <= 1 (slv)
+        else
+          nent_o(page)(vi_nent_idx) <= std_logic_vector(to_unsigned(to_integer(unsigned(nent_o(page)(vi_nent_idx))) + 1, nent_o(page)(vi_nent_idx)'length)); -- + 1 (slv)
+        end if; 
+      end if; -- (wea='1')
     end if;
-    if (wea='1') then
-      sa_RAM_data(to_integer(unsigned(addra))) <= dina; -- Write data
-      -- Count entries
-      vi_nent_idx := to_integer(shift_right(unsigned(addra), clogb2(NUM_ENTRIES_PER_MEM_BINS))) mod NUM_MEM_BINS; -- Calculate bin index
-      --if DEBUG=true then write(v_line_out, string'("vi_nent_idx: ")); write(v_line_out, vi_nent_idx); writeline(output, v_line_out); end if;
-
-      page := to_integer(unsigned(addra(clogb2(RAM_DEPTH)-1 downto clogb2(PAGE_LENGTH))));
-      addr_in_page := to_integer(unsigned(addra(clogb2(PAGE_LENGTH)-1 downto 0)));
-      assert (page < NUM_PAGES) report "page out of range" severity error;
-      if (addr_in_page = 0) then
-        nent_o(page)(vi_nent_idx) <= std_logic_vector(to_unsigned(1, nent_o(page)(vi_nent_idx)'length)); -- <= 1 (slv)
-      else
-        nent_o(page)(vi_nent_idx) <= std_logic_vector(to_unsigned(to_integer(unsigned(nent_o(page)(vi_nent_idx))) + 1, nent_o(page)(vi_nent_idx)'length)); -- + 1 (slv)
-      end if; 
-    end if; -- (wea='1')
   end if;
 end process;
 

@@ -6,7 +6,10 @@ use work.emp_device_decl.all;
 use work.emp_ttc_decl.all;
 
 use work.hybrid_config.all;
+use work.hybrid_tools.all;
 use work.hybrid_data_types.all;
+use work.tracklet_config.all;
+use work.tracklet_data_types.all;
 
 
 entity emp_payload is
@@ -75,7 +78,7 @@ function conv( l: ldata ) return std_logic_vector is
   variable s: std_logic_vector( numLinksTracklet - 1 downto 0 );
 begin
   for k in s'range loop
-    s( k ) := l( k ).valid;
+    s( k ) := l( k ).valid;    
   end loop;
   return s;
 end;
