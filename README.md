@@ -2,7 +2,7 @@
 
 This repository contains the payload project for the Hybrid Summer Chain - compatible with the extensible, modular firmware framework for phase-2 upgrades.
 
-The project can be built against multiple boards, but has so far been implemented for the Apollo (VU7P), Serenity (VU7P) and VCU118 (VU9P).
+The project can be built against multiple boards, but has so far been implemented for the Apollo (VU7P) and Serenity (KU15P).
 
 ## Quick start instructions for developers ##
 
