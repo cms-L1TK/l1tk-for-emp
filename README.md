@@ -7,7 +7,6 @@ The project can be built against multiple boards, but has so far been implemente
 ## Quick start instructions for developers ##
 
 Make sure that the [Prerequisites](#prerequisites) are satisfied.
-```
 
 ##### Step 1: Setup the work area
 
