@@ -1,4 +1,4 @@
-# Building/Simulating the Hybrid Summer Chain #
+# Building/Simulating the Summer Chain #
 
 This repository contains the payload project for the Hybrid Summer Chain - compatible with the extensible, modular firmware framework for phase-2 upgrades.
 
@@ -52,13 +52,13 @@ The project area for Hybrid Summer Chain can be created as follows.
 
 For implementation:
 ```
-ipbb proj create vivado tracklet hybrid:tracklet 'apollo.dep'
+ipbb proj create vivado tracklet l1tk-for-emp:tracklet 'apollo.dep'
 cd proj/tracklet
 ```
 
 For simulation testbench:
 ```
-ipbb proj create sim sim hybrid:tracklet 'sim.dep'
+ipbb proj create sim sim l1tk-for-emp:tracklet 'sim.dep'
 cd proj/sim
 ```
 
