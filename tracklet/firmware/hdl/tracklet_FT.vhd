@@ -35,7 +35,6 @@ port (
 end component;
 
 signal notFull: std_logic := '1';
-signal bx: std_logic_vector ( widthBX - 1 downto 0 ) := ( others => '0' );
 
 
 begin
@@ -54,6 +53,7 @@ signal rout: t_reads( numInputs  - 1 downto 0 ) := ( others => nulll );
 signal dout: t_datas( numOutputs  - 1 downto 0 ) := ( others => nulll );
 
 signal reset, start: std_logic := '0';
+signal bx: std_logic_vector ( widthBX - 1 downto 0 ) := ( others => '0' );
 
 begin
 
@@ -62,6 +62,7 @@ ft_rout( offsetIn + numInputs - 1 downto offsetIn ) <= rout;
 ft_dout( offsetOut + numOutputs - 1 downto offsetOut ) <= dout;
 
 start <= ft_din( offsetIn + 1 ).start;
+bx <= ft_din( offsetIn + 1 ).bx;
 
 process ( clk ) is
 begin

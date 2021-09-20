@@ -13,6 +13,7 @@ type t_reset is
 record
   reset: std_logic;
   start: std_logic;
+  bx   : std_logic_vector( widthBX - 1 downto 0 );
 end record;
 function nulll return t_reset;
 type t_resets is array ( natural range <> ) of t_reset;
@@ -127,7 +128,7 @@ end;
 package body hybrid_data_types is
 
 
-function nulll return t_reset is begin return ( others => '0' ); end function;
+function nulll return t_reset is begin return ( '0', '0', others => ( others => '0' ) ); end function;
 function nulll return t_stubDTCPS is begin return ( '0', '0', others => ( others => '0' ) ); end function;
 function nulll return t_stubDTC2S is begin return ( '0', '0', others => ( others => '0' ) ); end function;
 function nulll return t_stubsDTC is begin return ( ( others => nulll ), ( others => nulll ) ); end function;

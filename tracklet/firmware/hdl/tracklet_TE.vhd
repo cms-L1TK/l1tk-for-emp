@@ -53,9 +53,6 @@ port (
 );
 end component;
 
-signal bx: std_logic_vector ( widthBX - 1 downto 0 ) := ( others => '0' );
-signal writesAll: t_writes( numOutputsTE - 1 downto 0 ) := ( others => nulll );
-
 
 begin
 
@@ -77,6 +74,7 @@ type t_lutDatas is array ( natural range <> ) of std_logic_vector( 1 - 1 downto 
 signal lutData: t_lutDatas( 2 - 1 downto 0 ) := ( others => ( others => '0' ) );
 
 signal reset, start, done, enable: std_logic := '0';
+signal bxIn, bxOut: std_logic_vector ( widthBX - 1 downto 0 ) := ( others => '0' );
 signal writes: t_writes( numOutputs - 1 downto 0 ) := ( others => nulll );
 
 signal counter: std_logic_vector( widthNent - 1 downto 0 ) := ( others => '0' );
@@ -85,9 +83,9 @@ begin
 
 din <= te_din( offsetIn + numInputs - 1 downto offsetIn );
 te_rout( offsetIn + numInputs - 1 downto offsetIn ) <= rout;
-writesAll( offsetOut + numOutputs - 1 downto offsetOut ) <= writes;
 
 start <= te_din( offsetIn ).start;
+bxIn <= te_din( offsetIn ).bx;
 
 process ( clk ) is
 begin
@@ -101,6 +99,9 @@ if rising_edge( clk ) then
   if done = '1' then
     enable <= '1';
     counter <= ( others => '0' );
+  end if;
+  if reset = '1' then
+    enable <= '0';
   end if;
 
 end if;
@@ -124,7 +125,7 @@ c: tf_lut generic map ( lut_file, lut_width, lut_depth, RAM_PERFORMANCE ) port m
 
 end generate;
 
-c: entity work.TrackletEngineTop port map ( clk, reset, start, done, open, open, bx,
+c: entity work.TrackletEngineTop port map ( clk, reset, start, done, open, open, bxIn,
   rout( 0 ).addr( config_memories_in( 0 ).widthAddr - 1 downto 0 ), rout( 0 ).valid, din( 0 ).data( config_memories_in( 0 ).RAM_WIDTH - 1 downto 0 ),
   din( 0 ).nents( 0 )( config_memories_in( 0 ).widthNent - 1 downto 0 ), din( 0 ).nents( 1 )( config_memories_in( 0 ).widthNent - 1 downto 0 ),
   rout( 1 ).addr( config_memories_in( 1 ).widthAddr - 1 downto 0 ), rout( 1 ).valid, din( 1 ).data( config_memories_in( 1 ).RAM_WIDTH - 1 downto 0 ),
@@ -137,7 +138,7 @@ c: entity work.TrackletEngineTop port map ( clk, reset, start, done, open, open,
   din( 1 ).nents( 12 )( config_memories_in( 1 ).widthNent - 1 downto 0 ), din( 1 ).nents( 13 )( config_memories_in( 1 ).widthNent - 1 downto 0 ),
   din( 1 ).nents( 14 )( config_memories_in( 1 ).widthNent - 1 downto 0 ), din( 1 ).nents( 15 )( config_memories_in( 1 ).widthNent - 1 downto 0 ),
   lutRead( 0 ).addr( 8 - 1 downto 0 ), lutRead( 0 ).valid, lutData( 0 ),
-  lutRead( 1 ).addr( 8 - 1 downto 0 ), lutRead( 1 ).valid, lutData( 1 ), open, open,
+  lutRead( 1 ).addr( 8 - 1 downto 0 ), lutRead( 1 ).valid, lutData( 1 ), bxOut, open,
   writes( 0 ).addr( config_memories_out( 0 ).widthAddr - 1 downto 0 ), open, writes( 0 ).valid, writes( 0 ).data( config_memories_out( 0 ).RAM_WIDTH - 1 downto 0 )
 );
 
@@ -155,6 +156,7 @@ begin
 
 writes( l ).reset <= reset;
 writes( l ).start <= '1' when done = '1' or enable = '1' else '0';
+writes( l ).bx <= bxOut;
 
 memory_din <= writes( l );
 

@@ -30,5 +30,7 @@ constant freqLHC    : real    :=  40.0;                                 -- LHC F
 constant freqHyrbid : real    := 240.0;                                 -- TFP Frequency in MHz, has to be integer multiple of FreqLHC
 constant tmp        : natural :=  18;                                   -- time multiplexed period in number of BX
 
+constant widthBX: natural := 3;
+
 
 end;

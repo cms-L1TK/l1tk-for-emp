@@ -34,8 +34,6 @@ port (
 );
 end component;
 
-signal bx: std_logic_vector ( widthBX - 1 downto 0 ) := ( others => '0' );
-
 
 begin
 
@@ -53,6 +51,7 @@ signal din: t_datas( numInputs  - 1 downto 0 ) := ( others => nulll );
 signal rout: t_reads( numInputs  - 1 downto 0 ) := ( others => nulll );
 
 signal reset, start, done, enable: std_logic := '0';
+signal bxIn, bxOut: std_logic_vector ( widthBX - 1 downto 0 ) := ( others => '0' );
 signal writes: t_writes( numOutputs - 1 downto 0 ) := ( others => nulll );
 
 signal counter: std_logic_vector( widthNent - 1 downto 0 ) := ( others => '0' );
@@ -63,6 +62,7 @@ din <=me_din( offsetIn + numInputs - 1 downto offsetIn );
 me_rout( offsetIn + numInputs - 1 downto offsetIn ) <= rout;
 
 start <= me_din( offsetIn + 1 ).start;
+bxIn <= me_din( offsetIn + 1 ).bx;
 
 process ( clk ) is
 begin
@@ -77,12 +77,15 @@ if rising_edge( clk ) then
     enable <= '1';
     counter <= ( others => '0' );
   end if;
+  if reset = '1' then
+    enable <= '0';
+  end if;
 
 end if;
 end process;
 
 gL3: if k < 8 generate
-c: entity work.MatchEngineTop_L3 port map ( clk, reset, start, done, open, open, bx, open, open,
+c: entity work.MatchEngineTop_L3 port map ( clk, reset, start, done, open, open, bxIn, bxOut, open,
   rout( 0 ).addr( config_memories_in( 0 ).widthAddr - 1 downto 0 ), rout( 0 ).valid, din( 0 ).data( config_memories_in( 0 ).RAM_WIDTH - 1 downto 0 ),
   din( 0 ).nents(  0 )( config_memories_in( 0 ).widthNent - 1 downto 0 ), din( 0 ).nents(  1 )( config_memories_in( 0 ).widthNent - 1 downto 0 ),
   din( 0 ).nents(  2 )( config_memories_in( 0 ).widthNent - 1 downto 0 ), din( 0 ).nents(  3 )( config_memories_in( 0 ).widthNent - 1 downto 0 ),
@@ -121,7 +124,7 @@ c: entity work.MatchEngineTop_L3 port map ( clk, reset, start, done, open, open,
   writes( 0 ).addr( config_memories_out( 0 ).widthAddr - 1 downto 0 ), open, writes( 0 ).valid, writes( 0 ).data( config_memories_out( 0 ).RAM_WIDTH - 1 downto 0 ) );
 end generate;
 gL4: if k >= 8 and k < 16 generate
-c: entity work.MatchEngineTop_L4 port map ( clk, reset, start, done, open, open, bx, open, open,
+c: entity work.MatchEngineTop_L4 port map ( clk, reset, start, done, open, open, bxIn, bxOut, open,
   rout( 0 ).addr( config_memories_in( 0 ).widthAddr - 1 downto 0 ), rout( 0 ).valid, din( 0 ).data( config_memories_in( 0 ).RAM_WIDTH - 1 downto 0 ),
   din( 0 ).nents(  0 )( config_memories_in( 0 ).widthNent - 1 downto 0 ), din( 0 ).nents(  1 )( config_memories_in( 0 ).widthNent - 1 downto 0 ),
   din( 0 ).nents(  2 )( config_memories_in( 0 ).widthNent - 1 downto 0 ), din( 0 ).nents(  3 )( config_memories_in( 0 ).widthNent - 1 downto 0 ),
@@ -160,7 +163,7 @@ c: entity work.MatchEngineTop_L4 port map ( clk, reset, start, done, open, open,
   writes( 0 ).addr( config_memories_out( 0 ).widthAddr - 1 downto 0 ), open, writes( 0 ).valid, writes( 0 ).data( config_memories_out( 0 ).RAM_WIDTH - 1 downto 0 ) );
 end generate;
 gL5: if k >= 16 and k < 24 generate
-c: entity work.MatchEngineTop_L5 port map ( clk, reset, start, done, open, open, bx, open, open,
+c: entity work.MatchEngineTop_L5 port map ( clk, reset, start, done, open, open, bxIn, bxOut, open,
   rout( 0 ).addr( config_memories_in( 0 ).widthAddr - 1 downto 0 ), rout( 0 ).valid, din( 0 ).data( config_memories_in( 0 ).RAM_WIDTH - 1 downto 0 ),
   din( 0 ).nents(  0 )( config_memories_in( 0 ).widthNent - 1 downto 0 ), din( 0 ).nents(  1 )( config_memories_in( 0 ).widthNent - 1 downto 0 ),
   din( 0 ).nents(  2 )( config_memories_in( 0 ).widthNent - 1 downto 0 ), din( 0 ).nents(  3 )( config_memories_in( 0 ).widthNent - 1 downto 0 ),
@@ -199,7 +202,7 @@ c: entity work.MatchEngineTop_L5 port map ( clk, reset, start, done, open, open,
   writes( 0 ).addr( config_memories_out( 0 ).widthAddr - 1 downto 0 ), open, writes( 0 ).valid, writes( 0 ).data( config_memories_out( 0 ).RAM_WIDTH - 1 downto 0 ) );
 end generate;
 gL6: if k >= 24 generate
-c: entity work.MatchEngineTop_L6 port map ( clk, reset, start, done, open, open, bx, open, open,
+c: entity work.MatchEngineTop_L6 port map ( clk, reset, start, done, open, open, bxIn, bxOut, open,
   rout( 0 ).addr( config_memories_in( 0 ).widthAddr - 1 downto 0 ), rout( 0 ).valid, din( 0 ).data( config_memories_in( 0 ).RAM_WIDTH - 1 downto 0 ),
   din( 0 ).nents(  0 )( config_memories_in( 0 ).widthNent - 1 downto 0 ), din( 0 ).nents(  1 )( config_memories_in( 0 ).widthNent - 1 downto 0 ),
   din( 0 ).nents(  2 )( config_memories_in( 0 ).widthNent - 1 downto 0 ), din( 0 ).nents(  3 )( config_memories_in( 0 ).widthNent - 1 downto 0 ),
@@ -252,6 +255,7 @@ begin
 
 writes( l ).reset <= reset;
 writes( l ).start <= '1' when done = '1' or enable = '1' else '0';
+writes( l ).bx <= bxOut;
 
 memory_din <= writes( l );
 

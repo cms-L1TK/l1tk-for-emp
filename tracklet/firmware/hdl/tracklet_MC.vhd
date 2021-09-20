@@ -34,8 +34,6 @@ port (
 );
 end component;
 
-signal bx: std_logic_vector ( widthBX - 1 downto 0 ) := ( others => '0' );
-
 
 begin
 
@@ -53,6 +51,7 @@ signal din: t_datas( numInputs  - 1 downto 0 ) := ( others => nulll );
 signal rout: t_reads( numInputs  - 1 downto 0 ) := ( others => nulll );
 
 signal reset, start, done, enable: std_logic := '0';
+signal bxIn, bxOut: std_logic_vector ( widthBX - 1 downto 0 ) := ( others => '0' );
 signal writes: t_writes( numOutputs - 1 downto 0 ) := ( others => nulll );
 
 signal counter: std_logic_vector( widthNent - 1 downto 0 ) := ( others => '0' );
@@ -63,6 +62,7 @@ din <= mc_din( offsetIn + numInputs - 1 downto offsetIn );
 mc_rout( offsetIn + numInputs - 1 downto offsetIn ) <= rout;
 
 start <= mc_din( offsetIn ).start;
+bxIn <= mc_din( offsetIn ).bx;
 
 process ( clk ) is
 begin
@@ -77,12 +77,15 @@ if rising_edge( clk ) then
     enable <= '1';
     counter <= ( others => '0' );
   end if;
+  if reset = '1' then
+    enable <= '0';
+  end if;
 
 end if;
 end process;
 
 g0: if k = 0 generate
-c: entity work.MatchCalculator_L3PHIB port map ( clk, reset, start, done, open, open, bx,
+c: entity work.MatchCalculator_L3PHIB port map ( clk, reset, start, done, open, open, bxIn,
   rout( 0 ).addr( config_memories_in( 0 ).widthAddr - 1 downto 0 ), rout( 0 ).valid, din( 0 ).data( config_memories_in( 0 ).RAM_WIDTH - 1 downto 0 ),
   rout( 1 ).addr( config_memories_in( 1 ).widthAddr - 1 downto 0 ), rout( 1 ).valid, din( 1 ).data( config_memories_in( 1 ).RAM_WIDTH - 1 downto 0 ),
   rout( 2 ).addr( config_memories_in( 2 ).widthAddr - 1 downto 0 ), rout( 2 ).valid, din( 2 ).data( config_memories_in( 2 ).RAM_WIDTH - 1 downto 0 ),
@@ -101,11 +104,11 @@ c: entity work.MatchCalculator_L3PHIB port map ( clk, reset, start, done, open, 
   din( 7 ).nents( 0 )( config_memories_in( 0 ).widthNent - 1 downto 0 ), din( 7 ).nents( 1 )( config_memories_in( 0 ).widthNent - 1 downto 0 ),
   rout( 8 ).addr( config_memories_in( 8 ).widthAddr - 1 downto 0 ), rout( 8 ).valid, din( 8 ).data( config_memories_in( 8 ).RAM_WIDTH - 1 downto 0 ),
   rout( 9 ).addr( config_memories_in( 9 ).widthAddr - 1 downto 0 ), rout( 9 ).valid, din( 9 ).data( config_memories_in( 9 ).RAM_WIDTH - 1 downto 0 ),
-  open, open,
+  bxOut, open,
   writes( 0 ).addr( config_memories_out( 0 ).widthAddr - 1 downto 0 ), open, writes( 0 ).valid, writes( 0 ).data( config_memories_out( 0 ).RAM_WIDTH - 1 downto 0 ) );
 end generate;
 g1: if k = 1 generate
-c: entity work.MatchCalculator_L4PHIB port map ( clk, reset, start, done, open, open, bx,
+c: entity work.MatchCalculator_L4PHIB port map ( clk, reset, start, done, open, open, bxIn,
   rout( 0 ).addr( config_memories_in( 0 ).widthAddr - 1 downto 0 ), rout( 0 ).valid, din( 0 ).data( config_memories_in( 0 ).RAM_WIDTH - 1 downto 0 ),
   rout( 1 ).addr( config_memories_in( 1 ).widthAddr - 1 downto 0 ), rout( 1 ).valid, din( 1 ).data( config_memories_in( 1 ).RAM_WIDTH - 1 downto 0 ),
   rout( 2 ).addr( config_memories_in( 2 ).widthAddr - 1 downto 0 ), rout( 2 ).valid, din( 2 ).data( config_memories_in( 2 ).RAM_WIDTH - 1 downto 0 ),
@@ -124,11 +127,11 @@ c: entity work.MatchCalculator_L4PHIB port map ( clk, reset, start, done, open, 
   din( 7 ).nents( 0 )( config_memories_in( 0 ).widthNent - 1 downto 0 ), din( 7 ).nents( 1 )( config_memories_in( 0 ).widthNent - 1 downto 0 ),
   rout( 8 ).addr( config_memories_in( 8 ).widthAddr - 1 downto 0 ), rout( 8 ).valid, din( 8 ).data( config_memories_in( 8 ).RAM_WIDTH - 1 downto 0 ),
   rout( 9 ).addr( config_memories_in( 9 ).widthAddr - 1 downto 0 ), rout( 9 ).valid, din( 9 ).data( config_memories_in( 9 ).RAM_WIDTH - 1 downto 0 ),
-  open, open,
+  bxOut, open,
   writes( 0 ).addr( config_memories_out( 0 ).widthAddr - 1 downto 0 ), open, writes( 0 ).valid, writes( 0 ).data( config_memories_out( 0 ).RAM_WIDTH - 1 downto 0 ) );
 end generate;
 g2: if k = 2 generate
-c: entity work.MatchCalculator_L5PHIB port map ( clk, reset, start, done, open, open, bx,
+c: entity work.MatchCalculator_L5PHIB port map ( clk, reset, start, done, open, open, bxIn,
   rout( 0 ).addr( config_memories_in( 0 ).widthAddr - 1 downto 0 ), rout( 0 ).valid, din( 0 ).data( config_memories_in( 0 ).RAM_WIDTH - 1 downto 0 ),
   rout( 1 ).addr( config_memories_in( 1 ).widthAddr - 1 downto 0 ), rout( 1 ).valid, din( 1 ).data( config_memories_in( 1 ).RAM_WIDTH - 1 downto 0 ),
   rout( 2 ).addr( config_memories_in( 2 ).widthAddr - 1 downto 0 ), rout( 2 ).valid, din( 2 ).data( config_memories_in( 2 ).RAM_WIDTH - 1 downto 0 ),
@@ -147,11 +150,11 @@ c: entity work.MatchCalculator_L5PHIB port map ( clk, reset, start, done, open, 
   din( 7 ).nents( 0 )( config_memories_in( 0 ).widthNent - 1 downto 0 ), din( 7 ).nents( 1 )( config_memories_in( 0 ).widthNent - 1 downto 0 ),
   rout( 8 ).addr( config_memories_in( 8 ).widthAddr - 1 downto 0 ), rout( 8 ).valid, din( 8 ).data( config_memories_in( 8 ).RAM_WIDTH - 1 downto 0 ),
   rout( 9 ).addr( config_memories_in( 9 ).widthAddr - 1 downto 0 ), rout( 9 ).valid, din( 9 ).data( config_memories_in( 9 ).RAM_WIDTH - 1 downto 0 ),
-  open, open,
+  bxOut, open,
   writes( 0 ).addr( config_memories_out( 0 ).widthAddr - 1 downto 0 ), open, writes( 0 ).valid, writes( 0 ).data( config_memories_out( 0 ).RAM_WIDTH - 1 downto 0 ) );
 end generate;
 g3: if k = 3 generate
-c: entity work.MatchCalculator_L6PHIB port map ( clk, reset, start, done, open, open, bx,
+c: entity work.MatchCalculator_L6PHIB port map ( clk, reset, start, done, open, open, bxIn,
   rout( 0 ).addr( config_memories_in( 0 ).widthAddr - 1 downto 0 ), rout( 0 ).valid, din( 0 ).data( config_memories_in( 0 ).RAM_WIDTH - 1 downto 0 ),
   rout( 1 ).addr( config_memories_in( 1 ).widthAddr - 1 downto 0 ), rout( 1 ).valid, din( 1 ).data( config_memories_in( 1 ).RAM_WIDTH - 1 downto 0 ),
   rout( 2 ).addr( config_memories_in( 2 ).widthAddr - 1 downto 0 ), rout( 2 ).valid, din( 2 ).data( config_memories_in( 2 ).RAM_WIDTH - 1 downto 0 ),
@@ -170,7 +173,7 @@ c: entity work.MatchCalculator_L6PHIB port map ( clk, reset, start, done, open, 
   din( 7 ).nents( 0 )( config_memories_in( 0 ).widthNent - 1 downto 0 ), din( 7 ).nents( 1 )( config_memories_in( 0 ).widthNent - 1 downto 0 ),
   rout( 8 ).addr( config_memories_in( 8 ).widthAddr - 1 downto 0 ), rout( 8 ).valid, din( 8 ).data( config_memories_in( 8 ).RAM_WIDTH - 1 downto 0 ),
   rout( 9 ).addr( config_memories_in( 9 ).widthAddr - 1 downto 0 ), rout( 9 ).valid, din( 9 ).data( config_memories_in( 9 ).RAM_WIDTH - 1 downto 0 ),
-  open, open,
+  bxOut, open,
   writes( 0 ).addr( config_memories_out( 0 ).widthAddr - 1 downto 0 ), open, writes( 0 ).valid, writes( 0 ).data( config_memories_out( 0 ).RAM_WIDTH - 1 downto 0 ) );
 end generate;
 
@@ -188,6 +191,7 @@ begin
 
 writes( l ).reset <= reset;
 writes( l ).start <= '1' when done = '1' or enable = '1' else '0';
+writes( l ).bx <= bxOut;
 
 memory_din <= writes( l );
 

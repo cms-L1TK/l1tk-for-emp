@@ -1,10 +1,6 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use work.tracklet_config.all;
-use work.hybrid_data_types.all;
-use work.hybrid_data_formats.all;
-use work.hybrid_config.all;
-use work.hybrid_tools.all;
 use work.tf_pkg.all;
 
 
@@ -19,6 +15,7 @@ record
   reset: std_logic;
   start: std_logic;
   valid: std_logic;
+  bx   : std_logic_vector( widthBX   - 1 downto 0 );
   addr : std_logic_vector( widthAddr - 1 downto 0 );
   data : std_logic_vector( widthData - 1 downto 0 );
 end record;
@@ -39,6 +36,7 @@ record
   reset: std_logic;
   start: std_logic;
   valid: std_logic;
+  bx   : std_logic_vector( widthBX   - 1 downto 0 );
   nents: t_nents( 0 to numNent - 1 );
   data : std_logic_vector( widthData - 1 downto 0 );
 end record;
@@ -68,7 +66,7 @@ package body tracklet_data_types is
 
 function nulll return t_write is begin return ( '0', '0', '0', others => ( others => '0' ) ); end function;
 function nulll return t_read  is begin return ( '0', '0', others => ( others => '0' ) ); end function;
-function nulll return t_data  is begin return ( '0', '0', '0', (others => ( others => '0' ) ), ( others => '0' ) ); end function;
+function nulll return t_data  is begin return ( '0', '0', '0', ( others => '0' ) , (others => ( others => '0' ) ), ( others => '0' ) ); end function;
 
 function conv( hls: t_arr_7b ) return t_nents is
   variable nents: t_nents( hls'range );

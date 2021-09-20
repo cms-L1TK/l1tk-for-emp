@@ -120,6 +120,7 @@ sync_nent <= memory_read.start;
 
 dout.reset <= memory_din.reset;
 dout.start <= memory_din.start;
+dout.bx <= memory_din.bx;
 dout.data( doutb'range ) <= doutb;
 
 memory_dout <= dout;

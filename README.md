@@ -7,21 +7,9 @@ The project can be built against multiple boards, but has so far been implemente
 ## Quick start instructions for developers ##
 
 Make sure that the [Prerequisites](#prerequisites) are satisfied.
-
-##### Step 1: Setup the work area for Serenity and VCU118
-
-```
-ipbb init work
-cd work
-ipbb add git https://:@gitlab.cern.ch:8443/p2-xware/firmware/emp-fwk.git -b v0.5.6
-ipbb add git https://gitlab.cern.ch/ttc/legacy_ttc.git -b v2.1
-ipbb add git https://:@gitlab.cern.ch:8443/cms-tcds/cms-tcds2-firmware.git -b v0_1_1
-ipbb add git https://gitlab.cern.ch/HPTD/tclink.git -r fda0bcf
-ipbb add git https://github.com/ipbus/ipbus-firmware -b v1.9
-ipbb add git https://github.com/cms-L1TK/l1tk-for-emp.git
 ```
 
-##### Step 1: Setup the work area for Apollo
+##### Step 1: Setup the work area
 
 ```
 ipbb init work
@@ -30,7 +18,7 @@ ipbb add git https://:@gitlab.cern.ch:8443/p2-xware/firmware/emp-fwk.git -b feat
 ipbb add git https://github.com/apollo-lhc/CM_FPGA_FW -b v1.2
 cd src/CM_FPGA_FW; make init; cd -
 ipbb add git https://gitlab.cern.ch/ttc/legacy_ttc.git -b v2.1
-ipbb add git https://:@gitlab.cern.ch:8443/khahn/cms-tcds2-firmware.git 
+ipbb add git https://:@gitlab.cern.ch:8443/cms-tcds/cms-tcds2-firmware.git -b v0_1_1
 ipbb add git https://gitlab.cern.ch/HPTD/tclink.git -r fda0bcf
 ipbb add git https://github.com/ipbus/ipbus-firmware -b v1.9
 ipbb add git https://github.com/cms-L1TK/l1tk-for-emp.git
@@ -40,11 +28,10 @@ ipbb add git https://github.com/cms-L1TK/l1tk-for-emp.git
 
 ##### Step 2: Create an ipbb project area
 
-There is currently six available projects
+There is currently two available projects
 
 | Description                                              | `.dep` file name                  |
 | -------------------------------------------------------- | --------------------------------- |
-| Hybrid Summer Chain                                      | `vcu118.dep`                      |
 | Hybrid Summer Chain                                      | `serenity.dep`                    |
 | Hybrid Summer Chain                                      | `apollo.dep`                      |
 
@@ -59,6 +46,7 @@ cd proj/tracklet
 For simulation testbench:
 ```
 ipbb proj create sim sim l1tk-for-emp:tracklet 'sim.dep'
+ln -s src/l1tk-for-emp/tracklet/firmware/emData/ proj/
 cd proj/sim
 ```
 
@@ -66,7 +54,13 @@ cd proj/sim
 
 
 For implementation:
+Note: For the following commands, you need to ensure that can find & use the `gen_ipbus_addr_decode` script - e.g. for a standard uHAL installation:
 ```
+export PATH=/opt/cactus/bin/uhal/tools:$PATH LD_LIBRARY_PATH=/opt/cactus/lib:$LD_LIBRARY_PATH
+```
+Run the following IPBB commands:
+```
+ipbb ipbus gendecoders
 ipbb vivado generate-project synth -j8 impl -j8 package
 ```
 

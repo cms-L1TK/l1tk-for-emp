@@ -98,6 +98,7 @@ use work.emp_ttc_decl.all;
 use work.hybrid_tools.all;
 use work.hybrid_data_types.all;
 use work.hybrid_data_formats.all;
+use work.tracklet_config.all;
 
 entity hybrid_format_in_quad is
 port (
@@ -125,17 +126,24 @@ if rising_edge( clk ) then
   link <= quad_link;
   reset.reset <= '0';
   counter <= incr( counter );
-  if ready = '1' and quad_link = '1' and link = '0' then
-    reset.start <= '1';
+  if uint( counter ) = numFrames - 1 then
+    reset.bx <= incr( reset.bx );
+  end if;
+  if quad_link = '1' and link = '0' then
     ready <= '0';
     counter <= ( others => '0' );
+    if ready = '1' then
+      reset.start <= '1';
+      reset.bx <= ( others => '0' );
+    end if;
   end if;
-  if reset.start = '1' and uint( counter ) = numFrames + 1 - 1 then
+  if reset.start = '1' and quad_link = '0' and uint( counter ) = numFrames + 1 - 1 then
     reset.start <= '0';
   end if;
   if uint( quad_ttc.bctr ) = 0 and uint( quad_ttc.pctr ) = 0 and ready = '0' then
     reset.reset <= '1';
     ready <= '1';
+    reset.start <= '0';
   end if;
 
 end if;
