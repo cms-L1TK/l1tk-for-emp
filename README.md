@@ -13,6 +13,7 @@ Make sure that the [Prerequisites](#prerequisites) are satisfied.
 ```
 ipbb init work
 cd work
+kinit myusername@CERN.CH
 ipbb add git https://:@gitlab.cern.ch:8443/p2-xware/firmware/emp-fwk.git -b feature/apollo
 ipbb add git https://github.com/apollo-lhc/CM_FPGA_FW -b v1.2
 cd src/CM_FPGA_FW; make init; cd -
