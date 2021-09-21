@@ -83,4 +83,5 @@ where `input.txt` follows the standard pattern file convention.
 ```
 curl -L https://github.com/ipbus/ipbb/archive/dev/2021h.tar.gz | tar xvz
 source ipbb-dev-2021h/env.sh
+(or if you use tcsh:  bash -c 'source ipbb-dev-2021h/env.sh; tcsh -l')
 ```
