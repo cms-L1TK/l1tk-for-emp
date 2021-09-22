@@ -66,7 +66,7 @@ ipbb vivado generate-project synth -j8 impl -j8 package
 
 For simulation testbench:
 ```
-ipbb sim setup-simlibs
+ipbb sim setup-simlib
 ipbb sim generate-project
 
 ./vsim -c work.top -Gsourcefile=<input.txt> -Gsinkfile=<out.txt> 
