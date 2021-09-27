@@ -13,6 +13,7 @@ Make sure that the [Prerequisites](#prerequisites) are satisfied.
 ```
 ipbb init work
 cd work
+kinit myusername@CERN.CH
 ipbb add git https://:@gitlab.cern.ch:8443/p2-xware/firmware/emp-fwk.git -b feature/apollo
 ipbb add git https://github.com/apollo-lhc/CM_FPGA_FW -b v1.2
 cd src/CM_FPGA_FW; make init; cd -
@@ -65,7 +66,7 @@ ipbb vivado generate-project synth -j8 impl -j8 package
 
 For simulation testbench:
 ```
-ipbb sim setup-simlibs
+ipbb sim setup-simlib
 ipbb sim ipcores
 ipbb sim generate-project
 
@@ -84,4 +85,5 @@ where `input.txt` follows the standard pattern file convention.
 ```
 curl -L https://github.com/ipbus/ipbb/archive/dev/2021i.tar.gz | tar xvz
 source ipbb-dev-2021i/env.sh
+(or if you use tcsh:  bash -c 'source ipbb-dev-2021i/env.sh; tcsh -l')
 ```
