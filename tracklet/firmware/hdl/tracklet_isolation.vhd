@@ -126,12 +126,10 @@ if rising_edge( clk ) then
   link <= quad_link;
   reset.reset <= '0';
   counter <= incr( counter );
-  if uint( counter ) = numFrames - 1 then
-    reset.bx <= incr( reset.bx );
-  end if;
   if quad_link = '1' and link = '0' then
     ready <= '0';
     counter <= ( others => '0' );
+    reset.bx <= incr( reset.bx );
     if ready = '1' then
       reset.start <= '1';
       reset.bx <= ( others => '0' );

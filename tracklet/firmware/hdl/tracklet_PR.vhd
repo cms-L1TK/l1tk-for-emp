@@ -51,10 +51,9 @@ signal din: t_datas( numInputs  - 1 downto 0 ) := ( others => nulll );
 signal rout: t_reads( numInputs  - 1 downto 0 ) := ( others => nulll );
 
 signal reset, start, done, enable: std_logic := '0';
+signal counter: std_logic_vector( widthNent - 1 downto 0 ) := ( others => '0' );
 signal bxIn, bxOut: std_logic_vector ( widthBX - 1 downto 0 ) := ( others => '0' );
 signal writes: t_writes( numOutputs - 1 downto 0 ) := ( others => nulll );
-
-signal counter: std_logic_vector( widthNent - 1 downto 0 ) := ( others => '0' );
 
 begin
 
@@ -158,7 +157,7 @@ signal memory_dout: t_data := nulll;
 begin
 
 writes( l ).reset <= reset;
-writes( l ).start <= '1' when done = '1' or enable = '1' else '0';
+writes( l ).start <= done or enable;
 writes( l ).bx <= bxOut;
 
 memory_din <= writes( l );

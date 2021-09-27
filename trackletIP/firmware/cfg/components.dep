@@ -1,0 +1,101 @@
+src tracklet_isolation.vhd
+src tracklet_top.vhd
+src tracklet_format.vhd
+
+src tracklet_IR.vhd
+src tracklet_VMR.vhd
+src tracklet_TE.vhd
+src tracklet_TC.vhd
+src tracklet_PR.vhd
+src tracklet_ME.vhd
+src tracklet_MC.vhd
+src tracklet_FT.vhd
+
+src tracklet_memory.vhd
+
+src --vhdl2008 tf_lut.vhd
+src --vhdl2008 tf_mem.vhd
+src --vhdl2008 tf_mem_bin.vhd
+
+src tracklet_config_memory.vhd
+src tracklet_data_types.vhd
+src tracklet_config.vhd
+
+src tf_pkg.vhd
+
+iprepo xilinx_com_hls_InputRouterTop_IR_DTC_PS10G_1_A_1_0
+iprepo xilinx_com_hls_InputRouterTop_IR_DTC_PS10G_2_A_1_0
+iprepo xilinx_com_hls_InputRouterTop_IR_DTC_PS10G_2_B_1_0
+iprepo xilinx_com_hls_InputRouterTop_IR_DTC_PS10G_3_A_1_0
+iprepo xilinx_com_hls_InputRouterTop_IR_DTC_PS10G_3_B_1_0
+iprepo xilinx_com_hls_InputRouterTop_IR_DTC_PS_1_A_1_0
+iprepo xilinx_com_hls_InputRouterTop_IR_DTC_PS_1_B_1_0
+iprepo xilinx_com_hls_InputRouterTop_IR_DTC_PS_2_A_1_0
+iprepo xilinx_com_hls_InputRouterTop_IR_DTC_PS_2_B_1_0
+iprepo xilinx_com_hls_InputRouterTop_IR_DTC_2S_1_A_1_0
+iprepo xilinx_com_hls_InputRouterTop_IR_DTC_2S_1_B_1_0
+iprepo xilinx_com_hls_InputRouterTop_IR_DTC_2S_2_A_1_0
+iprepo xilinx_com_hls_InputRouterTop_IR_DTC_2S_2_B_1_0
+iprepo xilinx_com_hls_InputRouterTop_IR_DTC_2S_3_A_1_0
+iprepo xilinx_com_hls_InputRouterTop_IR_DTC_2S_3_B_1_0
+iprepo xilinx_com_hls_InputRouterTop_IR_DTC_2S_4_A_1_0
+iprepo xilinx_com_hls_InputRouterTop_IR_DTC_2S_4_B_1_0
+iprepo xilinx_com_hls_VMRouterTop_L1PHID_1_0
+iprepo xilinx_com_hls_VMRouterTop_L2PHIB_1_0
+iprepo xilinx_com_hls_VMRouterTop_L3PHIB_1_0
+iprepo xilinx_com_hls_VMRouterTop_L4PHIB_1_0
+iprepo xilinx_com_hls_VMRouterTop_L5PHIB_1_0
+iprepo xilinx_com_hls_VMRouterTop_L6PHIB_1_0
+iprepo xilinx_com_hls_TrackletEngineTop_1_0
+iprepo xilinx_com_hls_TrackletCalculator_L1L2F_1_0
+iprepo xilinx_com_hls_ProjectionRouterTop_L3PHIB_1_0
+iprepo xilinx_com_hls_ProjectionRouterTop_L4PHIB_1_0
+iprepo xilinx_com_hls_ProjectionRouterTop_L5PHIB_1_0
+iprepo xilinx_com_hls_ProjectionRouterTop_L6PHIB_1_0
+iprepo xilinx_com_hls_MatchEngineTop_L3_1_0
+iprepo xilinx_com_hls_MatchEngineTop_L4_1_0
+iprepo xilinx_com_hls_MatchEngineTop_L5_1_0
+iprepo xilinx_com_hls_MatchEngineTop_L6_1_0
+iprepo xilinx_com_hls_MatchCalculator_L3PHIB_1_0
+iprepo xilinx_com_hls_MatchCalculator_L4PHIB_1_0
+iprepo xilinx_com_hls_MatchCalculator_L5PHIB_1_0
+iprepo xilinx_com_hls_MatchCalculator_L6PHIB_1_0
+iprepo xilinx_com_hls_TrackBuilder_L1L2_1_0
+src ../cgn/IR_PS10G_1_A.xci
+src ../cgn/IR_PS10G_2_A.xci
+src ../cgn/IR_PS10G_2_B.xci
+src ../cgn/IR_PS10G_3_A.xci
+src ../cgn/IR_PS10G_3_B.xci
+src ../cgn/IR_PS_1_A.xci
+src ../cgn/IR_PS_1_B.xci
+src ../cgn/IR_PS_2_A.xci
+src ../cgn/IR_PS_2_B.xci
+src ../cgn/IR_2S_1_A.xci
+src ../cgn/IR_2S_1_B.xci
+src ../cgn/IR_2S_2_A.xci
+src ../cgn/IR_2S_2_B.xci
+src ../cgn/IR_2S_3_A.xci
+src ../cgn/IR_2S_3_B.xci
+src ../cgn/IR_2S_4_A.xci
+src ../cgn/IR_2S_4_B.xci
+src ../cgn/VMR_L1PHID.xci
+src ../cgn/VMR_L2PHIB.xci
+src ../cgn/VMR_L3PHIB.xci
+src ../cgn/VMR_L4PHIB.xci
+src ../cgn/VMR_L5PHIB.xci
+src ../cgn/VMR_L6PHIB.xci
+src ../cgn/TE_L1L2.xci
+src ../cgn/TC_L1L2F.xci
+src ../cgn/PR_L3PHIB.xci
+src ../cgn/PR_L4PHIB.xci
+src ../cgn/PR_L5PHIB.xci
+src ../cgn/PR_L6PHIB.xci
+src ../cgn/ME_L3PHIB.xci
+src ../cgn/ME_L4PHIB.xci
+src ../cgn/ME_L5PHIB.xci
+src ../cgn/ME_L6PHIB.xci
+src ../cgn/MC_L3PHIB.xci
+src ../cgn/MC_L4PHIB.xci
+src ../cgn/MC_L5PHIB.xci
+src ../cgn/MC_L6PHIB.xci
+src ../cgn/FT_L1L2.xci

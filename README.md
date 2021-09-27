@@ -66,6 +66,7 @@ ipbb vivado generate-project synth -j8 impl -j8 package
 For simulation testbench:
 ```
 ipbb sim setup-simlibs
+ipbb sim ipcores
 ipbb sim generate-project
 
 ./vsim -c work.top -Gsourcefile=<input.txt> -Gsinkfile=<out.txt> 
@@ -78,9 +79,9 @@ where `input.txt` follows the standard pattern file convention.
  * Xilinx Vivado 2020.2 (or later)
  * Python 2.7 - available on most linux distributions, natively or as [miniconda](https://conda.io/miniconda.html) distribution.
  * Python 3 devel
- * ipbb: `dev/2021h` pre-release or greater - the [IPbus Builder Tool](https://github.com/ipbus/ipbb). Note: a single `ipbb` installation is not work area specific and suffices for any number of projects.
+ * ipbb: `dev/2021i` pre-release or greater - the [IPbus Builder Tool](https://github.com/ipbus/ipbb). Note: a single `ipbb` installation is not work area specific and suffices for any number of projects.
  
 ```
-curl -L https://github.com/ipbus/ipbb/archive/dev/2021h.tar.gz | tar xvz
-source ipbb-dev-2021h/env.sh
+curl -L https://github.com/ipbus/ipbb/archive/dev/2021i.tar.gz | tar xvz
+source ipbb-dev-2021i/env.sh
 ```
