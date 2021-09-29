@@ -43,11 +43,18 @@ ipbb proj create vivado tracklet l1tk-for-emp:tracklet 'apollo.dep'
 cd proj/tracklet
 ```
 
-For simulation testbench:
+For questa simulation testbench:
 ```
-ipbb proj create sim sim l1tk-for-emp:tracklet 'sim.dep'
+ipbb proj create sim qsim l1tk-for-emp:tracklet 'qsim.dep'
 ln -s src/l1tk-for-emp/tracklet/firmware/emData/ proj/
-cd proj/sim
+cd proj/qsim
+```
+
+For vivado simulation testbench:
+```
+ipbb proj create sim vsim l1tk-for-emp:tracklet 'vsim.dep'
+ln -s src/l1tk-for-emp/tracklet/firmware/emData/ proj/
+cd proj/vsim
 ```
 
 ##### Step 3: Implementation and simulation
@@ -64,7 +71,7 @@ ipbb ipbus gendecoders
 ipbb vivado generate-project synth -j8 impl -j8 package
 ```
 
-For simulation testbench:
+For questa simulation testbench:
 ```
 ipbb sim setup-simlib
 ipbb sim ipcores
@@ -74,6 +81,12 @@ ipbb sim generate-project
 ```
 where `input.txt` follows the standard pattern file convention.
 *N.B.* The Xilinx simulation libraries can be shared between different ipbb projects and work areas. By default they are written to `${HOME}/.xilinx_sim_libs`, but they can be written to another directory by defining the environment variable `IPBB_SIMLIB_BASE` before running these two commands, or by adding the `-x` option to end of each command (e.g. `-x /path/to/simlib_directory`).
+
+For vivado simulation testbench:
+```
+ipbb vivado generate-project
+```
+and open the project with vivado gui for simulation.
 
 ## Prerequisites ##
 
