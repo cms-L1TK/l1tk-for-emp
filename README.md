@@ -65,7 +65,7 @@ Note: For the following commands, you need to ensure that can find & use the `ge
 ```
 export PATH=/opt/cactus/bin/uhal/tools:$PATH LD_LIBRARY_PATH=/opt/cactus/lib:$LD_LIBRARY_PATH
 ```
-Run the following IPBB commands:
+and run the following IPBB commands:
 ```
 ipbb ipbus gendecoders
 ipbb vivado generate-project synth -j8 impl -j8 package
@@ -91,6 +91,7 @@ and open the project with vivado gui for simulation.
 ## Prerequisites ##
 
  * Xilinx Vivado 2020.2 (or later)
+ * Add compatible version of QuestaSim to environment variable PATH, e.g. /opt/ppd/tools/mentor/questasim_2020.1/questasim/bin:$PATH 
  * Python 2.7 - available on most linux distributions, natively or as [miniconda](https://conda.io/miniconda.html) distribution.
  * Python 3 devel
  * ipbb: `dev/2021i` pre-release or greater - the [IPbus Builder Tool](https://github.com/ipbus/ipbb). Note: a single `ipbb` installation is not work area specific and suffices for any number of projects.
