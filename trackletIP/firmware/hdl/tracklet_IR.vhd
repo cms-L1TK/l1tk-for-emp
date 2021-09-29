@@ -1,10 +1,11 @@
-library ieee, xil_defaultlib;
+library ieee;
 use ieee.std_logic_1164.all;
 use work.hybrid_tools.all;
 use work.hybrid_data_formats.all;
 use work.tracklet_config.all;
 use work.tracklet_data_types.all;
 use work.tracklet_config_memory.all;
+use work.tracklet_components.all;
 
 
 entity tracklet_IR is
@@ -84,312 +85,107 @@ end if;
 end process;
 
 g0: if k = 0 generate
-c: entity xil_defaultlib.IR_PS10G_1_A port map (
-  ap_clk => clk,
-  ap_rst => reset,
-  ap_start => start,
-  ap_done => done,
-  hInputStubs_V_dout => data,
-  hInputStubs_V_empty_n => notEmpty,
-  bx_V => bxIn,
-  hLinkWord_V => link,
-  hPhBnWord_V => phiBin,
-  bx_o_V => bxOut,
-  hOutputStubs_0_dataarray_data_V_address0 => writes( 0 ).addr( config_memories( 0 ).widthAddr - 1 downto 0 ),
-  hOutputStubs_0_dataarray_data_V_we0 => writes( 0 ).valid,
-  hOutputStubs_0_dataarray_data_V_d0 => writes( 0 ).data( config_memories( 0 ).RAM_WIDTH - 1 downto 0 )
-  );
+c: IR_PS10G_1_A port map ( clk, reset, start, done, open, open, data, notEmpty, open,
+  bxIn, link, phiBin, bxOut, open, writes( 0 ).addr( config_memories( 0 ).widthAddr - 1 downto 0 ),
+  open, writes( 0 ).valid, writes( 0 ).data( config_memories( 0 ).RAM_WIDTH - 1 downto 0 ) );
 end generate;
 
 g1: if k = 1 generate
-c: entity xil_defaultlib.IR_PS10G_2_A port map (
-  ap_clk => clk,
-  ap_rst => reset,
-  ap_start => start,
-  ap_done => done,
-  hInputStubs_V_dout => data,
-  hInputStubs_V_empty_n => notEmpty,
-  bx_V => bxIn,
-  hLinkWord_V => link,
-  hPhBnWord_V => phiBin,
-  bx_o_V => bxOut,
-  hOutputStubs_0_dataarray_data_V_address0 => writes( 0 ).addr( config_memories( 0 ).widthAddr - 1 downto 0 ),
-  hOutputStubs_0_dataarray_data_V_we0 => writes( 0 ).valid,
-  hOutputStubs_0_dataarray_data_V_d0 => writes( 0 ).data( config_memories( 0 ).RAM_WIDTH - 1 downto 0 )
-  );
+c: IR_PS10G_2_A port map ( clk, reset, start, done, open, open, data, notEmpty, open,
+  bxIn, link, phiBin, bxOut, open, writes( 0 ).addr( config_memories( 0 ).widthAddr - 1 downto 0 ),
+  open, writes( 0 ).valid, writes( 0 ).data( config_memories( 0 ).RAM_WIDTH - 1 downto 0 ) );
 end generate;
 
 g2: if k = 2 generate
-c: entity xil_defaultlib.IR_PS10G_2_B port map (
-  ap_clk => clk,
-  ap_rst => reset,
-  ap_start => start,
-  ap_done => done,
-  hInputStubs_V_dout => data,
-  hInputStubs_V_empty_n => notEmpty,
-  bx_V => bxIn,
-  hLinkWord_V => link,
-  hPhBnWord_V => phiBin,
-  bx_o_V => bxOut,
-  hOutputStubs_0_dataarray_data_V_address0 => writes( 0 ).addr( config_memories( 0 ).widthAddr - 1 downto 0 ),
-  hOutputStubs_0_dataarray_data_V_we0 => writes( 0 ).valid,
-  hOutputStubs_0_dataarray_data_V_d0 => writes( 0 ).data( config_memories( 0 ).RAM_WIDTH - 1 downto 0 )
-  );
+c: IR_PS10G_2_B port map ( clk, reset, start, done, open, open, data, notEmpty, open,
+  bxIn, link, phiBin, bxOut, open, writes( 0 ).addr( config_memories( 0 ).widthAddr - 1 downto 0 ),
+  open, writes( 0 ).valid, writes( 0 ).data( config_memories( 0 ).RAM_WIDTH - 1 downto 0 ) );
 end generate;
 
 g3: if k = 3 generate
-c: entity xil_defaultlib.IR_PS10G_3_A port map (
-  ap_clk => clk,
-  ap_rst => reset,
-  ap_start => start,
-  ap_done => done,
-  hInputStubs_V_dout => data,
-  hInputStubs_V_empty_n => notEmpty,
-  bx_V => bxIn,
-  hLinkWord_V => link,
-  hPhBnWord_V => phiBin,
-  bx_o_V => bxOut,
-  hOutputStubs_0_dataarray_data_V_address0 => writes( 0 ).addr( config_memories( 0 ).widthAddr - 1 downto 0 ),
-  hOutputStubs_0_dataarray_data_V_we0 => writes( 0 ).valid,
-  hOutputStubs_0_dataarray_data_V_d0 => writes( 0 ).data( config_memories( 0 ).RAM_WIDTH - 1 downto 0 )
-  );
+c: IR_PS10G_3_A port map ( clk, reset, start, done, open, open, data, notEmpty, open,
+  bxIn, link, phiBin, bxOut, open, writes( 0 ).addr( config_memories( 0 ).widthAddr - 1 downto 0 ),
+  open, writes( 0 ).valid, writes( 0 ).data( config_memories( 0 ).RAM_WIDTH - 1 downto 0 ) );
 end generate;
 
 g4: if k = 4 generate
-c: entity xil_defaultlib.IR_PS10G_3_B port map (
-  ap_clk => clk,
-  ap_rst => reset,
-  ap_start => start,
-  ap_done => done,
-  hInputStubs_V_dout => data,
-  hInputStubs_V_empty_n => notEmpty,
-  bx_V => bxIn,
-  hLinkWord_V => link,
-  hPhBnWord_V => phiBin,
-  bx_o_V => bxOut,
-  hOutputStubs_0_dataarray_data_V_address0 => writes( 0 ).addr( config_memories( 0 ).widthAddr - 1 downto 0 ),
-  hOutputStubs_0_dataarray_data_V_we0 => writes( 0 ).valid,
-  hOutputStubs_0_dataarray_data_V_d0 => writes( 0 ).data( config_memories( 0 ).RAM_WIDTH - 1 downto 0 )
-  );
+c: IR_PS10G_3_B port map ( clk, reset, start, done, open, open, data, notEmpty, open,
+  bxIn, link, phiBin, bxOut, open, writes( 0 ).addr( config_memories( 0 ).widthAddr - 1 downto 0 ),
+  open, writes( 0 ).valid, writes( 0 ).data( config_memories( 0 ).RAM_WIDTH - 1 downto 0 ) );
 end generate;
 
 g5: if k = 5 generate
-c: entity xil_defaultlib.IR_PS_1_A port map (
-  ap_clk => clk,
-  ap_rst => reset,
-  ap_start => start,
-  ap_done => done,
-  hInputStubs_V_dout => data,
-  hInputStubs_V_empty_n => notEmpty,
-  bx_V => bxIn,
-  hLinkWord_V => link,
-  hPhBnWord_V => phiBin,
-  bx_o_V => bxOut,
-  hOutputStubs_0_dataarray_data_V_address0 => writes( 0 ).addr( config_memories( 0 ).widthAddr - 1 downto 0 ),
-  hOutputStubs_0_dataarray_data_V_we0 => writes( 0 ).valid,
-  hOutputStubs_0_dataarray_data_V_d0 => writes( 0 ).data( config_memories( 0 ).RAM_WIDTH - 1 downto 0 )
-  );
+c: IR_PS_1_A port map ( clk, reset, start, done, open, open, data, notEmpty, open,
+  bxIn, link, phiBin, bxOut, open, writes( 0 ).addr( config_memories( 0 ).widthAddr - 1 downto 0 ),
+  open, writes( 0 ).valid, writes( 0 ).data( config_memories( 0 ).RAM_WIDTH - 1 downto 0 ) );
 end generate;
 
 g6: if k = 6 generate
-c: entity xil_defaultlib.IR_PS_1_B port map (
-  ap_clk => clk,
-  ap_rst => reset,
-  ap_start => start,
-  ap_done => done,
-  hInputStubs_V_dout => data,
-  hInputStubs_V_empty_n => notEmpty,
-  bx_V => bxIn,
-  hLinkWord_V => link,
-  hPhBnWord_V => phiBin,
-  bx_o_V => bxOut,
-  hOutputStubs_0_dataarray_data_V_address0 => writes( 0 ).addr( config_memories( 0 ).widthAddr - 1 downto 0 ),
-  hOutputStubs_0_dataarray_data_V_we0 => writes( 0 ).valid,
-  hOutputStubs_0_dataarray_data_V_d0 => writes( 0 ).data( config_memories( 0 ).RAM_WIDTH - 1 downto 0 )
-  );
+c: IR_PS_1_B port map ( clk, reset, start, done, open, open, data, notEmpty, open,
+  bxIn, link, phiBin, bxOut, open, writes( 0 ).addr( config_memories( 0 ).widthAddr - 1 downto 0 ),
+  open, writes( 0 ).valid, writes( 0 ).data( config_memories( 0 ).RAM_WIDTH - 1 downto 0 ) );
 end generate;
 
 g7: if k = 7 generate
-c: entity xil_defaultlib.IR_PS_2_A port map (
-  ap_clk => clk,
-  ap_rst => reset,
-  ap_start => start,
-  ap_done => done,
-  hInputStubs_V_dout => data,
-  hInputStubs_V_empty_n => notEmpty,
-  bx_V => bxIn,
-  hLinkWord_V => link,
-  hPhBnWord_V => phiBin,
-  bx_o_V => bxOut,
-  hOutputStubs_0_dataarray_data_V_address0 => writes( 0 ).addr( config_memories( 0 ).widthAddr - 1 downto 0 ),
-  hOutputStubs_0_dataarray_data_V_we0 => writes( 0 ).valid,
-  hOutputStubs_0_dataarray_data_V_d0 => writes( 0 ).data( config_memories( 0 ).RAM_WIDTH - 1 downto 0 )
-  );
+c: IR_PS_2_A port map ( clk, reset, start, done, open, open, data, notEmpty, open,
+  bxIn, link, phiBin, bxOut, open, writes( 0 ).addr( config_memories( 0 ).widthAddr - 1 downto 0 ),
+  open, writes( 0 ).valid, writes( 0 ).data( config_memories( 0 ).RAM_WIDTH - 1 downto 0 ) );
 end generate;
 
 g8: if k = 8 generate
-c: entity xil_defaultlib.IR_PS_2_B port map (
-  ap_clk => clk,
-  ap_rst => reset,
-  ap_start => start,
-  ap_done => done,
-  hInputStubs_V_dout => data,
-  hInputStubs_V_empty_n => notEmpty,
-  bx_V => bxIn,
-  hLinkWord_V => link,
-  hPhBnWord_V => phiBin,
-  bx_o_V => bxOut,
-  hOutputStubs_0_dataarray_data_V_address0 => writes( 0 ).addr( config_memories( 0 ).widthAddr - 1 downto 0 ),
-  hOutputStubs_0_dataarray_data_V_we0 => writes( 0 ).valid,
-  hOutputStubs_0_dataarray_data_V_d0 => writes( 0 ).data( config_memories( 0 ).RAM_WIDTH - 1 downto 0 )
-  );
+c: IR_PS_2_B port map ( clk, reset, start, done, open, open, data, notEmpty, open,
+  bxIn, link, phiBin, bxOut, open, writes( 0 ).addr( config_memories( 0 ).widthAddr - 1 downto 0 ),
+  open, writes( 0 ).valid, writes( 0 ).data( config_memories( 0 ).RAM_WIDTH - 1 downto 0 ) );
 end generate;
 
 g9: if k = 9 generate
-c: entity xil_defaultlib.IR_2S_1_A port map (
-  ap_clk => clk,
-  ap_rst => reset,
-  ap_start => start,
-  ap_done => done,
-  hInputStubs_V_dout => data,
-  hInputStubs_V_empty_n => notEmpty,
-  bx_V => bxIn,
-  hLinkWord_V => link,
-  hPhBnWord_V => phiBin,
-  bx_o_V => bxOut,
-  hOutputStubs_0_dataarray_data_V_address0 => writes( 0 ).addr( config_memories( 0 ).widthAddr - 1 downto 0 ),
-  hOutputStubs_0_dataarray_data_V_we0 => writes( 0 ).valid,
-  hOutputStubs_0_dataarray_data_V_d0 => writes( 0 ).data( config_memories( 0 ).RAM_WIDTH - 1 downto 0 ),
-  hOutputStubs_1_dataarray_data_V_address0 => writes( 1 ).addr( config_memories( 1 ).widthAddr - 1 downto 0 ),
-  hOutputStubs_1_dataarray_data_V_we0 => writes( 1 ).valid,
-  hOutputStubs_1_dataarray_data_V_d0 => writes( 1 ).data( config_memories( 1 ).RAM_WIDTH - 1 downto 0 )
-  );
+c: IR_2S_1_A port map ( clk, reset, start, done, open, open, data, notEmpty, open,
+  bxIn, link, phiBin, bxOut, open, writes( 0 ).addr( config_memories( 0 ).widthAddr - 1 downto 0 ), open,
+  writes( 0 ).valid, writes( 0 ).data( config_memories( 0 ).RAM_WIDTH - 1 downto 0 ),
+  writes( 1 ).addr( config_memories( 1 ).widthAddr - 1 downto 0 ), open,
+  writes( 1 ).valid, writes( 1 ).data( config_memories( 1 ).RAM_WIDTH - 1 downto 0 ) );
 end generate;
 
 g10: if k = 10 generate
-c: entity xil_defaultlib.IR_2S_1_B port map (
-  ap_clk => clk,
-  ap_rst => reset,
-  ap_start => start,
-  ap_done => done,
-  hInputStubs_V_dout => data,
-  hInputStubs_V_empty_n => notEmpty,
-  bx_V => bxIn,
-  hLinkWord_V => link,
-  hPhBnWord_V => phiBin,
-  bx_o_V => bxOut,
-  hOutputStubs_0_dataarray_data_V_address0 => writes( 0 ).addr( config_memories( 0 ).widthAddr - 1 downto 0 ),
-  hOutputStubs_0_dataarray_data_V_we0 => writes( 0 ).valid,
-  hOutputStubs_0_dataarray_data_V_d0 => writes( 0 ).data( config_memories( 0 ).RAM_WIDTH - 1 downto 0 )
-  );
+c: IR_2S_1_B port map ( clk, reset, start, done, open, open, data, notEmpty, open,
+  bxIn, link, phiBin, bxOut, open, writes( 0 ).addr( config_memories( 0 ).widthAddr - 1 downto 0 ),
+  open, writes( 0 ).valid, writes( 0 ).data( config_memories( 0 ).RAM_WIDTH - 1 downto 0 ) );
 end generate;
 
 g11: if k = 11 generate
-c: entity xil_defaultlib.IR_2S_2_A port map (
-  ap_clk => clk,
-  ap_rst => reset,
-  ap_start => start,
-  ap_done => done,
-  hInputStubs_V_dout => data,
-  hInputStubs_V_empty_n => notEmpty,
-  bx_V => bxIn,
-  hLinkWord_V => link,
-  hPhBnWord_V => phiBin,
-  bx_o_V => bxOut,
-  hOutputStubs_0_dataarray_data_V_address0 => writes( 0 ).addr( config_memories( 0 ).widthAddr - 1 downto 0 ),
-  hOutputStubs_0_dataarray_data_V_we0 => writes( 0 ).valid,
-  hOutputStubs_0_dataarray_data_V_d0 => writes( 0 ).data( config_memories( 0 ).RAM_WIDTH - 1 downto 0 )
-  );
+c: IR_2S_2_A port map ( clk, reset, start, done, open, open, data, notEmpty, open,
+  bxIn, link, phiBin, bxOut, open, writes( 0 ).addr( config_memories( 0 ).widthAddr - 1 downto 0 ),
+  open, writes( 0 ).valid, writes( 0 ).data( config_memories( 0 ).RAM_WIDTH - 1 downto 0 ) );
 end generate;
 
 g12: if k = 12 generate
-c: entity xil_defaultlib.IR_2S_2_B port map (
-  ap_clk => clk,
-  ap_rst => reset,
-  ap_start => start,
-  ap_done => done,
-  hInputStubs_V_dout => data,
-  hInputStubs_V_empty_n => notEmpty,
-  bx_V => bxIn,
-  hLinkWord_V => link,
-  hPhBnWord_V => phiBin,
-  bx_o_V => bxOut,
-  hOutputStubs_0_dataarray_data_V_address0 => writes( 0 ).addr( config_memories( 0 ).widthAddr - 1 downto 0 ),
-  hOutputStubs_0_dataarray_data_V_we0 => writes( 0 ).valid,
-  hOutputStubs_0_dataarray_data_V_d0 => writes( 0 ).data( config_memories( 0 ).RAM_WIDTH - 1 downto 0 )
-  );
+c: IR_2S_2_B port map ( clk, reset, start, done, open, open, data, notEmpty, open,
+  bxIn, link, phiBin, bxOut, open, writes( 0 ).addr( config_memories( 0 ).widthAddr - 1 downto 0 ),
+  open, writes( 0 ).valid, writes( 0 ).data( config_memories( 0 ).RAM_WIDTH - 1 downto 0 ) );
 end generate;
 
 g13: if k = 13 generate
-c: entity xil_defaultlib.IR_2S_3_A port map (
-  ap_clk => clk,
-  ap_rst => reset,
-  ap_start => start,
-  ap_done => done,
-  hInputStubs_V_dout => data,
-  hInputStubs_V_empty_n => notEmpty,
-  bx_V => bxIn,
-  hLinkWord_V => link,
-  hPhBnWord_V => phiBin,
-  bx_o_V => bxOut,
-  hOutputStubs_0_dataarray_data_V_address0 => writes( 0 ).addr( config_memories( 0 ).widthAddr - 1 downto 0 ),
-  hOutputStubs_0_dataarray_data_V_we0 => writes( 0 ).valid,
-  hOutputStubs_0_dataarray_data_V_d0 => writes( 0 ).data( config_memories( 0 ).RAM_WIDTH - 1 downto 0 )
-  );
+c: IR_2S_3_A port map ( clk, reset, start, done, open, open, data, notEmpty, open,
+  bxIn, link, phiBin, bxOut, open, writes( 0 ).addr( config_memories( 0 ).widthAddr - 1 downto 0 ),
+  open, writes( 0 ).valid, writes( 0 ).data( config_memories( 0 ).RAM_WIDTH - 1 downto 0 ) );
 end generate;
 
 g14: if k = 14 generate
-c: entity xil_defaultlib.IR_2S_3_B port map (
-  ap_clk => clk,
-  ap_rst => reset,
-  ap_start => start,
-  ap_done => done,
-  hInputStubs_V_dout => data,
-  hInputStubs_V_empty_n => notEmpty,
-  bx_V => bxIn,
-  hLinkWord_V => link,
-  hPhBnWord_V => phiBin,
-  bx_o_V => bxOut,
-  hOutputStubs_0_dataarray_data_V_address0 => writes( 0 ).addr( config_memories( 0 ).widthAddr - 1 downto 0 ),
-  hOutputStubs_0_dataarray_data_V_we0 => writes( 0 ).valid,
-  hOutputStubs_0_dataarray_data_V_d0 => writes( 0 ).data( config_memories( 0 ).RAM_WIDTH - 1 downto 0 )
-  );
+c: IR_2S_3_B port map ( clk, reset, start, done, open, open, data, notEmpty, open,
+  bxIn, link, phiBin, bxOut, open, writes( 0 ).addr( config_memories( 0 ).widthAddr - 1 downto 0 ),
+  open, writes( 0 ).valid, writes( 0 ).data( config_memories( 0 ).RAM_WIDTH - 1 downto 0 ) );
 end generate;
 
 g15: if k = 15 generate
-c: entity xil_defaultlib.IR_2S_4_A port map (
-  ap_clk => clk,
-  ap_rst => reset,
-  ap_start => start,
-  ap_done => done,
-  hInputStubs_V_dout => data,
-  hInputStubs_V_empty_n => notEmpty,
-  bx_V => bxIn,
-  hLinkWord_V => link,
-  hPhBnWord_V => phiBin,
-  bx_o_V => bxOut,
-  hOutputStubs_0_dataarray_data_V_address0 => writes( 0 ).addr( config_memories( 0 ).widthAddr - 1 downto 0 ),
-  hOutputStubs_0_dataarray_data_V_we0 => writes( 0 ).valid,
-  hOutputStubs_0_dataarray_data_V_d0 => writes( 0 ).data( config_memories( 0 ).RAM_WIDTH - 1 downto 0 )
-  );
+c: IR_2S_4_A port map ( clk, reset, start, done, open, open, data, notEmpty, open,
+  bxIn, link, phiBin, bxOut, open, writes( 0 ).addr( config_memories( 0 ).widthAddr - 1 downto 0 ),
+  open, writes( 0 ).valid, writes( 0 ).data( config_memories( 0 ).RAM_WIDTH - 1 downto 0 ) );
 end generate;
 
 g16: if k = 16 generate
-c: entity xil_defaultlib.IR_2S_4_B port map (
-  ap_clk => clk,
-  ap_rst => reset,
-  ap_start => start,
-  ap_done => done,
-  hInputStubs_V_dout => data,
-  hInputStubs_V_empty_n => notEmpty,
-  bx_V => bxIn,
-  hLinkWord_V => link,
-  hPhBnWord_V => phiBin,
-  bx_o_V => bxOut,
-  hOutputStubs_0_dataarray_data_V_address0 => writes( 0 ).addr( config_memories( 0 ).widthAddr - 1 downto 0 ),
-  hOutputStubs_0_dataarray_data_V_we0 => writes( 0 ).valid,
-  hOutputStubs_0_dataarray_data_V_d0 => writes( 0 ).data( config_memories( 0 ).RAM_WIDTH - 1 downto 0 )
-  );
+c: IR_2S_4_B port map ( clk, reset, start, done, open, open, data, notEmpty, open,
+  bxIn, link, phiBin, bxOut, open, writes( 0 ).addr( config_memories( 0 ).widthAddr - 1 downto 0 ),
+  open, writes( 0 ).valid, writes( 0 ).data( config_memories( 0 ).RAM_WIDTH - 1 downto 0 ) );
 end generate;
 
 gOut: for l in 0 to numOutputs - 1 generate

@@ -1,6 +1,7 @@
 src tracklet_isolation.vhd
 src tracklet_top.vhd
 src tracklet_format.vhd
+src tracklet_components.vhd
 
 src tracklet_IR.vhd
 src tracklet_VMR.vhd

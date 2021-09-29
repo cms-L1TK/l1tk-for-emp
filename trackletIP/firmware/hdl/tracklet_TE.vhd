@@ -1,10 +1,11 @@
-library ieee, xil_defaultlib;
+library ieee;
 use ieee.std_logic_1164.all;
 use work.hybrid_tools.all;
 use work.hybrid_data_formats.all;
 use work.tracklet_config.all;
 use work.tracklet_config_memory.all;
 use work.tracklet_data_types.all;
+use work.tracklet_components.all;
 
 
 entity tracklet_TE is
@@ -125,46 +126,21 @@ c: tf_lut generic map ( lut_file, lut_width, lut_depth, RAM_PERFORMANCE ) port m
 
 end generate;
 
-c: entity xil_defaultlib.TE_L1L2 port map (
-  ap_clk => clk,
-  ap_rst => reset,
-  ap_start => start,
-  ap_done => done,
-  bx_V => bxIn,
-  bx_o_V => bxOut,
-  instubinnerdata_dataarray_data_V_address0 => rout( 0 ).addr( config_memories_in( 0 ).widthAddr - 1 downto 0 ),
-  instubinnerdata_dataarray_data_V_ce0 => rout( 0 ).valid,
-  instubinnerdata_dataarray_data_V_q0 => din( 0 ).data( config_memories_in( 0 ).RAM_WIDTH - 1 downto 0 ),
-  instubinnerdata_nentries_0_V => din( 0 ).nents( 0 )( config_memories_in( 0 ).widthNent - 1 downto 0 ),
-  instubinnerdata_nentries_1_V => din( 0 ).nents( 1 )( config_memories_in( 0 ).widthNent - 1 downto 0 ),
-  instubouterdata_dataarray_data_V_address0 => rout( 1 ).addr( config_memories_in( 1 ).widthAddr - 1 downto 0 ),
-  instubouterdata_dataarray_data_V_ce0 => rout( 1 ).valid,
-  instubouterdata_dataarray_data_V_q0 => din( 1 ).data( config_memories_in( 1 ).RAM_WIDTH - 1 downto 0 ),
-  instubouterdata_nentries_0_V_0 => din( 1 ).nents(  0 )( config_memories_in( 1 ).widthNent - 1 downto 0 ),
-  instubouterdata_nentries_0_V_1 => din( 1 ).nents(  1 )( config_memories_in( 1 ).widthNent - 1 downto 0 ),
-  instubouterdata_nentries_0_V_2 => din( 1 ).nents(  2 )( config_memories_in( 1 ).widthNent - 1 downto 0 ),
-  instubouterdata_nentries_0_V_3 => din( 1 ).nents(  3 )( config_memories_in( 1 ).widthNent - 1 downto 0 ),
-  instubouterdata_nentries_0_V_4 => din( 1 ).nents(  4 )( config_memories_in( 1 ).widthNent - 1 downto 0 ),
-  instubouterdata_nentries_0_V_5 => din( 1 ).nents(  5 )( config_memories_in( 1 ).widthNent - 1 downto 0 ),
-  instubouterdata_nentries_0_V_6 => din( 1 ).nents(  6 )( config_memories_in( 1 ).widthNent - 1 downto 0 ),
-  instubouterdata_nentries_0_V_7 => din( 1 ).nents(  7 )( config_memories_in( 1 ).widthNent - 1 downto 0 ),
-  instubouterdata_nentries_1_V_0 => din( 1 ).nents(  8 )( config_memories_in( 1 ).widthNent - 1 downto 0 ),
-  instubouterdata_nentries_1_V_1 => din( 1 ).nents(  9 )( config_memories_in( 1 ).widthNent - 1 downto 0 ),
-  instubouterdata_nentries_1_V_2 => din( 1 ).nents( 10 )( config_memories_in( 1 ).widthNent - 1 downto 0 ),
-  instubouterdata_nentries_1_V_3 => din( 1 ).nents( 11 )( config_memories_in( 1 ).widthNent - 1 downto 0 ),
-  instubouterdata_nentries_1_V_4 => din( 1 ).nents( 12 )( config_memories_in( 1 ).widthNent - 1 downto 0 ),
-  instubouterdata_nentries_1_V_5 => din( 1 ).nents( 13 )( config_memories_in( 1 ).widthNent - 1 downto 0 ),
-  instubouterdata_nentries_1_V_6 => din( 1 ).nents( 14 )( config_memories_in( 1 ).widthNent - 1 downto 0 ),
-  instubouterdata_nentries_1_V_7 => din( 1 ).nents( 15 )( config_memories_in( 1 ).widthNent - 1 downto 0 ),
-  bendinnertable_V_address0 => lutRead( 0 ).addr( 8 - 1 downto 0 ),
-  bendinnertable_V_ce0 => lutRead( 0 ).valid,
-  bendinnertable_V_q0 => lutData( 0 ),
-  bendoutertable_V_address0 => lutRead( 1 ).addr( 8 - 1 downto 0 ),
-  bendoutertable_V_ce0 => lutRead( 1 ).valid,
-  bendoutertable_V_q0 => lutData( 1 ),
-  outstubpair_dataarray_data_V_address0 => writes( 0 ).addr( config_memories_out( 0 ).widthAddr - 1 downto 0 ),
-  outstubpair_dataarray_data_V_we0 => writes( 0 ).valid,
-  outstubpair_dataarray_data_V_d0 => writes( 0 ).data( config_memories_out( 0 ).RAM_WIDTH - 1 downto 0 )
+c: TE_L1L2 port map ( clk, reset, start, done, open, open, bxIn,
+  rout( 0 ).addr( config_memories_in( 0 ).widthAddr - 1 downto 0 ), rout( 0 ).valid, din( 0 ).data( config_memories_in( 0 ).RAM_WIDTH - 1 downto 0 ),
+  din( 0 ).nents( 0 )( config_memories_in( 0 ).widthNent - 1 downto 0 ), din( 0 ).nents( 1 )( config_memories_in( 0 ).widthNent - 1 downto 0 ),
+  rout( 1 ).addr( config_memories_in( 1 ).widthAddr - 1 downto 0 ), rout( 1 ).valid, din( 1 ).data( config_memories_in( 1 ).RAM_WIDTH - 1 downto 0 ),
+  din( 1 ).nents(  0 )( config_memories_in( 1 ).widthNent - 1 downto 0 ), din( 1 ).nents(  1 )( config_memories_in( 1 ).widthNent - 1 downto 0 ),
+  din( 1 ).nents(  2 )( config_memories_in( 1 ).widthNent - 1 downto 0 ), din( 1 ).nents(  3 )( config_memories_in( 1 ).widthNent - 1 downto 0 ),
+  din( 1 ).nents(  4 )( config_memories_in( 1 ).widthNent - 1 downto 0 ), din( 1 ).nents(  5 )( config_memories_in( 1 ).widthNent - 1 downto 0 ),
+  din( 1 ).nents(  6 )( config_memories_in( 1 ).widthNent - 1 downto 0 ), din( 1 ).nents(  7 )( config_memories_in( 1 ).widthNent - 1 downto 0 ),
+  din( 1 ).nents(  8 )( config_memories_in( 1 ).widthNent - 1 downto 0 ), din( 1 ).nents(  9 )( config_memories_in( 1 ).widthNent - 1 downto 0 ),
+  din( 1 ).nents( 10 )( config_memories_in( 1 ).widthNent - 1 downto 0 ), din( 1 ).nents( 11 )( config_memories_in( 1 ).widthNent - 1 downto 0 ),
+  din( 1 ).nents( 12 )( config_memories_in( 1 ).widthNent - 1 downto 0 ), din( 1 ).nents( 13 )( config_memories_in( 1 ).widthNent - 1 downto 0 ),
+  din( 1 ).nents( 14 )( config_memories_in( 1 ).widthNent - 1 downto 0 ), din( 1 ).nents( 15 )( config_memories_in( 1 ).widthNent - 1 downto 0 ),
+  lutRead( 0 ).addr( 8 - 1 downto 0 ), lutRead( 0 ).valid, lutData( 0 ),
+  lutRead( 1 ).addr( 8 - 1 downto 0 ), lutRead( 1 ).valid, lutData( 1 ), bxOut, open,
+  writes( 0 ).addr( config_memories_out( 0 ).widthAddr - 1 downto 0 ), open, writes( 0 ).valid, writes( 0 ).data( config_memories_out( 0 ).RAM_WIDTH - 1 downto 0 )
 );
 
 gIn: for l in 0 to numInputs - 1 generate
