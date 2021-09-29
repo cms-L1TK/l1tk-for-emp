@@ -46,14 +46,14 @@ cd proj/tracklet
 For questa simulation testbench:
 ```
 ipbb proj create sim qsim l1tk-for-emp:tracklet 'qsim.dep'
-ln -s src/l1tk-for-emp/tracklet/firmware/emData/ proj/
+ln -s ../src/l1tk-for-emp/tracklet/firmware/emData/ proj/
 cd proj/qsim
 ```
 
 For vivado simulation testbench:
 ```
 ipbb proj create sim vsim l1tk-for-emp:tracklet 'vsim.dep'
-ln -s src/l1tk-for-emp/tracklet/firmware/emData/ proj/
+ln -s ../src/l1tk-for-emp/tracklet/firmware/emData/ proj/
 cd proj/vsim
 ```
 
@@ -65,7 +65,7 @@ Note: For the following commands, you need to ensure that can find & use the `ge
 ```
 export PATH=/opt/cactus/bin/uhal/tools:$PATH LD_LIBRARY_PATH=/opt/cactus/lib:$LD_LIBRARY_PATH
 ```
-and run the following IPBB commands:
+Run the following IPBB commands:
 ```
 ipbb ipbus gendecoders
 ipbb vivado generate-project synth -j8 impl -j8 package
@@ -77,7 +77,7 @@ ipbb sim setup-simlib
 ipbb sim ipcores
 ipbb sim generate-project
 
-./vsim -c work.top -Gsourcefile=<input.txt> -Gsinkfile=<out.txt> 
+./run_sim -c work.top -Gsourcefile=<input.txt> -Gsinkfile=<out.txt> 
 ```
 where `input.txt` follows the standard pattern file convention.
 *N.B.* The Xilinx simulation libraries can be shared between different ipbb projects and work areas. By default they are written to `${HOME}/.xilinx_sim_libs`, but they can be written to another directory by defining the environment variable `IPBB_SIMLIB_BASE` before running these two commands, or by adding the `-x` option to end of each command (e.g. `-x /path/to/simlib_directory`).
@@ -91,7 +91,6 @@ and open the project with vivado gui for simulation.
 ## Prerequisites ##
 
  * Xilinx Vivado 2020.2 (or later)
- * Add compatible version of QuestaSim to environment variable PATH, e.g. /opt/ppd/tools/mentor/questasim_2020.1/questasim/bin:$PATH 
  * Python 2.7 - available on most linux distributions, natively or as [miniconda](https://conda.io/miniconda.html) distribution.
  * Python 3 devel
  * ipbb: `dev/2021i` pre-release or greater - the [IPbus Builder Tool](https://github.com/ipbus/ipbb). Note: a single `ipbb` installation is not work area specific and suffices for any number of projects.
