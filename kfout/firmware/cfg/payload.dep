@@ -3,4 +3,4 @@ src kfout_isolation.vhd
 
 include components.dep
 
-include -c hybrid:common components.dep
+include -c l1tk-for-emp:common components.dep

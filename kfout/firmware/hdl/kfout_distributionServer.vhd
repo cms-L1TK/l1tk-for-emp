@@ -48,7 +48,8 @@ ARCHITECTURE rtl OF kfout_distributionServer IS
   SIGNAL Output         : Vector( 0 TO DataOut'LENGTH-1 )                         := NullVector( DataOut'LENGTH );
 
   SIGNAL RamCells       : Vector( 0 TO DataIn'LENGTH-1 )                          := NullVector( DataIn'Length );
-  SIGNAL RamCellPipe    : VectorPipe( 0 TO Interleaving )( 0 TO DataIn'Length-1 ) := NullVectorPipe( Interleaving+1 , DataIn'Length );
+  --SIGNAL RamCellPipe    : VectorPipe( 0 TO Interleaving )( 0 TO DataIn'Length-1 ) := NullVectorPipe( Interleaving+1 , DataIn'Length );
+  SIGNAL RamCellPipe    : VectorPipe( 0 TO Interleaving )( 0 TO DataIn'Length-1 ) := ( others => ( others => cNull ) );
 
 -- --------  
   SUBTYPE tAddress        IS INTEGER RANGE 0 TO 511;

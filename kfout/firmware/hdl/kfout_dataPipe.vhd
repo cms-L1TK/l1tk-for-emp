@@ -17,6 +17,7 @@ LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
 
 USE work.ArrayTypes.ALL;
+USE work.DataType.ALL;
 -- -------------------------------------------------------------------------
 
 -- -------------------------------------------------------------------------
@@ -31,7 +32,8 @@ END DataPipe;
 
 -- -------------------------------------------------------------------------
 ARCHITECTURE rtl OF DataPipe IS
-    SIGNAL DataPipeInternal : VectorPipe( DataPipe'RANGE )( DataIn'RANGE ) := NullVectorPipe( DataPipe'LENGTH , DataIn'LENGTH );
+    --SIGNAL DataPipeInternal : VectorPipe( DataPipe'RANGE )( DataIn'RANGE ) := NullVectorPipe( DataPipe'LENGTH , DataIn'LENGTH );
+    SIGNAL DataPipeInternal : VectorPipe( DataPipe'RANGE )( DataIn'RANGE ) := ( others => ( others => ( cNull ) ) );
 BEGIN
 
   DataPipeInternal( 0 ) <= DataIn; -- since the data is clocked out , no need to clock it in as well...

@@ -41,7 +41,7 @@ constant widthKFinv2R: natural := 16;
 constant widthKFphiT : natural := 11;
 constant widthKFzT   : natural := 13;
 constant widthKFcot  : natural := 14;
-constant widthKFphi  : natural := 10;
+constant widthKFphi  : natural := 12;
 constant widthKFz    : natural := 12;
 
 constant widthKFhits  : natural := 6;
