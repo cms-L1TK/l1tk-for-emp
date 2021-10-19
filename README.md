@@ -100,3 +100,17 @@ curl -L https://github.com/ipbus/ipbb/archive/dev/2021i.tar.gz | tar xvz
 source ipbb-dev-2021i/env.sh
 (or if you use tcsh:  bash -c 'source ipbb-dev-2021i/env.sh; tcsh -l')
 ```
+
+## Converting DAT file to the EMP format ##
+
+For converting the IR input file you can use the python3 script:
+```
+python3 scripts/EMPconvert.py [-h] [-e EVENT_NUM] 
+```
+where the mapping between the input links and the files should be done editing the header of the script itself (one file per link).
+
+To check if the output of the HLS chain in the DAT format matches the output in the EMP format you can use:
+```
+python3 scripts/TF_compare.py [-h] [-d DATEVENT] [-e EMPEVENT] datfile empfile
+```
+Where one should specify the event number to compare in each input file (default is 0). This is needed because the EMP output format of the HLS chain doesn't contain the initial event reference.
