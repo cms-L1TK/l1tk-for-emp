@@ -1,7 +1,11 @@
 src emp_payload.vhd
 
-include -c l1tk-for-emp:tracklet components.dep
-include -c l1tk-for-emp:kfin components.dep
+src -c l1tk-for-emp:common link_map.vhd
+src pkg_link_map_apollo.vhd
+
+include -c l1tk-for-emp:kfout components.dep
 include -c l1tk-for-emp:kf components.dep
+include -c l1tk-for-emp:kfin components.dep
+include -c l1tk-for-emp:tracklet components.dep
 
 include -c l1tk-for-emp:common components.dep
