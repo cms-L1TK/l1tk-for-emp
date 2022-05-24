@@ -262,7 +262,6 @@ ARCHITECTURE RTL OF kfout_trackTransform IS
   type hitpatternARRAY is array ( NATURAL range <>) of UNSIGNED( widthHitPattern - 1 DOWNTO 0 );
   type TanlARRAY is array ( NATURAL range <>) of SIGNED( widthTanL - 1 DOWNTO 0 );
   type InvRARRAY is array ( NATURAL range <>) of SIGNED( widthInvR - 1 DOWNTO 0 );
-  type ChiARRAY is array ( NATURAL range <>) of UNSIGNED( widthChi2RPhi - 1 DOWNTO 0 );
 
   SIGNAL Output : VECTOR( 0 TO numNodesKF - 1 ):= NullVector( numNodesKF );
   SIGNAL reset  : STD_LOGIC_VECTOR( 0 TO numNodesKF - 1 ) := ( OTHERS => '0' );
@@ -292,9 +291,6 @@ ARCHITECTURE RTL OF kfout_trackTransform IS
     SIGNAL HitPattern_array : hitpatternARRAY( 0 TO frame_delay - 1 ) := ( OTHERS => ( OTHERS =>'0'));
     SIGNAL Tanl_array       : TanlARRAY( 0 TO frame_delay - 1 )       := ( OTHERS => ( OTHERS =>'0'));
     SIGNAL InvR_array       : InvRARRAY( 0 TO frame_delay - 1 )       := ( OTHERS => ( OTHERS =>'0'));
-    SIGNAL Chi2Rphi_array   : ChiARRAY( 0 TO  chiLatency - 1 ) := ( OTHERS => ( OTHERS =>'0'));
-    SIGNAL Chi2RZ_array     : ChiARRAY( 0 TO  chiLatency - 1 ) := ( OTHERS => ( OTHERS =>'0'));
-    
     SIGNAL EtaSector : INTEGER RANGE 0 TO 16 := 0 ;
 
     COMPONENT ScaleZT
@@ -379,9 +375,6 @@ ARCHITECTURE RTL OF kfout_trackTransform IS
         modCot           := TO_SIGNED((TO_INTEGER(cot) + CotBins(EtaSector)),widthTanL);
         Tanl_array       <= modCot & Tanl_array( 0 TO frame_delay - 2 );
         InvR_array       <= RESIZE(-inv2R - 1,widthinvr ) & InvR_array( 0 TO frame_delay - 2 );
-        Chi2Rphi_array   <= Chi2Rphi & Chi2Rphi_array( 0 TO  chiLatency - 2 );
-        Chi2RZ_array     <= Chi2RZ & Chi2RZ_array( 0 TO chiLatency - 2 );
-
 
         IF TO_BOOLEAN( frame_array( frame_delay- 2 ) ) THEN 
 
@@ -389,10 +382,10 @@ ARCHITECTURE RTL OF kfout_trackTransform IS
           Output( i ).DataValid  <=  TO_BOOLEAN( frame_array( frame_delay- 2 ) );
           Output( i ).extraMVA   <=  TO_UNSIGNED( 0, widthExtraMVA );  --Blank for now
           Output( i ).TQMVA      <=  TO_UNSIGNED( 0, widthTQMVA );     --Blank for now
-          Output( i ).HitPattern <=  HitPattern_array(frame_delay - 1 );
+          Output( i ).HitPattern <=  HitPattern_array(frame_delay - 3 );
           Output( i ).BendChi2   <=  TO_UNSIGNED( 0, widthBendChi2 );  --Blank for now
-          Output( i ).Chi2RPhi   <=  Chi2Rphi_array(  chiLatency - 2 );
-          Output( i ).Chi2RZ     <=  Chi2RZ_array(  chiLatency - 2 );
+          Output( i ).Chi2RPhi   <=  Chi2Rphi;
+          Output( i ).Chi2RZ     <=  Chi2RZ;
           Output( i ).D0         <=  TO_SIGNED( 0, widthD0 );          --Blank for now
           Output( i ).Z0         <=  z0;
           Output( i ).TanL       <=  Tanl_array( frame_delay - 3 );

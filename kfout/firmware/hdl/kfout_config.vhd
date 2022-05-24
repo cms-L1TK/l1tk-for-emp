@@ -29,7 +29,7 @@ TYPE VECTOR_ARRAY   IS ARRAY ( NATURAL RANGE <> ) OF STD_LOGIC_VECTOR( 63 DOWNTO
 
 CONSTANT zscaleLatency   : NATURAL := 5;
 CONSTANT phiscaleLatency : NATURAL := 5;
-CONSTANT chiLatency      : NATURAL := 7;
+CONSTANT chiLatency      : NATURAL := 8;
 
 CONSTANT zTfactor   : REAL := 0.00999469;
 CONSTANT CotFactor  : REAL := 0.000244141;
@@ -67,7 +67,7 @@ CONSTANT BendChi2Conv : REAL := 1.0;
 
 --- LINK OUTPUT formatting specific constants
 
-CONSTANT total_frame_delay  : INTEGER := 15; --Constant latency of all algorithm steps
+CONSTANT total_frame_delay  : INTEGER := 17; --Constant latency of all algorithm steps
 CONSTANT PacketBufferLength : INTEGER := 104;  --Depth of buffer for output packets
 
 TYPE PacketArray IS ARRAY( INTEGER RANGE <> ) of STD_LOGIC_VECTOR( widthpartialTTTrack*2  - 1 DOWNTO 0 );
