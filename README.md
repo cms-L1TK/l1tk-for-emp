@@ -14,9 +14,8 @@ Make sure that the [Prerequisites](#prerequisites) are satisfied.
 ipbb init work
 cd work
 kinit myusername@CERN.CH
-ipbb add git https://:@gitlab.cern.ch:8443/p2-xware/firmware/emp-fwk.git -b feature/apollo
-ipbb add git https://github.com/apollo-lhc/CM_FPGA_FW -b v1.2
-cd src/CM_FPGA_FW; make init; cd -
+ipbb add git https://:@gitlab.cern.ch:8443/p2-xware/firmware/emp-fwk.git -b v0.7.0-alpha
+ipbb add git https://github.com/apollo-lhc/CM_FPGA_FW -b v1.2.2
 ipbb add git https://gitlab.cern.ch/ttc/legacy_ttc.git -b v2.1
 ipbb add git https://:@gitlab.cern.ch:8443/cms-tcds/cms-tcds2-firmware.git -b v0_1_1
 ipbb add git https://gitlab.cern.ch/HPTD/tclink.git -r fda0bcf
@@ -109,15 +108,15 @@ python3 ../src/l1tk-for-emp/script/compareEMP_FT.py
 
 ## Prerequisites ##
 
- * Xilinx Vivado 2020.2 (or later)
+ * Xilinx Vivado 2022.1 (or later)
  * Python 2.7 - available on most linux distributions, natively or as [miniconda](https://conda.io/miniconda.html) distribution.
  * Python 3 devel
- * ipbb: `dev/2021i` pre-release or greater - the [IPbus Builder Tool](https://github.com/ipbus/ipbb). Note: a single `ipbb` installation is not work area specific and suffices for any number of projects.
+ * ipbb: `dev/2021j` pre-release or greater - the [IPbus Builder Tool](https://github.com/ipbus/ipbb). Note: a single `ipbb` installation is not work area specific and suffices for any number of projects.
  
 ```
 curl -L https://github.com/ipbus/ipbb/archive/dev/2021j.tar.gz | tar xvz
-source ipbb-dev-2021i/env.sh
-(or if you use tcsh:  bash -c 'source ipbb-dev-2021i/env.sh; tcsh -l')
+source ipbb-dev-2021j/env.sh
+(or if you use tcsh:  bash -c 'source ipbb-dev-2021j/env.sh; tcsh -l')
 ```
 
 ## Guide to firmware ##
