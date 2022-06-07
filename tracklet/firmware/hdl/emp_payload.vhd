@@ -17,6 +17,7 @@ port (
   clk: in std_logic;
   rst: in std_logic;
   ipb_in: in ipb_wbus;
+  clk40: in std_logic;
   clk_payload: in std_logic_vector( 2 downto 0 );
   rst_payload: in std_logic_vector( 2 downto 0 );
   clk_p: in std_logic;
