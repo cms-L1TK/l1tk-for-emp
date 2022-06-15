@@ -25,6 +25,20 @@ ipbb add git https://github.com/cms-L1TK/l1tk-for-emp.git
 
 *Note: You need to be a member of the `cms-tcds2-users` egroup in order to clone the `cms-tcds2-firmware` repository. In order to add yourself to that egroup, go to the "Members" tab of [this page](https://e-groups.cern.ch/e-groups/Egroup.do?egroupId=10380295), and click on the "Add me" button; you may need to wait ~ 24 hours to get access to the GitLab repo.*
 
+replace
+```
+set_false_path -through [get_nets {ttc/tcds2_interface_stat[channel0_ttc2]*}] -to [get_clocks {clk_40_extern0 clk_40_pseudo}]
+```
+in
+
+```
+emp-fw/components/top/firmware/ucf/clock_contsraints_tcds2.tcl
+```
+with
+```
+set_false_path -through [get_nets {ttc/*tcds2_interface_stat[channel0_ttc2]*}] -to [get_clocks {clk_40_extern0 clk_40_pseudo}]
+```
+
 ##### Step 2: Create an ipbb project area
 
 There is currently two available projects
@@ -111,7 +125,7 @@ python3 ../src/l1tk-for-emp/script/compareEMP_FT.py
  * Xilinx Vivado 2022.1 (or later)
  * Python 2.7 - available on most linux distributions, natively or as [miniconda](https://conda.io/miniconda.html) distribution.
  * Python 3 devel
- * ipbb: `dev/2021j` pre-release or greater - the [IPbus Builder Tool](https://github.com/ipbus/ipbb). Note: a single `ipbb` installation is not work area specific and suffices for any number of projects.
+ * ipbb: `dev/2022d` pre-release or greater - the [IPbus Builder Tool](https://github.com/ipbus/ipbb). Note: a single `ipbb` installation is not work area specific and suffices for any number of projects.
  
 ```
 curl -L https://github.com/ipbus/ipbb/archive/dev/2021j.tar.gz | tar xvz
