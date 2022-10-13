@@ -21,4 +21,5 @@ src tracklet_config.vhd
 
 src tf_pkg.vhd
 
-src --cd ../hls_hdl *.vhd
+iprepo *
+src ../cgn/*/*.xci

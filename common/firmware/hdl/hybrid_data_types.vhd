@@ -27,7 +27,6 @@ record
   phi  : std_logic_vector( widthsIRphi ( 0 ) - 1 downto 0 );
   bend : std_logic_vector( widthsIRbend( 0 ) - 1 downto 0 );
   layer: std_logic_vector( widthIRlayer      - 1 downto 0 );
-  bx   : std_logic_vector( widthIRBX         - 1 downto 0 );
 end record;
 function nulll return t_stubDTCPS;
 type t_stubsDTCPS is array ( natural range <> ) of t_stubDTCPS;
@@ -41,7 +40,6 @@ record
   phi  : std_logic_vector( widthsIRphi ( 1 ) - 1 downto 0 );
   bend : std_logic_vector( widthsIRbend( 1 ) - 1 downto 0 );
   layer: std_logic_vector( widthIRlayer      - 1 downto 0 );
-  bx   : std_logic_vector( widthIRBX         - 1 downto 0 );
 end record;
 function nulll return t_stubDTC2S;
 type t_stubsDTC2S is array ( natural range <> ) of t_stubDTC2S;

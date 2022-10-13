@@ -3,6 +3,8 @@ setup ../ucf/vsim.tcl
 include -c emp-fwk:boards/testbench
 include payload.dep
 
+setup ../ucf/ip.tcl
+
 src -c ipbus-firmware:components/ipbus_core ipbus_package.vhd ipbus_trans_decl.vhd
 src -c emp-fwk:components/ttc emp_ttc_decl.vhd
 

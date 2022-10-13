@@ -21,7 +21,7 @@ constant PAYLOAD_LATENCY: integer := 816;
 
 constant REGION_CONF : region_conf_array_t := (
   0 to 1 => ( no_mgt, buf, no_fmt, buf,    no_mgt ),
-  2 to 4 => ( no_mgt, buf, no_fmt, no_buf, no_mgt ),
+  2 to 3 => ( no_mgt, buf, no_fmt, no_buf, no_mgt ),
   others => kDummyRegion
 );
 

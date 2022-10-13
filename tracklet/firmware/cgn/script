@@ -1,0 +1,75 @@
+for i in IR VMR TE TC PR ME MC FT
+do
+    if [ $i = IR ]
+    then
+        for k in PS10G_1_A PS10G_2_A PS10G_2_B PS10G_3_A PS10G_3_B PS_1_A PS_2_A PS_2_B 2S_1_A 2S_1_B 2S_2_A 2S_2_B 2S_3_A 2S_4_A 2S_4_B
+        do
+            unzip "xilinx_com_hls_InputRouterTop_IR_DTC_"$k"_1_0.zip" -d $i"_"$k
+            rm "xilinx_com_hls_InputRouterTop_IR_DTC_"$k"_1_0.zip"
+            mv $i"_"$k".xci" $i"_"$k
+        done
+    fi
+    if [ $i = VMR ]
+    then
+        for k in L1PHID L2PHIB L3PHIB L4PHIB L5PHIB L6PHIB
+        do
+            unzip "xilinx_com_hls_VMRouterTop_"$k"_1_0.zip" -d $i"_"$k
+            rm "xilinx_com_hls_VMRouterTop_"$k"_1_0.zip"
+            mv $i"_"$k".xci" $i"_"$k
+        done
+    fi
+    if [ $i = TE ]
+    then
+        for k in PS_PS
+        do
+            unzip "xilinx_com_hls_TrackletEngine_"$k"_1_0.zip" -d $i"_"$k
+            rm "xilinx_com_hls_TrackletEngine_"$k"_1_0.zip"
+            mv $i"_"$k".xci" $i"_"$k
+        done
+    fi
+    if [ $i = TC ]
+    then
+        for k in L1L2F
+        do
+            unzip "xilinx_com_hls_TrackletCalculator_"$k"_1_0.zip" -d $i"_"$k
+            rm "xilinx_com_hls_TrackletCalculator_"$k"_1_0.zip"
+            mv $i"_"$k".xci" $i"_"$k
+        done
+    fi
+    if [ $i = PR ]
+    then
+        for k in L3PHIB L4PHIB L5PHIB L6PHIB
+        do
+            unzip "xilinx_com_hls_ProjectionRouterTop_"$k"_1_0.zip" -d $i"_"$k
+            rm "xilinx_com_hls_ProjectionRouterTop_"$k"_1_0.zip"
+            mv $i"_"$k".xci" $i"_"$k
+        done
+    fi
+    if [ $i = ME ]
+    then
+        for k in L3 L4 L5 L6
+        do
+            unzip "xilinx_com_hls_MatchEngineTop_"$k"_1_0.zip" -d $i"_"$k
+            rm "xilinx_com_hls_MatchEngineTop_"$k"_1_0.zip"
+            mv $i"_"$k".xci" $i"_"$k
+        done
+    fi
+    if [ $i = MC ]
+    then
+        for k in L3PHIB L4PHIB L5PHIB L6PHIB
+        do
+            unzip "xilinx_com_hls_MatchCalculator_"$k"_1_0.zip" -d $i"_"$k
+            rm "xilinx_com_hls_MatchCalculator_"$k"_1_0.zip"
+            mv $i"_"$k".xci" $i"_"$k
+        done
+    fi
+    if [ $i = FT ]
+    then
+        for k in L1L2
+        do
+            unzip "xilinx_com_hls_TrackBuilder_"$k"_1_0.zip" -d $i"_"$k
+            rm "xilinx_com_hls_TrackBuilder_"$k"_1_0.zip"
+            mv $i"_"$k".xci" $i"_"$k
+        done
+    fi
+done

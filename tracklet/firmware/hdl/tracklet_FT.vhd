@@ -1,3 +1,4 @@
+library xil_defaultlib;
 library ieee;
 use ieee.std_logic_1164.all;
 use work.hybrid_tools.all;
@@ -61,22 +62,54 @@ if rising_edge( clk ) then
 end if;
 end process;
 
-c: entity work.TrackBuilder_L1L2 port map ( clk, reset, start, open, open, open,
-  dout( 0 ).data( r_trackWord ), notFull, dout( 0 ).valid,
-  dout( 1 ).data( r_stubWord ), notFull, dout( 1 ).valid,
-  dout( 2 ).data( r_stubWord ), notFull, dout( 2 ).valid,
-  dout( 3 ).data( r_stubWord ), notFull, dout( 3 ).valid,
-  dout( 4 ).data( r_stubWord ), notFull, dout( 4 ).valid, bx,
-  rout( 0 ).addr( config_memories( 0 ).widthAddr - 1 downto 0 ), rout( 0 ).valid, din( 0 ).data( config_memories( 0 ).widthData - 1 downto 0 ),
-  rout( 1 ).addr( config_memories( 1 ).widthAddr - 1 downto 0 ), rout( 1 ).valid, din( 1 ).data( config_memories( 1 ).widthData - 1 downto 0 ),
-  rout( 2 ).addr( config_memories( 2 ).widthAddr - 1 downto 0 ), rout( 2 ).valid, din( 2 ).data( config_memories( 2 ).widthData - 1 downto 0 ),
-  rout( 3 ).addr( config_memories( 3 ).widthAddr - 1 downto 0 ), rout( 3 ).valid, din( 3 ).data( config_memories( 3 ).widthData - 1 downto 0 ),
-  rout( 4 ).addr( config_memories( 4 ).widthAddr - 1 downto 0 ), rout( 4 ).valid, din( 4 ).data( config_memories( 4 ).widthData - 1 downto 0 ),
-  din( 1 ).nents( 0 )( config_memories( 1 ).widthNent - 1 downto 0 ), din( 1 ).nents( 1 )( config_memories( 1 ).widthNent - 1 downto 0 ),
-  din( 2 ).nents( 0 )( config_memories( 2 ).widthNent - 1 downto 0 ), din( 2 ).nents( 1 )( config_memories( 2 ).widthNent - 1 downto 0 ),
-  din( 3 ).nents( 0 )( config_memories( 3 ).widthNent - 1 downto 0 ), din( 3 ).nents( 1 )( config_memories( 3 ).widthNent - 1 downto 0 ),
-  din( 4 ).nents( 0 )( config_memories( 4 ).widthNent - 1 downto 0 ), din( 4 ).nents( 1 )( config_memories( 4 ).widthNent - 1 downto 0 ),
-  open, bxValid
+L1L2: entity xil_defaultlib.FT_L1L2 port map (
+  ap_clk => clk,
+  ap_rst => reset,
+  ap_start => start,
+  bx_V => bx,
+  bx_o_V_ap_vld => bxValid,
+  ap_done => open,
+  ap_idle => open,
+  ap_ready => open,
+  bx_o_V => open,
+  trackWord_V_full_n => notFull,
+  barrelStubWords_0_V_full_n => notFull,
+  barrelStubWords_1_V_full_n => notFull,
+  barrelStubWords_2_V_full_n => notFull,
+  barrelStubWords_3_V_full_n => notFull,
+  trackWord_V_write => dout( 0 ).valid,
+  barrelStubWords_0_V_write => dout( 1 ).valid,
+  barrelStubWords_1_V_write => dout( 2 ).valid,
+  barrelStubWords_2_V_write => dout( 3 ).valid,
+  barrelStubWords_3_V_write => dout( 4 ).valid,
+  trackWord_V_din => dout( 0 ).data( r_trackWord ),
+  barrelStubWords_0_V_din => dout( 1 ).data( r_stubWord ),
+  barrelStubWords_1_V_din => dout( 2 ).data( r_stubWord ),
+  barrelStubWords_2_V_din => dout( 3 ).data( r_stubWord ),
+  barrelStubWords_3_V_din => dout( 4 ).data( r_stubWord ),
+  trackletParameters_0_dataarray_data_V_ce0 => rout( 0 ).valid,
+  barrelFullMatches_0_dataarray_data_V_ce0 => rout( 1 ).valid,
+  barrelFullMatches_1_dataarray_data_V_ce0 => rout( 2 ).valid,
+  barrelFullMatches_2_dataarray_data_V_ce0 => rout( 3 ).valid,
+  barrelFullMatches_3_dataarray_data_V_ce0 => rout( 4 ).valid,
+  trackletParameters_0_dataarray_data_V_address0 => rout( 0 ).addr( config_memories( 0 ).widthAddr - 1 downto 0 ),
+  barrelFullMatches_0_dataarray_data_V_address0 => rout( 1 ).addr( config_memories( 1 ).widthAddr - 1 downto 0 ),
+  barrelFullMatches_1_dataarray_data_V_address0 => rout( 2 ).addr( config_memories( 2 ).widthAddr - 1 downto 0 ),
+  barrelFullMatches_2_dataarray_data_V_address0 => rout( 3 ).addr( config_memories( 3 ).widthAddr - 1 downto 0 ),
+  barrelFullMatches_3_dataarray_data_V_address0 => rout( 4 ).addr( config_memories( 4 ).widthAddr - 1 downto 0 ),
+  trackletParameters_0_dataarray_data_V_q0 => din( 0 ).data( config_memories( 0 ).widthData - 1 downto 0 ),
+  barrelFullMatches_0_dataarray_data_V_q0 => din( 1 ).data( config_memories( 1 ).widthData - 1 downto 0 ),
+  barrelFullMatches_1_dataarray_data_V_q0 => din( 2 ).data( config_memories( 2 ).widthData - 1 downto 0 ),
+  barrelFullMatches_2_dataarray_data_V_q0 => din( 3 ).data( config_memories( 3 ).widthData - 1 downto 0 ),
+  barrelFullMatches_3_dataarray_data_V_q0 => din( 4 ).data( config_memories( 4 ).widthData - 1 downto 0 ),
+  barrelFullMatches_0_nentries_0_V => din( 1 ).nents( 0 )( config_memories( 1 ).widthNent - 1 downto 0 ),
+  barrelFullMatches_0_nentries_1_V => din( 1 ).nents( 1 )( config_memories( 1 ).widthNent - 1 downto 0 ),
+  barrelFullMatches_1_nentries_0_V => din( 2 ).nents( 0 )( config_memories( 2 ).widthNent - 1 downto 0 ),
+  barrelFullMatches_1_nentries_1_V => din( 2 ).nents( 1 )( config_memories( 2 ).widthNent - 1 downto 0 ),
+  barrelFullMatches_2_nentries_0_V => din( 3 ).nents( 0 )( config_memories( 3 ).widthNent - 1 downto 0 ),
+  barrelFullMatches_2_nentries_1_V => din( 3 ).nents( 1 )( config_memories( 3 ).widthNent - 1 downto 0 ),
+  barrelFullMatches_3_nentries_0_V => din( 4 ).nents( 0 )( config_memories( 4 ).widthNent - 1 downto 0 ),
+  barrelFullMatches_3_nentries_1_V => din( 4 ).nents( 1 )( config_memories( 4 ).widthNent - 1 downto 0 )
 );
 
 gIn: for l in 0 to numInputs - 1 generate

@@ -174,9 +174,8 @@ signal din: lword := ( ( others => '0' ), '0', '0', '1' );
 signal dout: t_stubDTCPS := nulll;
 
 function conv( l: std_logic_vector ) return t_stubDTCPS is
-    variable s: t_stubDTCPS := nulll;
+  variable s: t_stubDTCPS := nulll;
 begin
-  s.bx    := l( LWORD_WIDTH - 2 downto LWORD_WIDTH - 4 );
   s.r     := l( widthsIRr( 0 ) + widthsIRz( 0 ) + widthsIRphi( 0 ) + widthsIRbend( 0 ) + widthIRlayer + 1 - 1 downto widthsIRz( 0 ) + widthsIRphi( 0 ) + widthsIRbend( 0 ) + widthIRlayer + 1 );
   s.z     := l(                  widthsIRz( 0 ) + widthsIRphi( 0 ) + widthsIRbend( 0 ) + widthIRlayer + 1 - 1 downto                  widthsIRphi( 0 ) + widthsIRbend( 0 ) + widthIRlayer + 1 );
   s.phi   := l(                                   widthsIRphi( 0 ) + widthsIRbend( 0 ) + widthIRlayer + 1 - 1 downto                                     widthsIRbend( 0 ) + widthIRlayer + 1 );
@@ -241,7 +240,6 @@ signal dout: t_stubDTC2S := nulll;
 function conv( l: std_logic_vector ) return t_stubDTC2S is
     variable s: t_stubDTC2S := nulll;
 begin
-  s.bx    := l( LWORD_WIDTH - 2 downto LWORD_WIDTH - 4 );
   s.r     := l( widthsIRr( 1 ) + widthsIRz( 1 ) + widthsIRphi( 1 ) + widthsIRbend( 1 ) + widthIRlayer + 1 - 1 downto widthsIRz( 1 ) + widthsIRphi( 1 ) + widthsIRbend( 1 ) + widthIRlayer + 1 );
   s.z     := l(                  widthsIRz( 1 ) + widthsIRphi( 1 ) + widthsIRbend( 1 ) + widthIRlayer + 1 - 1 downto                  widthsIRphi( 1 ) + widthsIRbend( 1 ) + widthIRlayer + 1 );
   s.phi   := l(                                   widthsIRphi( 1 ) + widthsIRbend( 1 ) + widthIRlayer + 1 - 1 downto                                     widthsIRbend( 1 ) + widthIRlayer + 1 );
