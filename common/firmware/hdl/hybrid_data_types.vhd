@@ -9,6 +9,14 @@ use work.emp_data_types.all;
 package hybrid_data_types is
 
 
+function nulll return lword;
+type t_packet is
+record
+  valid: std_logic;
+  start_of_orbit: std_logic;
+end record;
+type t_packets is array ( natural range <> ) of t_packet;
+
 type t_reset is
 record
   reset: std_logic;
@@ -164,6 +172,7 @@ end;
 package body hybrid_data_types is
 
 
+function nulll return lword is begin return ( ( others => '0' ), '0', '0', '0', '1', '0' ); end function;
 function nulll return t_reset is begin return ( '0', '0', others => ( others => '0' ) ); end function;
 function nulll return t_stubDTCPS is begin return ( '0', '0', others => ( others => '0' ) ); end function;
 function nulll return t_stubDTC2S is begin return ( '0', '0', others => ( others => '0' ) ); end function;

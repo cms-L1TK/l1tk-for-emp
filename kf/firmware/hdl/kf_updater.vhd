@@ -433,7 +433,7 @@ if rising_edge( clk ) then
   elsif state( 16 ).valid = '1' then
     dout <= state( 16 );
     dout.skip <= '0';
-    if ( index < numLayers - 1 and state( 16 ).hitsT( index + 1 ) = '0' ) or count( state( 16 ).hits, '1' ) = maxStubs then
+    if ( index < numLayers - 1 and state( 16 ).hitsT( index + 1 ) = '0' ) or count( state( 16 ).hits, '1' ) = maxLayersKF then
       dout.skip <= '1';
     end if;
     if state( 16 ).skip = '0' then
@@ -450,7 +450,7 @@ if rising_edge( clk ) then
       dout.C22 <= C22;
       dout.C23 <= C23;
       dout.C33 <= C33;
-      if count( state( 16 ).hits, '1' ) = maxStubs - 1 then
+      if count( state( 16 ).hits, '1' ) = maxLayersKF - 1 then
         dout.skip <= '1';
       end if;
     end if;

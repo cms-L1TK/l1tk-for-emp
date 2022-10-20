@@ -222,7 +222,7 @@ end function;
 
 function f_skip( state: t_state ) return boolean is
   variable available: natural;
-  variable needed: natural := maxStubs - count( state.hits, '1' );
+  variable needed: integer := minLayersKF - count( state.hits, '1' );
 begin
   if index = numLayers - 1 then
     return false;

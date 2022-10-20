@@ -27,7 +27,7 @@ begin
 
 g: for k in 0 to numNodesKF - 1 generate
 
-signal node_din: ldata( numLayers + 1 - 1 downto 0 ) := ( others => ( ( others => '0' ), '0', '0', '1' ) );
+signal node_din: ldata( numLayers + 1 - 1 downto 0 ) := ( others => nulll );
 signal node_dout: t_channelZHT := nulll;
 
 begin
@@ -58,7 +58,7 @@ end;
 
 architecture rtl of kf_isolation_in_node is
 
-signal track_din: lword := ( ( others => '0' ), '0', '0', '1' );
+signal track_din: lword := nulll;
 signal track_dout: t_trackZHT := nulll;
 component kf_isolation_in_track
 port (
@@ -85,7 +85,7 @@ c: kf_isolation_in_track port map ( clk, track_din, track_dout );
 
 g: for k in 0 to numLayers - 1 generate
 
-signal stub_din: lword := ( ( others => '0' ), '0', '0', '1' );
+signal stub_din: lword := nulll;
 signal stub_dout: t_stubZHT := nulll;
 
 begin
@@ -118,7 +118,7 @@ end;
 architecture rtl of kf_isolation_in_track is
 
 -- step 1
-signal din: lword := ( ( others => '0' ), '0', '0', '1' );
+signal din: lword := nulll;
 
 -- step 2
 signal dout: t_trackZHT := nulll;
@@ -181,7 +181,7 @@ end;
 architecture rtl of kf_isolation_in_stub is
 
 -- step 1
-signal din: lword := ( ( others => '0' ), '0', '0', '1' );
+signal din: lword := nulll;
 
 -- step 2
 signal dout: t_stubZHT := nulll;
@@ -236,7 +236,7 @@ use work.emp_data_types.all;
 entity kf_isolation_out is
 port (
   clk: in std_logic;
-  out_packet: in std_logic_vector( numNodesKF * ( numLayers + 1 ) - 1 downto 0 );
+  out_packet: in t_packets( numNodesKF * ( numLayers + 1 ) - 1 downto 0 );
   out_din: in t_channelsKF( numNodesKF - 1 downto 0 );
   out_dout: out ldata( 4 * N_REGION - 1 downto 0 )
 );
@@ -244,11 +244,11 @@ end;
 
 architecture rtl of kf_isolation_out is
 
-signal dout: ldata( 4 * N_REGION - 1 downto 0 ) := ( others => ( ( others => '0' ), '0', '0', '1' ) );
+signal dout: ldata( 4 * N_REGION - 1 downto 0 ) := ( others => nulll );
 component kf_isolation_out_node
 port (
   clk: in std_logic;
-  node_packet: in std_logic_vector( numLayers + 1 - 1 downto 0 );
+  node_packet: in t_packets( numLayers + 1 - 1 downto 0 );
   node_din: in t_channelKF;
   node_dout: out ldata( numLayers + 1 - 1 downto 0 )
 );
@@ -260,9 +260,9 @@ out_dout <= dout;
 
 node: for k in 0 to numNodesKF - 1 generate
 
-signal node_packet: std_logic_vector( numLayers + 1 - 1 downto 0 ) := ( others => '0' );
+signal node_packet: t_packets( numLayers + 1 - 1 downto 0 ) := ( others => ( others => '0' ) );
 signal node_din: t_channelKF := nulll;
-signal node_dout: ldata( numLayers + 1 - 1 downto 0 ) := ( others => ( ( others => '0' ), '0', '0', '1' ) );
+signal node_dout: ldata( numLayers + 1 - 1 downto 0 ) := ( others => nulll );
 
 begin
 
@@ -286,7 +286,7 @@ use work.emp_data_types.all;
 entity kf_isolation_out_node is
 port (
   clk: in std_logic;
-  node_packet: in std_logic_vector( numLayers + 1 - 1 downto 0 );
+  node_packet: in t_packets( numLayers + 1 - 1 downto 0 );
   node_din: in t_channelKF;
   node_dout: out ldata( numLayers + 1 - 1 downto 0 )
 );
@@ -294,13 +294,13 @@ end;
 
 architecture rtl of kf_isolation_out_node is
 
-signal track_packet: std_logic := '0';
+signal track_packet: t_packet := ( others => '0' );
 signal track_din: t_trackKF := nulll;
-signal track_dout: lword := ( ( others => '0' ), '0', '0', '1' );
+signal track_dout: lword := nulll;
 component kf_isolation_out_track
 port (
   clk: in std_logic;
-  track_packet: in std_logic;
+  track_packet: in t_packet;
   track_din: in t_trackKF;
   track_dout: out lword
 );
@@ -309,7 +309,7 @@ end component;
 component kf_isolation_out_stub
 port (
   clk: in std_logic;
-  stub_packet: in std_logic;
+  stub_packet: in t_packet;
   stub_din: in t_stubKF;
   stub_dout: out lword
 );
@@ -325,9 +325,9 @@ c: kf_isolation_out_track port map ( clk, track_packet, track_din, track_dout );
 
 g: for k in 0 to numLayers - 1 generate
 
-signal stub_packet: std_logic := '0';
+signal stub_packet: t_packet := ( others => '0' );
 signal stub_din: t_stubKF := nulll;
-signal stub_dout: lword := ( ( others => '0' ), '0', '0', '1' );
+signal stub_dout: lword := nulll;
 
 begin
 
@@ -346,14 +346,13 @@ library ieee;
 use ieee.std_logic_1164.all;
 use work.hybrid_data_types.all;
 use work.hybrid_data_formats.all;
-use work.hybrid_tools.all;
 use work.emp_data_types.all;
 use work.emp_project_decl.all;
 
 entity kf_isolation_out_track is
 port (
   clk: in std_logic;
-  track_packet: in std_logic;
+  track_packet: in t_packet;
   track_din: in t_trackKF;
   track_dout: out lword
 );
@@ -363,11 +362,11 @@ architecture rtl of kf_isolation_out_track is
 
 constant widthTrack: natural := 1 + 1 + widthKFsector + widthKFphiT + widthKFinv2R + widthKFcot + widthKFzT;
 -- sr
-signal sr: std_logic_vector( PAYLOAD_LATENCY - 1 downto 0 ) := ( others => '0' );
+signal sr: t_packets( PAYLOAD_LATENCY - 1 downto 0 ) := ( others => ( others => '0' ) );
 
 -- step 1
 signal din:  t_trackKF := nulll;
-signal dout: lword := ( ( others => '0' ), '0', '0', '1' );
+signal dout: lword := nulll;
 
 function conv( s: t_trackKF ) return std_logic_vector is
 begin
@@ -390,9 +389,10 @@ if rising_edge( clk ) then
 
   -- step 1
 
+  dout.start_of_orbit <= sr( sr'high ).start_of_orbit;
   dout.valid <= '0';
   dout.data <= ( others => '0' );
-  if msb( sr ) = '1' then
+  if sr( sr'high ).valid = '1' then
     dout.valid <= '1';
     dout.data( widthTrack - 1 downto 0  ) <= conv( din );
   end if;
@@ -405,7 +405,6 @@ end;
 
 library ieee;
 use ieee.std_logic_1164.all;
-use work.hybrid_tools.all;
 use work.hybrid_data_types.all;
 use work.hybrid_data_formats.all;
 use work.emp_data_types.all;
@@ -414,7 +413,7 @@ use work.emp_project_decl.all;
 entity kf_isolation_out_stub is
 port (
   clk: in std_logic;
-  stub_packet: in std_logic;
+  stub_packet: in t_packet;
   stub_din: in t_stubKF;
   stub_dout: out lword
 );
@@ -424,11 +423,11 @@ architecture rtl of kf_isolation_out_stub is
 
 constant widthStub: natural := 1 + widthKFr + widthKFphi + widthKFz + widthKFdPhi + widthKFdZ;
 -- sr
-signal sr: std_logic_vector( PAYLOAD_LATENCY - 1 downto 0 ) := ( others => '0' );
+signal sr: t_packets( PAYLOAD_LATENCY - 1 downto 0 ) := ( others => ( others => '0' ) );
 
 -- step 1
 signal din:  t_stubKF := nulll;
-signal dout: lword := ( ( others => '0' ), '0', '0', '1' );
+signal dout: lword := nulll;
 
 function conv( s: t_stubKF ) return std_logic_vector is
 begin
@@ -451,9 +450,10 @@ if rising_edge( clk ) then
 
   -- step 1
 
+  dout.start_of_orbit <= sr( sr'high ).start_of_orbit;
   dout.valid <= '0';
   dout.data <= ( others => '0' );
-  if msb( sr ) = '1' then
+  if sr( sr'high ).valid = '1' then
     dout.valid <= '1';
     dout.data( widthStub - 1 downto 0  ) <= conv( din );
   end if;

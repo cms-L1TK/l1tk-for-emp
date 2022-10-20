@@ -19,7 +19,12 @@ ipbb add git https://github.com/apollo-lhc/CM_FPGA_FW -b v1.2.2
 ipbb add git https://gitlab.cern.ch/ttc/legacy_ttc.git -b v2.1
 ipbb add git https://:@gitlab.cern.ch:8443/cms-tcds/cms-tcds2-firmware.git -b v0_1_1
 ipbb add git https://gitlab.cern.ch/HPTD/tclink.git -r fda0bcf
+ipbb add git https://gitlab.cern.ch/dth_p1-v2/slinkrocket_ips.git -b v03.09
+ipbb add git https://:@gitlab.cern.ch:8443/dth_p1-v2/slinkrocket.git -b v03.10
 ipbb add git https://github.com/ipbus/ipbus-firmware -b v1.9
+ipbb add git https://gitlab.cern.ch/gbt-fpga/gbt-fpga.git -b gbt_fpga_6_1_0
+ipbb add git https://gitlab.cern.ch/gbt-fpga/lpgbt-fpga.git -b v.2.1
+ipbb add git https://:@gitlab.cern.ch:8443/gbtsc-fpga-support/gbt-sc.git -b gbt_sc_4_1
 ipbb add git https://github.com/cms-L1TK/l1tk-for-emp.git
 ```
 
@@ -68,13 +73,16 @@ export PATH=/opt/cactus/bin/uhal/tools:$PATH LD_LIBRARY_PATH=/opt/cactus/lib:$LD
 Run the following IPBB commands:
 ```
 ipbb ipbus gendecoders
-ipbb vivado generate-project synth -j8 impl -j8 package
+ipbb vivado generate-project --single
+ipbb vivado synth -j8 impl -j8
+ipbb vivado package
 ```
 
 For questa simulation testbench:
 ```
 ipbb sim setup-simlib
 ipbb sim ipcores
+ipbb sim fli-udp
 ipbb sim generate-project (rerun this if you change VHDL)
 
 ./run_sim -c work.top -Gsourcefile=<input.txt> -Gsinkfile=<out.txt> -Gplaylen=xyz -Gcaplen=xyz -do 'run 50.0us' -do quit 
@@ -115,9 +123,9 @@ python3 ../src/l1tk-for-emp/script/compareEMP_FT.py
  * ipbb: `dev/2022d` pre-release or greater - the [IPbus Builder Tool](https://github.com/ipbus/ipbb). Note: a single `ipbb` installation is not work area specific and suffices for any number of projects.
  
 ```
-curl -L https://github.com/ipbus/ipbb/archive/dev/2021j.tar.gz | tar xvz
-source ipbb-dev-2021j/env.sh
-(or if you use tcsh:  bash -c 'source ipbb-dev-2021j/env.sh; tcsh -l')
+curl -L https://github.com/ipbus/ipbb/archive/dev/2022f.tar.gz | tar xvz
+source ipbb-dev-2022f/env.sh
+(or if you use tcsh:  bash -c 'source ipbb-dev-2022f/env.sh; tcsh -l')
 ```
 
 ## Guide to firmware ##

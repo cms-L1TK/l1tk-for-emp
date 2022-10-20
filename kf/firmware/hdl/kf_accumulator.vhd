@@ -48,31 +48,11 @@ function conv( c: t_channelResidual ) return std_logic_vector is
   variable stub: t_stubKF := nulll;
 begin
   s( widthMaybe + widthx0 + widthx1 + widthx2 + widthx3 + numLayers * widthStub - 1 downto numLayers * widthStub ) := state.maybe & state.x0 & state.x1 & state.x2 & state.x3;
-  for k in c.stubs'range loop
+  for k in 0 to numLayers - 1 loop
     stub := c.stubs( k );
     s( 1 + widthKFr + widthKFphi + widthKFz + widthKFdPhi + widthKFdZ + k * widthStub - 1 downto k * widthStub ) := stub.valid & stub.r & stub.phi & stub.z & stub.dPhi & stub.dZ;
   end loop;
   return s;
-end function;
-
-function conv( s: std_logic_vector ) return t_channelResidual is
-  variable c: t_channelResidual := nulll;
-begin
-  c.state.valid := '1';
-  c.state.maybe := s( widthMaybe + widthx0 + widthx1 + widthx2 + widthx3 + numLayers * widthStub - 1 downto widthx0 + widthx1 + widthx2 + widthx3 + numLayers * widthStub );
-  c.state.x0    := s(              widthx0 + widthx1 + widthx2 + widthx3 + numLayers * widthStub - 1 downto           widthx1 + widthx2 + widthx3 + numLayers * widthStub );
-  c.state.x1    := s(                        widthx1 + widthx2 + widthx3 + numLayers * widthStub - 1 downto                     widthx2 + widthx3 + numLayers * widthStub );
-  c.state.x2    := s(                                  widthx2 + widthx3 + numLayers * widthStub - 1 downto                               widthx3 + numLayers * widthStub );
-  c.state.x3    := s(                                            widthx3 + numLayers * widthStub - 1 downto                                         numLayers * widthStub );
-  for k in c.stubs'range loop
-    c.stubs( k ).valid := s( 1 + widthKFr + widthKFphi + widthKFz + widthKFdPhi + widthKFdZ + k * widthStub - 1 );
-    c.stubs( k ).r     := s(     widthKFr + widthKFphi + widthKFz + widthKFdPhi + widthKFdZ + k * widthStub - 1 downto widthKFphi + widthKFz + widthKFdPhi + widthKFdZ + k * widthStub );
-    c.stubs( k ).phi   := s(                widthKFphi + widthKFz + widthKFdPhi + widthKFdZ + k * widthStub - 1 downto              widthKFz + widthKFdPhi + widthKFdZ + k * widthStub );
-    c.stubs( k ).z     := s(                             widthKFz + widthKFdPhi + widthKFdZ + k * widthStub - 1 downto                         widthKFdPhi + widthKFdZ + k * widthStub );
-    c.stubs( k ).dPhi  := s(                                        widthKFdPhi + widthKFdZ + k * widthStub - 1 downto                                       widthKFdZ + k * widthStub );
-    c.stubs( k ).dZ    := s(                                                      widthKFdZ + k * widthStub - 1 downto                                                   k * widthStub );
-  end loop;
-  return c;
 end function;
 
 function f_val( c: t_channelResidual ) return t_val is
@@ -98,16 +78,18 @@ begin
         val.nGood := incr( val.nGood );
       end if;
     end if; 
+    if c.state.maybe( k ) = '1' then
+      hits( k ) := '1';
+    end if;
   end loop;
-  hits := hits or c.state.maybe;
   val.nSkip := stdu( count( hits, high, 0, '0' ), widthLayer);
   return val;
 end function;
 
 function f_better( a, b: t_val ) return std_logic is
   variable tie: boolean := a.nGood = b.nGood;
-  variable moreGood: boolean := uint( a.nGood ) > uint( b.nGood );
-  variable lessSkip: boolean := uint( a.nSkip ) < uint( b.nSkip );
+  variable moreGood: boolean := unsigned( a.nGood ) > unsigned( b.nGood );
+  variable lessSkip: boolean := unsigned( a.nSkip ) < unsigned( b.nSkip );
 begin
   if moreGood or ( tie and lessSkip ) then
     return '1';
@@ -122,8 +104,8 @@ signal val: t_val := ( others => ( others => '0' ) );
 -- step 2
 signal optional: std_logic_vector( widthBRam - 1 downto 0 ) := ( others => '0' );
 signal valRam: t_val := ( others => ( others => '0' ) );
-signal reset: std_logic_vector( 4 downto 2 + 1 ) := ( others => '0' );
-signal valid: std_logic_vector( 4 downto 2 + 1 ) := ( others => '0' );
+signal reset: std_logic := '0';
+signal valid: std_logic := '0';
 signal bram: t_bram := ( others => ( others => '0' ) );
 signal dram: t_dram := ( others => ( others => '0' ) );
 signal better, first: std_logic := '0';
@@ -187,8 +169,8 @@ if rising_edge( clk ) then
 
   -- step 2
 
-  reset <= reset( reset'high - 1 downto reset'low ) & din.state.reset;
-  valid <= valid( valid'high - 1 downto valid'low ) & '0';
+  reset <= din.state.reset;
+  valid <= '0';
   optional <= bram( uint( not toggle & addr ) );
   addrReg <= addr;
   if din.state.valid = '1' then
@@ -207,24 +189,38 @@ if rising_edge( clk ) then
     raddr <= ( others => '0' );
   elsif raddr /= laddr then
     raddr <= incr( raddr );
-    valid( valid'low ) <= '1';
+    valid <= '1';
   end if;
 
   -- step 3
 
-  ramReg <= conv( optional );
+  ramReg.state.reset <= reset;
+  ramReg.state.valid <= valid;
   ramReg.state.track <= addrReg;
+  ramReg.state.maybe <= optional( widthMaybe + widthx0 + widthx1 + widthx2 + widthx3 + numLayers * widthStub - 1 downto widthx0 + widthx1 + widthx2 + widthx3 + numLayers * widthStub );
+  ramReg.state.x0    <= optional(              widthx0 + widthx1 + widthx2 + widthx3 + numLayers * widthStub - 1 downto           widthx1 + widthx2 + widthx3 + numLayers * widthStub );
+  ramReg.state.x1    <= optional(                        widthx1 + widthx2 + widthx3 + numLayers * widthStub - 1 downto                     widthx2 + widthx3 + numLayers * widthStub );
+  ramReg.state.x2    <= optional(                                  widthx2 + widthx3 + numLayers * widthStub - 1 downto                               widthx3 + numLayers * widthStub );
+  ramReg.state.x3    <= optional(                                            widthx3 + numLayers * widthStub - 1 downto                                         numLayers * widthStub );
+  for k in 0 to numLayers - 1 loop
+    ramReg.stubs( k ).valid <= optional( 1 + widthKFr + widthKFphi + widthKFz + widthKFdPhi + widthKFdZ + k * widthStub - 1 );
+    ramReg.stubs( k ).r     <= optional(     widthKFr + widthKFphi + widthKFz + widthKFdPhi + widthKFdZ + k * widthStub - 1 downto widthKFphi + widthKFz + widthKFdPhi + widthKFdZ + k * widthStub );
+    ramReg.stubs( k ).phi   <= optional(                widthKFphi + widthKFz + widthKFdPhi + widthKFdZ + k * widthStub - 1 downto              widthKFz + widthKFdPhi + widthKFdZ + k * widthStub );
+    ramReg.stubs( k ).z     <= optional(                             widthKFz + widthKFdPhi + widthKFdZ + k * widthStub - 1 downto                         widthKFdPhi + widthKFdZ + k * widthStub );
+    ramReg.stubs( k ).dPhi  <= optional(                                        widthKFdPhi + widthKFdZ + k * widthStub - 1 downto                                       widthKFdZ + k * widthStub );
+    ramReg.stubs( k ).dZ    <= optional(                                                      widthKFdZ + k * widthStub - 1 downto                                                   k * widthStub );
+  end loop;
 
   -- step 4
 
   dout <= nulll;
-  if reset( reset'high ) = '1' then
+  if ramReg.state.reset = '1' then
     dout.state.reset <= '1';
     for k in dout.stubs'range loop
       dout.stubs( k ).reset <= '1';
     end loop;
   end if;
-  if valid( valid'high ) = '1' then
+  if ramReg.state.valid = '1' then
     dout <= ramReg;
   end if;
 
