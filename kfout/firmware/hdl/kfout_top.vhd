@@ -23,7 +23,7 @@ end;
 
 architecture rtl of kfout_top IS
 
-CONSTANT reset_delay : INTEGER := 23;
+CONSTANT reset_delay : INTEGER := 26;
 CONSTANT router_reset_delay : INTEGER := 8;
 
 signal TTTracks: Vector(numNodesKF -1 downto 0) := NullVector(  numNodesKF );

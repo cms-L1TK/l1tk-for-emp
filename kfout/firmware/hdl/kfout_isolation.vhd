@@ -29,7 +29,7 @@ begin
 
 g: for k in 0 to numNodesKF - 1 generate
 
-signal node_din: ldata( numLayers + 1 - 1 downto 0 ) := ( others => ( ( others => '0' ), '0', '0', '1' ) );
+signal node_din: ldata( numLayers + 1 - 1 downto 0 ) := ( others =>  nulll );
 signal node_dout: t_channelKF := nulll;
 
 begin
@@ -63,7 +63,7 @@ end;
 
 architecture rtl of kfout_isolation_in_node is
 
-signal track_din: lword := ( ( others => '0' ), '0', '0', '1' );
+signal track_din: lword := nulll;
 signal track_dout: t_trackKF := nulll;
 component kfout_isolation_in_track
 port (
@@ -90,7 +90,7 @@ c: kfout_isolation_in_track port map ( clk, track_din, track_dout );
 
 g: for k in 0 to numLayers - 1 generate
 
-signal stub_din: lword := ( ( others => '0' ), '0', '0', '1' );
+signal stub_din: lword := nulll;
 signal stub_dout: t_stubKF := nulll;
 
 begin
@@ -125,7 +125,7 @@ end;
 architecture rtl of kfout_isolation_in_track is
 
 -- step 1
-signal din: lword := ( ( others => '0' ), '0', '0', '1' );
+signal din: lword := nulll;
 
 -- step 2
 signal dout: t_trackKF := nulll;
@@ -192,7 +192,7 @@ end;
 architecture rtl of kfout_isolation_in_stub is
 
 -- step 1
-signal din: lword := ( ( others => '0' ), '0', '0', '1' );
+signal din: lword := nulll;
 
 -- step 2
 signal dout: t_stubKF := nulll;
@@ -250,7 +250,7 @@ use work.hybrid_data_types.all;
 entity kfout_isolation_out is
 port (
     clk: in std_logic;
-    out_packet: in std_logic_vector( numLinksTFP - 1 downto 0 );
+    out_packet: in t_packets( numLinksTFP - 1 downto 0 );
     out_din: in t_frames( numLinksTFP - 1 downto 0 );
     out_dout: out ldata( numLinksTFP - 1 downto 0 )  
 );
@@ -258,11 +258,11 @@ end;
 
 architecture rtl of kfout_isolation_out is
 
-signal dout: ldata( numLinksTFP - 1 downto 0 ) := ( others => ( ( others => '0' ), '0', '0', '1' ) );
+signal dout: ldata( numLinksTFP - 1 downto 0 ) := ( others => nulll );
 component kfout_isolation_out_node
 port (
     clk: in std_logic;
-    node_packet: in std_logic;
+    node_packet: in t_packet;
     node_din: in t_frame;
     node_dout: out lword
 );
@@ -274,9 +274,9 @@ out_dout <= dout;
 
 node: for k in 0 to numLinksTFP - 1 generate
 
-signal node_packet: std_logic := '0';
+signal node_packet: t_packet := ( others => '0' );
 signal node_din: t_frame := ( others => '0' );
-signal node_dout: lword := ( ( others => '0' ), '0', '0', '1' );
+signal node_dout: lword := nulll;
 
 begin
 
@@ -303,7 +303,7 @@ use work.hybrid_data_types.all;
 entity kfout_isolation_out_node is
 port (
     clk: in std_logic;
-    node_packet: in std_logic;
+    node_packet: in t_packet;
     node_din: in t_frame;
     node_dout: out lword
 );
@@ -312,11 +312,11 @@ end;
 architecture rtl of kfout_isolation_out_node is
 
 -- sr
-signal sr: std_logic_vector( PAYLOAD_LATENCY - 1 downto 0 ) := ( others => '0' );
+signal sr: t_packets( PAYLOAD_LATENCY - 1 downto 0 ) := ( others => ( others => '0' ) );
 
 -- step 1
 signal din:  t_frame := ( others => '0' );
-signal dout: lword := ( ( others => '0' ), '0', '0', '1' );
+signal dout: lword := nulll;
 
 begin
 
@@ -333,9 +333,10 @@ if rising_edge( clk ) then
 
     -- step 1
 
+    dout.start_of_orbit <= sr( sr'high ).start_of_orbit;
     dout.valid <= '0';
     dout.data <= ( others => '0' );
-    if sr( sr'high ) = '1' then
+    if sr( sr'high ).valid = '1' then
         dout.valid <= '1';
         dout.data <= node_din;
     end if;
