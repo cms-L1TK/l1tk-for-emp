@@ -1,0 +1,8 @@
+src emp_payload.vhd
+
+include components.dep
+
+include -c l1tk-for-emp:kf components.dep
+include -c l1tk-for-emp:kfin components.dep
+include -c l1tk-for-emp:tq components.dep
+include -c l1tk-for-emp:common components.dep
