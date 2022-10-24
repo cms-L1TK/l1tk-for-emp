@@ -63,7 +63,7 @@ end generate;
 
 gPS: for k in 0 to numTypedStubs( t_stubTypes'pos( LayerPS ) ) - 1 generate
 
-signal node_din: lword := nulll ;
+signal node_din: lword := nulll;
 signal node_dout: t_stubDTCPS := nulll;
 
 begin
@@ -77,7 +77,7 @@ end generate;
 
 g2S: for k in 0 to numTypedStubs( t_stubTypes'pos( Layer2S ) ) - 1 generate
 
-signal node_din: lword :=  nulll ;
+signal node_din: lword := nulll;
 signal node_dout: t_stubDTC2S := nulll;
 
 begin
@@ -168,7 +168,7 @@ end;
 architecture rtl of tracklet_isolation_in_nodePS is
 
 -- step 1
-signal din: lword := nulll ;
+signal din: lword := nulll;
 
 -- step 2
 signal dout: t_stubDTCPS := nulll;
@@ -232,7 +232,7 @@ end;
 architecture rtl of tracklet_isolation_in_node2S is
 
 -- step 1
-signal din: lword :=  nulll ;
+signal din: lword := nulll;
 
 -- step 2
 signal dout: t_stubDTC2S := nulll;
@@ -323,9 +323,9 @@ out_dout <= dout;
 
 gSeedTypes: for k in 0 to numSeedTypes - 1 generate
 
-signal track_packet: t_packet := (others => '0');
+signal track_packet: t_packet := ( others => '0' );
 signal track_din: t_trackTB := nulll;
-signal track_dout: lword := nulll ;
+signal track_dout: lword :=nulll;
 
 begin
 
@@ -337,9 +337,9 @@ cTrack: tracklet_isolation_out_track port map ( clk, track_packet, track_din, tr
 
 gStubs: for j in 0 to numsProjectionLayers( k ) - 1 generate
 
-signal stub_packet: t_packet := (others => '0');
+signal stub_packet: t_packet := ( others => '0' );
 signal stub_din: t_stubTB := nulll;
-signal stub_dout: lword := nulll ;
+signal stub_dout: lword := nulll;
 
 begin
 
@@ -378,7 +378,7 @@ architecture rtl of tracklet_isolation_out_track is
 
 constant widthTrack: natural := 1 + widthTBseedType + widthTBinv2R + widthTBphi0 + widthTBz0 + widthTBcot;
 -- sr
-signal sr: t_packets( PAYLOAD_LATENCY - 1 downto 0 ) := ( others => ( others => '0') );
+signal sr: t_packets( PAYLOAD_LATENCY - 1 downto 0 ) := ( others => ( others => '0' ) );
 
 -- step 1
 signal din:  t_trackTB := nulll;
@@ -438,20 +438,16 @@ end;
 
 architecture rtl of tracklet_isolation_out_stub is
 
---constant widthStub: natural := 1 + widthTrackletTrackId + widthTrackletStubId + widthTrackletR + widthTrackletPhi + widthTrackletZ;
 constant widthStub: natural := 1 + widthsTBr( 0 ) + widthsTBphi( 0 ) + widthsTBz( 0 );
 -- sr
--- FIX: This signal used to create output "valid" signal by delaying input
---      one by PAYLOAD_LATENCY. Better to take it from HLS ap_done signal.
-signal sr: t_packets( PAYLOAD_LATENCY - 1 downto 0 ) := ( others => (others => '0') );
+signal sr: t_packets( PAYLOAD_LATENCY - 1 downto 0 ) := ( others => ( others => '0' ) );
 
 -- step 1
 signal din:  t_stubTB := nulll;
-signal dout: lword :=  nulll;
+signal dout: lword := nulll;
 
 function conv( s: t_stubTB ) return std_logic_vector is
 begin
-  --return s.valid & s.trackId & s.stubId & s.r & s.phi & s.z;
   return s.valid & s.r( widthsTBr( 0 ) - 1 downto 0 ) & s.phi( widthsTBphi( 0 ) - 1 downto 0 ) & s.z( widthsTBz( 0 ) - 1 downto 0 );
 end function;
 
