@@ -98,8 +98,12 @@ BEGIN
 
     SIGNAL packet_counter : INTEGER := 0;  -- Count packets created
     SIGNAL out_counter    : INTEGER := 0;  -- Count packets out
+    SIGNAL out_counter_delay    : INTEGER := 0;  -- Count packets out
 
     SIGNAL OutBuffer   : STD_LOGIC_VECTOR( widthpartialTTTrack*2  - 1 DOWNTO 0 );
+    SIGNAL OutBuffer_delay   : STD_LOGIC_VECTOR( widthpartialTTTrack*2  - 1 DOWNTO 0 );
+
+    
 
 
   BEGIN
@@ -139,15 +143,18 @@ BEGIN
 
           END IF;
 
-          Out_counter <= (Out_counter + 1) MOD (PacketBufferLength);
+          out_counter_delay <= (Out_counter + 1) MOD (PacketBufferLength);
+          Out_counter <= out_counter_delay;
 
-          PacketData( i )  <= OutBuffer;
+          OutBuffer_delay <= OutBuffer;
+          PacketData( i )  <= OutBuffer_delay;
 
           RAMreset <= reset;
 
           IF reset = '1' THEN
             packet_counter <= 0;
             Out_counter <= 0;
+            out_counter_delay <= 0;
             odd_even := 0;
           END IF;
 
