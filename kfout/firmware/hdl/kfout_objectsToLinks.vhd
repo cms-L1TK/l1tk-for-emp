@@ -45,7 +45,7 @@ BEGIN
         IF ReadAddr < 1 THEN
           positive_read_addr := 0;
         ELSE
-          positive_read_addr := ReadAddr;
+          positive_read_addr := ReadAddr MOD count;
         END IF;
 
         PacketOut <= RAM ( positive_read_addr );  --Put packet on output link
@@ -98,12 +98,8 @@ BEGIN
 
     SIGNAL packet_counter : INTEGER := 0;  -- Count packets created
     SIGNAL out_counter    : INTEGER := 0;  -- Count packets out
-    SIGNAL out_counter_delay    : INTEGER := 0;  -- Count packets out
 
     SIGNAL OutBuffer   : STD_LOGIC_VECTOR( widthpartialTTTrack*2  - 1 DOWNTO 0 );
-    SIGNAL OutBuffer_delay   : STD_LOGIC_VECTOR( widthpartialTTTrack*2  - 1 DOWNTO 0 );
-
-    
 
 
   BEGIN
@@ -143,19 +139,16 @@ BEGIN
 
           END IF;
 
-          out_counter_delay <= (Out_counter + 1) MOD (PacketBufferLength);
-          Out_counter <= out_counter_delay;
-
-          OutBuffer_delay <= OutBuffer;
-          PacketData( i )  <= OutBuffer_delay;
-
           RAMreset <= reset;
 
           IF reset = '1' THEN
             packet_counter <= 0;
-            Out_counter <= 0;
-            out_counter_delay <= 0;
+            out_counter <= 0;
             odd_even := 0;
+            PacketData( i ) <= (OTHERS => '0');
+          ELSE
+            Out_counter <= out_counter + 1;
+            PacketData( i )  <= OutBuffer;
           END IF;
 
         END IF;

@@ -57,7 +57,7 @@ CONSTANT numdZBins : NATURAL := 2**10;
 CONSTANT basedZ : REAL := 0.0399788;
 CONSTANT basedPhi : REAL := 4.26106e-05;
 
-CONSTANT floatMVABins : REALS( 0 TO ( 2**widthTQMVA ) - 1) := ( 0.0, 0.125, 0.25, 0.375, 0.5, 0.625, 0.750, 0.875 );
+CONSTANT floatMVABins : REALS( 0 TO ( 2**widthTQMVA )) := ( 0.0, 0.125, 0.25, 0.375, 0.5, 0.625, 0.750, 0.875, 1.0 );
 
 --- LINK OUTPUT formatting specific constants
 
@@ -103,7 +103,7 @@ PACKAGE BODY kfout_config IS
     VARIABLE res: mva_array( floatMVABins'LENGTH - 1 DOWNTO 0 ) := ( OTHERS => ( OTHERS=>'0' ) ) ;
   BEGIN
     FOR k IN 0 TO floatMVABins'LENGTH - 1 LOOP
-        res( k ) := TO_SFIXED( floatMVABins( k ), 5,-5 );
+        res( k ) := TO_SFIXED( floatMVABins( k )*32.0, 5,-5 );
     END LOOP;
     RETURN res;
   END FUNCTION;

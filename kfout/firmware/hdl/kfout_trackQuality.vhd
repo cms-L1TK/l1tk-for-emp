@@ -54,8 +54,6 @@ BEGIN
     SIGNAL s_temp_chi2rphi  : SFIXED( 5 DOWNTO -5 ) := (OTHERS => '0');
     SIGNAL s_temp_chi2rz    : SFIXED( 5 DOWNTO -5 ) := (OTHERS => '0');
 
-    
-
     BEGIN
 
     BDTentity : ENTITY work.BDTTop
@@ -76,7 +74,7 @@ BEGIN
     VARIABLE temp_ninterior : SFIXED( 5 DOWNTO -5 ) := (OTHERS => '0');
     VARIABLE temp_chi2rphi  : SFIXED( 5 DOWNTO -5 ) := (OTHERS => '0');
     VARIABLE temp_chi2rz    : SFIXED( 5 DOWNTO -5 ) := (OTHERS => '0');
-
+    
     BEGIN
         IF RISING_EDGE(clk) THEN
 
@@ -123,6 +121,7 @@ BEGIN
 
             Output( i ).FrameValid <=  InputPipe( frame_delay - 1 ).FrameValid;
             Output( i ).reset <=  InputPipe( frame_delay - 1 ).reset;
+
 
             IF ty_vld(0) THEN
                 Output( i ).TQMVA      <=  MVAPacker((TO_SFIXED(ty_out( 0 ),5,-5)),MVAbins);
