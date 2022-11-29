@@ -55,7 +55,6 @@ CM: ME_memories port map ( clk, memories_din, memories_rin, memories_dout );
 end;
 
 
-library xil_defaultlib;
 library ieee;
 use ieee.std_logic_1164.all;
 use work.hybrid_tools.all;
@@ -89,7 +88,7 @@ constant config_memories_in: t_config_memories( 0 to numInputs - 1 ) := config_m
 signal din: t_datas( numInputs  - 1 downto 0 ) := ( others => nulll );
 signal rout: t_reads( numInputs  - 1 downto 0 ) := ( others => nulll );
 
-signal reset, start, done, enable: std_logic := '0';
+signal start, done, enable: std_logic := '0';
 signal counter: std_logic_vector( widthNent - 1 downto 0 ) := ( others => '0' );
 signal bxIn, bxOut: std_logic_vector ( widthBX - 1 downto 0 ) := ( others => '0' );
 signal writes: t_writes( numOutputs - 1 downto 0 ) := ( others => nulll );
@@ -107,7 +106,6 @@ process ( clk ) is
 begin
 if rising_edge( clk ) then
 
-  reset <= process_din( offsetIn + 1 ).reset;
   counter <= incr( counter );
   if enable = '1' and uint( counter ) = numFrames - 1 then
     enable <= '0';
@@ -115,9 +113,6 @@ if rising_edge( clk ) then
   if done = '1' then
     enable <= '1';
     counter <= ( others => '0' );
-  end if;
-  if reset = '1' then
-    enable <= '0';
   end if;
 
 end if;
@@ -128,15 +123,14 @@ rout( l ).start <= start;
 end generate;
 
 gOut: for l in 0 to numOutputs - 1 generate
-writes( l ).reset <= reset;
 writes( l ).start <= done or enable;
 writes( l ).bx <= bxOut;
 end generate;
 
 gL3: if k < 8 generate
-L3: entity xil_defaultlib.ME_L3 port map (
+L3: entity work.ME_L3 port map (
   ap_clk => clk,
-  ap_rst => reset,
+  ap_rst => '0',
   ap_start => start,
   bx_V => bxIn,
   bx_o_V => bxOut,
@@ -223,9 +217,9 @@ L3: entity xil_defaultlib.ME_L3 port map (
 );
 end generate;
 gL4: if k >= 8 and k < 16 generate
-L4: entity xil_defaultlib.ME_L4 port map (
+L4: entity work.ME_L4 port map (
   ap_clk => clk,
-  ap_rst => reset,
+  ap_rst => '0',
   ap_start => start,
   bx_V => bxIn,
   bx_o_V => bxOut,
@@ -312,9 +306,9 @@ L4: entity xil_defaultlib.ME_L4 port map (
 );
 end generate;
 gL5: if k >= 16 and k < 24 generate
-L5: entity xil_defaultlib.ME_L5 port map (
+L5: entity work.ME_L5 port map (
   ap_clk => clk,
-  ap_rst => reset,
+  ap_rst => '0',
   ap_start => start,
   bx_V => bxIn,
   bx_o_V => bxOut,
@@ -401,9 +395,9 @@ L5: entity xil_defaultlib.ME_L5 port map (
 );
 end generate;
 gL6: if k >= 24 generate
-L6: entity xil_defaultlib.ME_L6 port map (
+L6: entity work.ME_L6 port map (
   ap_clk => clk,
-  ap_rst => reset,
+  ap_rst => '0',
   ap_start => start,
   bx_V => bxIn,
   bx_o_V => bxOut,

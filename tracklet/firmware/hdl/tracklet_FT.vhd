@@ -1,4 +1,3 @@
-library xil_defaultlib;
 library ieee;
 use ieee.std_logic_1164.all;
 use work.hybrid_tools.all;
@@ -40,7 +39,7 @@ signal din: t_datas( numInputs  - 1 downto 0 ) := ( others => nulll );
 signal rout: t_reads( numInputs  - 1 downto 0 ) := ( others => nulll );
 signal dout: t_datas( numOutputs  - 1 downto 0 ) := ( others => nulll );
 
-signal reset, start, bxValid: std_logic := '0';
+signal start, reset: std_logic := '0';
 signal bx: std_logic_vector ( widthBX - 1 downto 0 ) := ( others => '0' );
 
 begin
@@ -52,26 +51,25 @@ ft_dout( offsetOut + numOutputs - 1 downto offsetOut ) <= dout;
 start <= ft_din( offsetIn + 1 ).start;
 bx <= ft_din( offsetIn + 1 ).bx;
 
-process ( clk ) is
+process( clk ) is
 begin
 if rising_edge( clk ) then
 
-  reset <= ft_din( offsetIn + 1 ).reset;
-  dout( 0 ).reset <= bxValid;
+  dout( 0 ).start <= reset;
 
 end if;
 end process;
 
-L1L2: entity xil_defaultlib.FT_L1L2 port map (
+L1L2: entity work.FT_L1L2 port map (
   ap_clk => clk,
-  ap_rst => reset,
+  ap_rst => '0',
   ap_start => start,
   bx_V => bx,
-  bx_o_V_ap_vld => bxValid,
   ap_done => open,
   ap_idle => open,
   ap_ready => open,
   bx_o_V => open,
+  bx_o_V_ap_vld => reset,
   trackWord_V_full_n => notFull,
   barrelStubWords_0_V_full_n => notFull,
   barrelStubWords_1_V_full_n => notFull,

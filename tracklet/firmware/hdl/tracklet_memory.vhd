@@ -59,7 +59,6 @@ memory_dout <= dout;
 
 nent <= incr( resize( memory_din.addr( widthNentIn - 1 downto 0 ), widthNent ) );
 indexNent <= memory_din.addr( widthAddr - 1 downto widthAddr - widthIndexNent );
-dout.reset <= memory_din.reset;
 dout.start <= memory_din.start;
 dout.bx <= memory_din.bx;
 bx <= memory_din.bx( widthIndexBX - 1 downto 0 );
@@ -87,12 +86,6 @@ if rising_edge( clk ) then
   if memory_din.valid = '1' then
     dout.nents( uint( indexNent ) )( widthNent - 1 downto 0 ) <= nent;
     ram( uint( memory_din.addr( widthAddr - 1 downto 0 ) ) ) <= memory_din.data( widthData - 1 downto 0 );
-  end if; 
-
-  if memory_din.reset = '1' then
-    for k in 0 to 2 ** widthIndexNent - 1 loop
-      dout.nents( k )( widthNent - 1 downto 0 ) <= ( others => '0' );
-    end loop;
   end if;
 
   -- step 2

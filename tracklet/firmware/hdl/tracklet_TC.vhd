@@ -55,7 +55,6 @@ cM: TC_memories port map ( clk, memories_din, memories_rin, memories_dout );
 end;
 
 
-library xil_defaultlib;
 library ieee;
 use ieee.std_logic_1164.all;
 use work.hybrid_tools.all;
@@ -89,7 +88,7 @@ constant config_memories_in: t_config_memories( 0 to numInputs - 1 ) := config_m
 signal din: t_datas( numInputs  - 1 downto 0 ) := ( others => nulll );
 signal rout: t_reads( numInputs  - 1 downto 0 ) := ( others => nulll );
 
-signal reset, start, done, enable: std_logic := '0';
+signal start, done, enable: std_logic := '0';
 signal counter: std_logic_vector( widthNent - 1 downto 0 ) := ( others => '0' );
 signal bxIn, bxOut: std_logic_vector ( widthBX - 1 downto 0 ) := ( others => '0' );
 signal writes: t_writes( numOutputs - 1 downto 0 ) := ( others => nulll );
@@ -107,7 +106,6 @@ process ( clk ) is
 begin
 if rising_edge( clk ) then
 
-  reset <= process_din( offsetIn + 2 ).reset;
   counter <= incr( counter );
   if enable = '1' and uint( counter ) = numFrames - 1 then
     enable <= '0';
@@ -115,9 +113,6 @@ if rising_edge( clk ) then
   if done = '1' then
     enable <= '1';
     counter <= ( others => '0' );
-  end if;
-  if reset = '1' then
-    enable <= '0';
   end if;
 
 end if;
@@ -128,14 +123,13 @@ rout( l ).start <= start;
 end generate;
 
 gOut: for l in 0 to numOutputs - 1 generate
-writes( l ).reset <= reset;
 writes( l ).start <= done or enable;
 writes( l ).bx <= bxOut;
 end generate;
 
-L1L2F: entity xil_defaultlib.TC_L1L2F port map (
+L1L2F: entity work.TC_L1L2F port map (
   ap_clk => clk,
-  ap_rst => reset,
+  ap_rst => '0',
   ap_start => start,
   ap_done => done,
   bx_V => bxIn,
