@@ -10,7 +10,6 @@ use work.tracklet_data_types.all;
 entity tracklet_top is
 port (
   clk: in std_logic;
-  tracklet_reset: in t_resets( numPPquads - 1 downto 0 );
   tracklet_din: in t_stubsDTC;
   tracklet_dout: out t_channlesTB( numSeedTypes - 1 downto 0 )
 );
@@ -20,13 +19,11 @@ end;
 architecture rtl of tracklet_top is
 
 
-signal in_reset: t_resets( numPPquads - 1 downto 0 ) := ( others => nulll );
 signal in_din: t_stubsDTC := nulll;
 signal in_dout: t_datas( numInputsIR  - 1 downto 0 ) := ( others => nulll );
 component tracklet_format_in
 port (
   clk: in std_logic;
-  in_reset: in t_resets( numPPquads - 1 downto 0 );
   in_din: in t_stubsDTC;
   in_dout: out t_datas( numInputsIR  - 1 downto 0 )
 );
@@ -169,7 +166,6 @@ readsOut <= FT_rout & MC_rout & ME_rout & PR_rout & TC_rout & TE_rout & VMR_rout
 readsIn <= f_map( readsOut );
 datasIn <= f_map( datasOut );
 
-in_reset <= tracklet_reset;
 in_din   <= tracklet_din;
 
 ir_din  <= in_dout;
@@ -199,7 +195,7 @@ out_din <= ft_dout;
 
 tracklet_dout <= out_dout;
 
-Fin: tracklet_format_in port map ( clk, in_reset, in_din, in_dout );
+Fin: tracklet_format_in port map ( clk, in_din, in_dout );
 
 IR:  tracklet_IR  port map ( clk, ir_din,  ir_rin,  ir_rout,  ir_dout );
 

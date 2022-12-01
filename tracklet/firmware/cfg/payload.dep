@@ -2,3 +2,5 @@ src emp_payload.vhd
 
 include components.dep
 include -c l1tk-for-emp:common components.dep
+
+addrtab -c emp-fwk:components/payload emp_payload.xml 

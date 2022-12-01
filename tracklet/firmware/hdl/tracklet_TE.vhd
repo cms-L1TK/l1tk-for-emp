@@ -55,7 +55,6 @@ cM: TE_memories port map ( clk, memories_din, memories_rin, memories_dout );
 end;
 
 
-library xil_defaultlib;
 library ieee;
 use ieee.std_logic_1164.all;
 use work.hybrid_tools.all;
@@ -112,7 +111,7 @@ signal lutRead: t_reads( 2 - 1 downto 0 ) := ( others => nulll );
 type t_lutDatas is array ( natural range <> ) of std_logic_vector( 1 - 1 downto 0 );
 signal lutData: t_lutDatas( 2 - 1 downto 0 ) := ( others => ( others => '0' ) );
 
-signal reset, start, done, enable: std_logic := '0';
+signal start, done, enable: std_logic := '0';
 signal counter: std_logic_vector( widthNent - 1 downto 0 ) := ( others => '0' );
 signal bxIn, bxOut: std_logic_vector ( widthBX - 1 downto 0 ) := ( others => '0' );
 signal writes: t_writes( numOutputs - 1 downto 0 ) := ( others => nulll );
@@ -130,7 +129,6 @@ process ( clk ) is
 begin
 if rising_edge( clk ) then
 
-  reset <= process_din( offsetIn ).reset;
   counter <= incr( counter );
   if enable = '1' and uint( counter ) = numFrames - 1 then
     enable <= '0';
@@ -138,9 +136,6 @@ if rising_edge( clk ) then
   if done = '1' then
     enable <= '1';
     counter <= ( others => '0' );
-  end if;
-  if reset = '1' then
-    enable <= '0';
   end if;
 
 end if;
@@ -151,7 +146,6 @@ rout( l ).start <= start;
 end generate;
 
 gOut: for l in 0 to numOutputs - 1 generate
-writes( l ).reset <= reset;
 writes( l ).start <= done or enable;
 writes( l ).bx <= bxOut;
 end generate;
@@ -174,9 +168,9 @@ lut: tf_lut generic map ( lut_file, lut_width, lut_depth, RAM_PERFORMANCE ) port
 
 end generate;
 
-PS_PS: entity xil_defaultlib.TE_PS_PS port map (
+PS_PS: entity work.TE_PS_PS port map (
   ap_clk => clk,
-  ap_rst => reset,
+  ap_rst => '0',
   ap_start => start,
   ap_done => done,
   bx_V => bxIn,

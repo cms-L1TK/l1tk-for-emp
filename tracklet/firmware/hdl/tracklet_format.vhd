@@ -1,5 +1,6 @@
 library ieee;
 use ieee.std_logic_1164.all;
+use work.hybrid_tools.all;
 use work.hybrid_data_types.all;
 use work.tracklet_data_types.all;
 use work.tracklet_config.all;
@@ -8,7 +9,6 @@ use work.hybrid_config.all;
 entity tracklet_format_in is
 port (
   clk: in std_logic;
-  in_reset: in t_resets( numPPQuads - 1 downto 0 );
   in_din: in t_stubsDTC;
   in_dout: out t_datas( numInputsIR  - 1 downto 0 )
 );
@@ -20,41 +20,70 @@ begin
 
 gPS: for k in in_din.ps'range generate
 
-signal r: t_reset := nulll;
-signal s: t_stubDTCPS := nulll;
-signal d: t_data := nulll;
+signal din: t_stubDTCPS := nulll;
+signal dout: t_data := nulll;
+signal counter: std_logic_vector( widthFrames - 1 downto 0 ) := ( others => '0' );
 
 begin
 
-r <= in_reset( k / 4 );
-s <= in_din.ps( k );
-d.reset <= r.reset;
-d.start <= r.start;
-d.bx <= r.bx;
-d.valid <= '1';
-d.data( r_dataDTC ) <= s.r & s.z & s.phi & s.bend & s.layer & s.valid;
-in_dout( k ) <= d;
+din <= in_din.ps( k );
+
+dout.valid <= '1';
+in_dout( k ) <= dout;
+
+process ( clk ) is
+begin
+if rising_edge( clk ) then
+
+  dout.data( r_dataDTC ) <= din.r & din.z & din.phi & din.bend & din.layer & din.valid;
+  counter <= incr( counter );
+  if uint( counter ) = numFrames then
+    dout.start <= '0';
+  end if;
+
+  if din.reset = '1' then
+    dout.start <= '1';
+    dout.bx <= incr( dout.bx );
+    counter <= ( others => '0' );
+  end if;
+
+end if;
+end process;
 
 end generate;
 
 g2S: for k in in_din.ss'range generate
 
 constant l: natural := numTypedStubs( t_stubTypes'pos( LayerPS ) ) + k;
-signal r: t_reset := nulll;
-signal s: t_stubDTC2S := nulll;
-signal reset, start: std_logic := '0';
-signal d: t_data := nulll;
+signal din: t_stubDTC2S := nulll;
+signal dout: t_data := nulll;
+signal counter: std_logic_vector( widthFrames - 1 downto 0 ) := ( others => '0' );
 
 begin
 
-r <= in_reset( l / 4 );
-s <= in_din.ss( k );
-d.reset <= r.reset;
-d.start <= r.start;
-d.bx <= r.bx;
-d.valid <= '1';
-d.data( r_dataDTC ) <= s.r & s.z & s.phi & s.bend & s.layer & s.valid;
-in_dout( l ) <= d;
+din <= in_din.ss( k );
+
+dout.valid <= '1';
+in_dout( l ) <= dout;
+
+process ( clk ) is
+begin
+if rising_edge( clk ) then
+
+  dout.data( r_dataDTC ) <= din.r & din.z & din.phi & din.bend & din.layer & din.valid;
+  counter <= incr( counter );
+  if uint( counter ) = numFrames then
+    dout.start <= '0';
+  end if;
+
+  if din.reset = '1' then
+    dout.start <= '1';
+    dout.bx <= incr( dout.bx );
+    counter <= ( others => '0' );
+  end if;
+
+end if;
+end process;
 
 end generate;
 
@@ -91,10 +120,7 @@ begin
 if rising_edge( clk ) then
 
   dout( 0 ) <= nulll;
-  dout( 0 ).track.reset <= out_din( 0 ).reset;
-  for k in 1 to numOutputsFT - 1 loop
-    dout( 0 ).stubs( k - 1 ).reset <= out_din( 0 ).reset;
-  end loop; 
+  dout( 0 ).track.reset <= out_din( 0 ).start;
   if out_din( 0 ).valid = '1' then
     dout( 0 ).track.valid    <= out_din( 0 ).data( 1 + widthTBseedType + widthTBinv2R + widthTBphi0 + widthTBz0 + widthTBcot + widthTrackletLmap - 1 );
     dout( 0 ).track.seedtype <= out_din( 0 ).data(     widthTBseedType + widthTBinv2R + widthTBphi0 + widthTBz0 + widthTBcot + widthTrackletLmap - 1 downto widthTBinv2R + widthTBphi0 + widthTBz0 + widthTBcot + widthTrackletLmap );

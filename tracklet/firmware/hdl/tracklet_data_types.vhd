@@ -10,7 +10,6 @@ type t_nents is array ( natural range <> ) of std_logic_vector( widthNent - 1 do
 
 type t_write is
 record
-  reset: std_logic;
   start: std_logic;
   valid: std_logic;
   bx   : std_logic_vector( widthBX   - 1 downto 0 );
@@ -31,7 +30,6 @@ function nulll return t_read;
 
 type t_data is
 record
-  reset: std_logic;
   start: std_logic;
   valid: std_logic;
   bx   : std_logic_vector( widthBX   - 1 downto 0 );
@@ -63,9 +61,9 @@ end;
 
 package body tracklet_data_types is
 
-function nulll return t_write is begin return ( '0', '0', '0', others => ( others => '0' ) ); end function;
+function nulll return t_write is begin return ( '0', '0', others => ( others => '0' ) ); end function;
 function nulll return t_read  is begin return ( '0', '0', others => ( others => '0' ) ); end function;
-function nulll return t_data  is begin return ( '0', '0', '0', ( others => '0' ) , (others => ( others => '0' ) ), ( others => '0' ) ); end function;
+function nulll return t_data  is begin return ( '0', '0', ( others => '0' ) , (others => ( others => '0' ) ), ( others => '0' ) ); end function;
 
 function conv( rs: t_ramStyle ) return string is
 begin
