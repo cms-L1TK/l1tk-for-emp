@@ -39,27 +39,21 @@ architecture rtl of emp_payload is
 -- signal d_mapped : ldata( numInputLinks - 1 downto 0);   -- mapped data in
 -- signal q_mapped : ldata( numLinksTFP - 1 downto 0);  -- mapped data out
 
-signal in_ttc: ttc_stuff_array( N_REGION - 1 downto 0 ) := ( others => TTC_STUFF_NULL );
 signal in_din: ldata( 4 * N_REGION - 1 downto 0 ) := ( others => nulll );
-signal in_reset: t_resets( numPPquads - 1 downto 0 ) := ( others => nulll );
 signal in_dout: t_stubsDTC := nulll;
 component tracklet_isolation_in
 port (
   clk: in std_logic;
-  in_ttc: in ttc_stuff_array( N_REGION - 1 downto 0 );
   in_din: in ldata( 4 * N_REGION - 1 downto 0 );
-  in_reset: out t_resets( numPPquads - 1 downto 0 );
   in_dout: out t_stubsDTC
 );
 end component;
 
-signal tracklet_reset: t_resets( numPPquads - 1 downto 0 ) := ( others => nulll );
 signal tracklet_din: t_stubsDTC := nulll;
 signal tracklet_dout: t_channlesTB( numSeedTypes - 1 downto 0 ) := ( others => nulll );
 component tracklet_top
 port (
   clk: in std_logic;
-  tracklet_reset: in t_resets( numPPquads - 1 downto 0 );
   tracklet_din: in t_stubsDTC;
   tracklet_dout: out t_channlesTB( numSeedTypes - 1 downto 0 )
 );
@@ -127,10 +121,8 @@ begin
 --     q        => q
 -- );
 
-in_ttc <= ctrs;
 in_din <= d;
 
-tracklet_reset <= in_reset;
 tracklet_din <= in_dout;
 
 kfin_din <= tracklet_dout;
@@ -152,9 +144,9 @@ q(5).strobe <= '1';
 q(5).start  <= '0';
 
 
-fin: tracklet_isolation_in port map ( clk_p, in_ttc, in_din, in_reset, in_dout );
+fin: tracklet_isolation_in port map ( clk_p, in_din, in_dout );
 
-tracklet: tracklet_top port map ( clk_p, tracklet_reset, tracklet_din, tracklet_dout );
+tracklet: tracklet_top port map ( clk_p, tracklet_din, tracklet_dout );
 
 kfin: kfin_top port map ( clk_p, kfin_din, kfin_dout );
 
