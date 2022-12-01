@@ -50,14 +50,15 @@ CONSTANT UnsignedBaseSector : UNSIGNED( widthKFphiT - 1 DOWNTO 0 ) := TO_UNSIGNE
 --TYPE weight_array IS ARRAY ( NATURAL RANGE <> ) OF INTEGER;
 TYPE weight_array IS ARRAY ( NATURAL RANGE <> ) OF SIGNED( 0 TO widthDSPportA - 1);
 TYPE chi_array IS ARRAY( NATURAL RANGE <> ) OF SIGNED( widthDSPportC - 1 DOWNTO 0 ) ;
-TYPE MVA_array is ARRAY ( NATURAL RANGE <> ) OF SFIXED(5 DOWNTO -5);
+TYPE MVA_array is ARRAY ( NATURAL RANGE <> ) OF SIGNED(9 DOWNTO 0);
 
 CONSTANT numdPhiBins : NATURAL := 2**9;
 CONSTANT numdZBins : NATURAL := 2**10;
 CONSTANT basedZ : REAL := 0.0399788;
 CONSTANT basedPhi : REAL := 4.26106e-05;
 
-CONSTANT floatMVABins : REALS( 0 TO ( 2**widthTQMVA )) := ( 0.0, 0.125, 0.25, 0.375, 0.5, 0.625, 0.750, 0.875, 1.0 );
+--CONSTANT floatMVABins : REALS( 0 TO ( 2**widthTQMVA )) := ( 0.0, 0.125, 0.25, 0.375, 0.5, 0.625, 0.750, 0.875, 1.0 );
+CONSTANT floatMVABins : REALS( 0 TO ( 2**widthTQMVA )) := ( -15.0, -1.945910149, -1.098612289, -0.5108256238, 0.0, 0.5108256238, 1.098612289, 1.945910149, 15.0 );
 
 --- LINK OUTPUT formatting specific constants
 
@@ -103,7 +104,7 @@ PACKAGE BODY kfout_config IS
     VARIABLE res: mva_array( floatMVABins'LENGTH - 1 DOWNTO 0 ) := ( OTHERS => ( OTHERS=>'0' ) ) ;
   BEGIN
     FOR k IN 0 TO floatMVABins'LENGTH - 1 LOOP
-        res( k ) := TO_SFIXED( floatMVABins( k )*32.0, 5,-5 );
+        res( k ) := TO_SIGNED( INTEGER(floatMVABins( k )*32.0), 10);
     END LOOP;
     RETURN res;
   END FUNCTION;

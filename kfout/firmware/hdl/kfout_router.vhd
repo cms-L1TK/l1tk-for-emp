@@ -43,7 +43,7 @@ END kfout_router;
 
 ARCHITECTURE rtl OF kfout_router IS
 
-CONSTANT delay_tracks : INTEGER := 3;
+CONSTANT delay_tracks : INTEGER := 5;
 
 SIGNAL Input          : Vector( 0 TO delay_tracks-1 ) := NullVector( delay_tracks );
 
@@ -64,7 +64,7 @@ END rtl;
 
 --   SIGNAL Output         : Vector( 0 TO DataOut'LENGTH-1 )                         := NullVector( DataOut'LENGTH );
 
---   SIGNAL reset_array : std_logic_vector(0 TO 5) := (OTHERS=>'0');
+--   SIGNAL reset_array : std_logic_vector(0 TO 7) := (OTHERS=>'0');
 
 --   SUBTYPE tAddress        IS INTEGER RANGE 0 TO PacketBufferLength - 1;
 --   TYPE tAddressArray      IS ARRAY( 0 TO DataIn'LENGTH-1 ) OF tAddress;
@@ -79,10 +79,13 @@ END rtl;
 --     SIGNAL Input          : Vector( 0 TO DataIn'LENGTH-1 )                          := NullVector( DataIn'LENGTH );
 
 --     SIGNAL Addresses_ram : INTEGER_VECTOR( 0 TO 107) := (OTHERS=>0);
---     SIGNAL Addresses_ram_idx : INTEGER_VECTOR( 0 TO 107) := (OTHERS=>0);
+--     SIGNAL Addresses_ram_delay : INTEGER_VECTOR( 0 TO 107) := (OTHERS=>0);
 
 --     SIGNAL WriteAddr    : tAddressArray                       := ( OTHERS => 0 );
 --     SIGNAL ReadAddr     :tAddressArray := ( OTHERS => 0 );
+--     SIGNAL ReadAddr_delay     :tAddressArray := ( OTHERS => 0 );
+
+--     SIGNAL out_counter : INTEGER_VECTOR( 0 TO 2) := (OTHERS=>0);
 
 --   BEGIN
 
@@ -111,26 +114,27 @@ END rtl;
 --   BEGIN
 --     IF( RISING_EDGE( clk ) ) THEN
 
---     reset_array <= reset & reset_array( 0 TO 4);
-
--- -- Increment the write pointer if we do write
---       FOR ram IN Input'RANGE LOOP
---         IF (DataIn( ram ).sortkey  = j) AND ( DataIn( ram ) .DataValid ) THEN
---           Input( ram )  <= DataIn( ram );
---           WriteAddr( ram ) <= ( WriteAddr( ram ) + 1 ) MOD PacketBufferLength;
-          
---           Addresses_ram( buffer_counter ) <= ram;
---           Addresses_ram_idx( buffer_counter ) <= WriteAddr( ram );
---           buffer_counter := buffer_counter + 1;
-
---         END IF;
---       END LOOP;
-
+--       reset_array <= reset & reset_array( 0 TO 6);
+     
 --       IF reset = '1' THEN
 --         buffer_counter := 0;
---         Addresses_ram <= (OTHERS=>0);
---         Addresses_ram_idx <= (OTHERS=>0);
+--         --Addresses_ram <= (OTHERS=>0);
+--         WriteAddr <= ( OTHERS => 0 );
+--       ELSE
+--         FOR ram IN Input'RANGE LOOP
+--           IF (DataIn( 7 - ram ).sortkey  = j) AND ( DataIn( 7 - ram ) .DataValid ) THEN
+--             Input( ram )  <= DataIn( 7 - ram );
+--             WriteAddr( ram ) <= ( WriteAddr( ram ) + 1 ) MOD PacketBufferLength;
+            
+--             Addresses_ram( buffer_counter ) <= ram;
+--             buffer_counter := buffer_counter + 1;
+
+--           END IF;
+--         END LOOP;
+
 --       END IF;
+
+--       Addresses_ram_delay <= Addresses_ram;
 
 --     END IF;
 --   END PROCESS;
@@ -139,19 +143,23 @@ END rtl;
 
 --   PROCESS( clk )
 
---   VARIABLE out_counter : INTEGER := 0;
+
   
 --   BEGIN
 --     IF( RISING_EDGE( clk ) ) THEN
 
---       ReadAddr( Addresses_ram( out_counter + 2 ) ) <=   ReadAddr( Addresses_ram( out_counter + 2 ) ) + 1;   --Addresses_ram_idx( out_counter + 2 );
+--       DataOut( j ) <= RamCells(Addresses_ram_delay( out_counter(2)));
 
---       DataOut( j ) <= RamCells(Addresses_ram( out_counter));
-
---       out_counter := (out_counter + 1) MOD (PacketBufferLength - 2);
-
+--       out_counter(1) <= out_counter(0);
+--       out_counter(2) <= out_counter(1);
+  
 --       IF reset_array(2) = '1' THEN
---         out_counter := 0;
+--         ReadAddr <= ( OTHERS => 0 );
+--         out_counter(0) <= 0;
+--       ELSE
+--         out_counter(0) <= (out_counter(0) + 1) MOD (PacketBufferLength + 1);
+--         ReadAddr( Addresses_ram_delay( out_counter(0)  ) ) <=   (ReadAddr( Addresses_ram_delay( out_counter(0)  ) ) + 1) MOD PacketBufferLength;
+
 --       END IF;
 
 --     END IF;

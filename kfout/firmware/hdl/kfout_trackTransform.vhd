@@ -273,7 +273,7 @@ ARCHITECTURE RTL OF kfout_trackTransform IS
     
     SIGNAL frame_signal : STD_LOGIC := '0';
     SIGNAL frame_array  : STD_LOGIC_VECTOR( 0 TO frame_delay - 1 ) := ( OTHERS => '0' );  --Delaying frame valid signals
-    SIGNAL sign_array   : STD_LOGIC_VECTOR( 0 TO frame_delay - 1 )  := ( OTHERS => '0' );  --Delaying track num signals
+    SIGNAL sign_array   : INTEGER_VECTOR( 0 TO frame_delay - 1 )  := ( OTHERS => 0 );  --Delaying track num signals
 
     SIGNAL z0  : SIGNED( widthZ0 - 1 DOWNTO 0 )    := ( OTHERS =>'0' );
     SIGNAL zT  : SIGNED( widthKFZT - 1 DOWNTO 0 )  := ( OTHERS =>'0' );
@@ -348,7 +348,7 @@ ARCHITECTURE RTL OF kfout_trackTransform IS
     PROCESS (clk)
 
      
-      VARIABLE EtaSign   : STD_LOGIC := '0';
+      VARIABLE EtaSign   : INTEGER := 0;
       VARIABLE modCot   : SIGNED( widthTanL -1 DOWNTO 0 ) := ( OTHERS => '0' );
       VARIABLE TrackCounter : INTEGER := 0;
 
@@ -369,7 +369,7 @@ ARCHITECTURE RTL OF kfout_trackTransform IS
         EtaSector  <= TO_INTEGER(UNSIGNED( KFObjectsIn( i ).track.sector( widthKFsector - 2 downto 0 )));
 
 
-        EtaSign := '1' WHEN EtaSector < INTEGER(numSectorsEta/2) ELSE '0';
+        EtaSign := 1 WHEN EtaSector < INTEGER(numSectorsEta/2) ELSE 0;
 
         HitPattern_array <= UNSIGNED(HitPattern(stubs)) & HitPattern_array( 0 TO frame_delay - 2 );
         modCot           := TO_SIGNED((TO_INTEGER(cot) + CotBins(EtaSector)),widthTanL);
@@ -391,7 +391,7 @@ ARCHITECTURE RTL OF kfout_trackTransform IS
           Output( i ).TanL       <=  Tanl_array( frame_delay - 3 ); --TO_SIGNED( 0, widthTanL ); --
           Output( i ).Phi0       <=  phi0; --TO_SIGNED( 0, widthphi0 ); --
           Output( i ).InvR       <=  InvR_array( frame_delay - 3 );
-          Output( i ).SortKey    <=  0 WHEN (sign_array(frame_delay - 4) = '1') ELSE 1;
+          Output( i ).SortKey    <=  sign_array(frame_delay - 4);
 
           TrackCounter := TrackCounter + 1;
 

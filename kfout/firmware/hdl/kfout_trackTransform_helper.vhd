@@ -15,7 +15,7 @@ USE work.kfout_luts.ALL;
 PACKAGE tracktransform_helper IS
   FUNCTION HitPattern ( stubs : t_stubsKF )               RETURN STD_LOGIC_VECTOR;
   FUNCTION Chi2Packer (chi2 : SIGNED; bins : chi_array) RETURN UNSIGNED;
-  FUNCTION MVAPacker (MVA : SFIXED; bins : MVA_array) RETURN UNSIGNED;
+  FUNCTION MVAPacker (MVA : SIGNED; bins : MVA_array) RETURN UNSIGNED;
 
   FUNCTION Nstub ( hitmask : STD_LOGIC_VECTOR ) RETURN INTEGER;
   FUNCTION Ninterior ( hitmask : STD_LOGIC_VECTOR ) RETURN INTEGER;
@@ -56,7 +56,7 @@ PACKAGE BODY tracktransform_helper IS
   RETURN chi;
   END FUNCTION Chi2Packer;
 
-  FUNCTION MVAPacker ( MVA : SFIXED; bins : MVA_array ) RETURN UNSIGNED IS
+  FUNCTION MVAPacker ( MVA : SIGNED; bins : MVA_array ) RETURN UNSIGNED IS
   VARIABLE mva_out : UNSIGNED( widthTQMVA - 1 DOWNTO 0 ) := ( OTHERS => '0' );
   BEGIN
   FOR i in 0 TO bins'LENGTH - 2 LOOP
@@ -80,14 +80,21 @@ PACKAGE BODY tracktransform_helper IS
 
   FUNCTION Ninterior ( hitmask : STD_LOGIC_VECTOR ) RETURN INTEGER IS  --Function to calculate N stub from hitmask and return if > 3
   VARIABLE temp_count : INTEGER := 0;
-  VARIABLE Counter : BOOLEAN := FALSE;
   BEGIN
-    FOR i IN hitmask'RANGE LOOP
-      IF hitmask( i ) = '1' THEN Counter := TRUE;
-      ELSIF Counter AND hitmask( i ) = '0' THEN
-        temp_count := temp_count + 1;
+    IF hitmask( 0 ) = '1' THEN
+      FOR i IN 1 TO 5 LOOP
+        IF hitmask( i ) = '0' THEN temp_count := temp_count + 1;
       END IF;
-    END LOOP;
+      END LOOP;
+
+
+    ELSIF hitmask( 0 ) = '0' AND hitmask( 1 ) = '1'  THEN
+      FOR i IN 2 TO 5 LOOP
+        IF hitmask( i ) = '0' THEN temp_count := temp_count + 1;
+      END IF;
+      END LOOP;
+
+    END IF;
   RETURN temp_count; 
   END FUNCTION Ninterior;
 

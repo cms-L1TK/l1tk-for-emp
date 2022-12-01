@@ -36,8 +36,8 @@ entity emp_payload is
 architecture rtl of emp_payload is
 
 
---signal d_mapped : ldata( numInputLinks - 1 downto 0);   -- mapped data in
---signal q_mapped : ldata( numLinksTFP - 1 downto 0);  -- mapped data out
+-- signal d_mapped : ldata( numInputLinks - 1 downto 0);   -- mapped data in
+-- signal q_mapped : ldata( numLinksTFP - 1 downto 0);  -- mapped data out
 
 signal in_ttc: ttc_stuff_array( N_REGION - 1 downto 0 ) := ( others => TTC_STUFF_NULL );
 signal in_din: ldata( 4 * N_REGION - 1 downto 0 ) := ( others => nulll );
@@ -142,14 +142,14 @@ out_packet <=  conv( d );
 out_din <= kfout_dout;
 
 
-q(0) <= out_dout(0);
-q(1) <= out_dout(1);
-q(0) <= out_dout(0);
-q(1) <= out_dout(1);
-q(0).strobe <= '1';
-q(0).start  <= '0';
-q(1).strobe <= '1';
-q(1).start  <= '0';
+q(4) <= out_dout(0);
+q(5) <= out_dout(1);
+q(4) <= out_dout(0);
+q(5) <= out_dout(1);
+q(4).strobe <= '1';
+q(4).start  <= '0';
+q(5).strobe <= '1';
+q(5).start  <= '0';
 
 
 fin: tracklet_isolation_in port map ( clk_p, in_ttc, in_din, in_reset, in_dout );

@@ -21,9 +21,9 @@ constant PAYLOAD_LATENCY: integer := 1137 ;-- 8 * 108 + 239 + 31 + 2; --2 + 18 +
 -- mgt -> chk -> buf -> fmt -> (algo) -> (fmt) -> buf -> chk -> mgt -> clk -> altclk
 constant REGION_CONF : region_conf_array_t :=  (
     0  => kDummyRegion, -- not used in apollo  -224 A, reserved: util-0 / c2c
-    1  => (no_mgt, buf, no_fmt, buf, no_mgt),    --225 B, clk from 225 B
-    2  => (no_mgt, buf, no_fmt, buf, no_mgt),    --226 C, clk from 227 D
-    3  => (no_mgt, buf, no_fmt, buf, no_mgt),    --227 D, clk from 227 D
+    1  => (no_mgt, buf, no_fmt, buf, gty25),    --225 B, clk from 225 B
+    2  => (no_mgt, buf, no_fmt, buf, gty25),    --226 C, clk from 227 D
+    3  => (no_mgt, buf, no_fmt, buf, gty25),    --227 D, clk from 227 D
     4  => (no_mgt, buf, no_fmt, buf, no_mgt), --  --228 E, reserved: tcds2
     5  => (no_mgt, buf, no_fmt, buf, no_mgt),    --229 F, clk from 230 G
     6  => (no_mgt, no_buf, no_fmt, no_buf, no_mgt),    --230 G, clk from 230 G
