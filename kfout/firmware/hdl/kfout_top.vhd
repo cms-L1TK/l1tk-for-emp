@@ -76,9 +76,9 @@ PORT MAP(
 OutObjectsToPacketsInstance : ENTITY work.kfout_outObjectsToPackets
 PORT MAP(
   clk                 => clk ,
-  Reset               => reset( reset_delay - 1 ),
-  SortedTracks        => TTTracksTQ,
-  PacketData          => kfout_dout
+  reset               => reset( reset_delay - 1 ),
+  sortedtracks        => TTTracksTQ,
+  packetdata          => kfout_dout
 );
 -- ------------------------------------------------------------------------
 -- ------------------------------------------------------------------------

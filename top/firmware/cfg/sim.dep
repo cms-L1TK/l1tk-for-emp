@@ -1,5 +1,5 @@
 include -c emp-fwk:boards/testbench top.dep
-src --vhdl2008 emp_payload.vhd
+src --vhdl2008 emp_payload_kfchain.vhd
 include payload.dep
 
 src tb_decl.vhd

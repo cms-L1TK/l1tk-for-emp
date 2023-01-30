@@ -16,7 +16,7 @@ constant CLOCK_AUX_DIV     : clock_divisor_array_t := (18, 9, 4);
 constant CLOCK_COMMON_RATIO: integer               := 36;
 constant CLOCK_RATIO       : integer               :=  6;
 
-constant PAYLOAD_LATENCY: integer := 1137 ;-- 8 * 108 + 239 + 31 + 2; --2 + 18 + 9 + 5;-
+constant PAYLOAD_LATENCY: integer :=  326 + 2;--1143 ;-- 8 * 108 + 239 + 31 + 2; --2 + 18 + 9 + 5;-
 
 -- mgt -> chk -> buf -> fmt -> (algo) -> (fmt) -> buf -> chk -> mgt -> clk -> altclk
 constant REGION_CONF : region_conf_array_t :=  (

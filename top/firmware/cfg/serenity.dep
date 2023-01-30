@@ -1,7 +1,7 @@
 setup ../ucf/settings.tcl
 #src ../ucf/apollo.tcl
 
-src emp_payload.vhd
+src emp_payload_kfchain.vhd
 include payload.dep
 
 setup ../../../tracklet/firmware/ucf/ip.tcl
