@@ -334,6 +334,8 @@ if rising_edge( clk ) then
     -- step 1
 
     dout.start_of_orbit <= sr( sr'high ).start_of_orbit;
+    dout.start <= sr( sr'high ).start;
+    dout.last <= sr( sr'high ).last;
     dout.valid <= '0';
     dout.data <= ( others => '0' );
     if sr( sr'high ).valid = '1' then

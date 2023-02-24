@@ -141,7 +141,7 @@ BEGIN
 
           RAMreset <= reset;
 
-          IF reset = '1' THEN
+          IF reset = '1' or out_counter >= PacketBufferLength + 1 THEN
             packet_counter <= 0;
             out_counter <= 0;
             odd_even := 0;

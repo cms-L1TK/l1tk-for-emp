@@ -14,6 +14,8 @@ type t_packet is
 record
   valid: std_logic;
   start_of_orbit: std_logic;
+  start: std_logic;
+  last: std_logic;
 end record;
 type t_packets is array ( natural range <> ) of t_packet;
 
