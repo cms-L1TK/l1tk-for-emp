@@ -59,21 +59,8 @@ record
 end record;
 function nulll return t_stubsDTC;
 
-type t_trackTB is
-record
-  reset   : std_logic;
-  valid   : std_logic;
-  seedType: std_logic_vector( widthTBseedType - 1 downto 0 );
-  inv2R   : std_logic_vector( widthTBinv2R    - 1 downto 0 );
-  phi0    : std_logic_vector( widthTBphi0     - 1 downto 0 );
-  z0      : std_logic_vector( widthTBz0       - 1 downto 0 );
-  cot     : std_logic_vector( widthTBcot      - 1 downto 0 );
-end record;
-function nulll return t_trackTB;
-
 type t_stubTB is
 record
-  reset  : std_logic;
   valid  : std_logic;
   trackId: std_logic_vector( widthTBtrackId - 1 downto 0 );
   stubId : std_logic_vector( widthTBstubId  - 1 downto 0 );
@@ -84,48 +71,98 @@ end record;
 type t_stubsTB is array ( natural range <> ) of t_stubTB;
 function nulll return t_stubTB;
 
-type t_channelTB is
+type t_trackTB is
 record
-  track: t_trackTB;
-  stubs: t_stubsTB( maxNumProjectionLayers - 1 downto 0 );
+  reset   : std_logic;
+  valid   : std_logic;
+  seedType: std_logic_vector( widthTBseedType - 1 downto 0 );
+  inv2R   : std_logic_vector( widthTBinv2R    - 1 downto 0 );
+  phi0    : std_logic_vector( widthTBphi0     - 1 downto 0 );
+  z0      : std_logic_vector( widthTBz0       - 1 downto 0 );
+  cot     : std_logic_vector( widthTBcot      - 1 downto 0 );
+  stubs   : t_stubsTB( maxNumProjectionLayers - 1 downto 0 );
 end record;
-type t_channlesTB is array ( natural range <> ) of t_channelTB;
-function nulll return t_channelTB;
+type t_tracksTB is array ( natural range <> ) of t_trackTB;
+function nulll return t_trackTB;
 
-type t_stubZHT is
+type t_stubDRin is
+record
+  valid  : std_logic;
+  tilt   : std_logic;
+  layerId: std_logic_vector( widthDRlayerId - 1 downto 0 );
+  stubId : std_logic_vector( widthDRstubId  - 1 downto 0 );
+  r      : std_logic_vector( widthDRr       - 1 downto 0 );
+  phi    : std_logic_vector( widthDRphi     - 1 downto 0 );
+  z      : std_logic_vector( widthDRz       - 1 downto 0 );
+end record;
+type t_stubsDRin is array ( natural range <> ) of t_stubDRin;
+function nulll return t_stubDRin;
+
+type t_trackDRin is
+record
+  reset: std_logic;
+  valid: std_logic;
+  inv2R: std_logic_vector( widthDRinv2R - 1 downto 0 );
+  phiT : std_logic_vector( widthDRphiT  - 1 downto 0 );
+  zT   : std_logic_vector( widthDRzT    - 1 downto 0 );
+  cot  : std_logic_vector( widthDRcot   - 1 downto 0 );
+  stubs: t_stubsDRin( numLayers - 1 downto 0 );
+end record;
+type t_tracksDRin is array ( natural range <> ) of t_trackDRin;
+function nulll return t_trackDRin;
+
+type t_stubDR is
+record
+  valid  : std_logic;
+  tilt   : std_logic;
+  layerId: std_logic_vector( widthDRlayerId - 1 downto 0 );
+  r      : std_logic_vector( widthDRr       - 1 downto 0 );
+  phi    : std_logic_vector( widthDRphi     - 1 downto 0 );
+  z      : std_logic_vector( widthDRz       - 1 downto 0 );
+end record;
+type t_stubsDR is array ( natural range <> ) of t_stubDR;
+function nulll return t_stubDR;
+
+type t_trackDR is
+record
+  reset: std_logic;
+  valid: std_logic;
+  inv2R: std_logic_vector( widthDRinv2R - 1 downto 0 );
+  phiT : std_logic_vector( widthDRphiT  - 1 downto 0 );
+  zT   : std_logic_vector( widthDRzT    - 1 downto 0 );
+  cot  : std_logic_vector( widthDRcot   - 1 downto 0 );
+  stubs: t_stubsDR( numLayers - 1 downto 0 );
+end record;
+type t_tracksDR is array ( natural range <> ) of t_trackDR;
+function nulll return t_trackDR;
+
+type t_stubKFin is
+record
+    reset: std_logic;
+    valid: std_logic;
+    r    : std_logic_vector( widthDRr    - 1 downto 0 );
+    phi  : std_logic_vector( widthDRphi  - 1 downto 0 );
+    z    : std_logic_vector( widthDRz    - 1 downto 0 );
+    dPhi : std_logic_vector( widthDRdPhi - 1 downto 0 );
+    dZ   : std_logic_vector( widthDRdZ   - 1 downto 0 );
+end record;
+type t_stubsKFin is array ( natural range <> ) of t_stubKFin;
+function nulll return t_stubsKFin;
+
+type t_trackKFin is
 record
     reset : std_logic;
     valid : std_logic;
-    r     : std_logic_vector( widthZHTr    - 1 downto 0 );
-    phi   : std_logic_vector( widthZHTphi  - 1 downto 0 );
-    z     : std_logic_vector( widthZHTz    - 1 downto 0 );
-    dPhi  : std_logic_vector( widthZHTdPhi - 1 downto 0 );
-    dZ    : std_logic_vector( widthZHTdZ   - 1 downto 0 );
+    maybe : std_logic_vector( numLayers      - 1 downto 0 );
+    sector: std_logic_vector( widthDRsector - 1 downto 0 );
+    phiT  : std_logic_vector( widthDRphiT   - 1 downto 0 );
+    inv2R : std_logic_vector( widthDRinv2R  - 1 downto 0 );
+    zT    : std_logic_vector( widthDRzT     - 1 downto 0 );
+    cot   : std_logic_vector( widthDRcot    - 1 downto 0 );
+    stubs : t_stubsKFin( numLayers - 1 downto 0 );
 end record;
-type t_stubsZHT is array ( natural range <> ) of t_stubZHT;
-function nulll return t_stubZHT;
-
-type t_trackZHT is
-record
-    reset : std_logic;
-    valid : std_logic;
-    maybe : std_logic_vector( widthZHTmaybe  - 1 downto 0 );
-    sector: std_logic_vector( widthZHTsector - 1 downto 0 );
-    phiT  : std_logic_vector( widthZHTphiT   - 1 downto 0 );
-    inv2R : std_logic_vector( widthZHTinv2R  - 1 downto 0 );
-    zT    : std_logic_vector( widthZHTzT     - 1 downto 0 );
-    cot   : std_logic_vector( widthZHTcot    - 1 downto 0 );
-end record;
-type t_tracksZHT is array ( natural range <> ) of t_trackZHT;
-function nulll return t_trackZHT;
-
-type t_channelZHT is
-record
-    track: t_trackZHT;
-    stubs: t_stubsZHT( numLayers - 1 downto 0 );
-end record;
-type t_channelsZHT is array ( natural range <> ) of t_channelZHT;
-function nulll return t_channelZHT;
+type t_tracksKFin is array ( natural range <> ) of t_trackKFin;
+function nulll return t_trackKFin;
 
 type t_stubKF is
 record
@@ -177,12 +214,14 @@ function nulll return t_reset is begin return ( '0', '0', others => ( others => 
 function nulll return t_stubDTCPS is begin return ( '0', '0', others => ( others => '0' ) ); end function;
 function nulll return t_stubDTC2S is begin return ( '0', '0', others => ( others => '0' ) ); end function;
 function nulll return t_stubsDTC is begin return ( ( others => nulll ), ( others => nulll ) ); end function;
-function nulll return t_trackTB is begin return ( '0', '0', others => ( others => '0' ) ); end function;
-function nulll return t_stubTB is begin return ( '0', '0', others => ( others => '0' ) ); end function;
-function nulll return t_channelTB is begin return ( nulll, ( others => nulll ) ); end function;
-function nulll return t_stubZHT is begin return ( '0', '0', others => ( others => '0' ) ); end function;
-function nulll return t_trackZHT is begin return ( '0', '0', others => ( others => '0' ) ); end function;
-function nulll return t_channelZHT is begin return ( nulll, ( others => nulll ) ); end function;
+function nulll return t_stubTB is begin return ( '0', others => ( others => '0' ) ); end function;
+function nulll return t_trackTB is begin return ( '0', '0', ( others => '0' ), ( others => '0' ), ( others => '0' ), ( others => '0' ), ( others => nulll ) ); end function;
+function nulll return t_stubDRin is begin return ( '0', '0', others => ( others => '0' ) ); end function;
+function nulll return t_trackDRin is begin return ( '0', '0', ( others => '0' ), ( others => '0' ), ( others => '0' ), ( others => '0' ), ( others => nulll ) ); end function;
+function nulll return t_stubDR is begin return ( '0', '0', others => ( others => '0' ) ); end function;
+function nulll return t_trackDR is begin return ( '0', '0', ( others => '0' ), ( others => '0' ), ( others => '0' ), ( others => '0' ), ( others => nulll ) ); end function;
+function nulll return t_stubKFin is begin return ( '0', '0', others => ( others => '0' ) ); end function;
+function nulll return t_trackKFin is begin return ( '0', '0', ( others => '0' ), ( others => '0' ), ( others => '0' ), ( others => '0' ), ( others => '0' ), ( others => '0' ), ( others => nulll ) ); end function;
 function nulll return t_stubKF is begin return ( '0', '0', others => ( others => '0' ) ); end function;
 function nulll return t_trackKF is begin return ( '0', '0', '0', others => ( others => '0' ) ); end function;
 function nulll return t_channelKF is begin return ( nulll, ( others => nulll ) ); end function;

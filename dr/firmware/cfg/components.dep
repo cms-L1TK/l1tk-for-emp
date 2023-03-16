@@ -1,0 +1,6 @@
+src dr_isolation.vhd
+src dr_top.vhd
+
+iprepo DuplicateRemoval
+
+src ../cgn/DuplicateRemoval/DuplicateRemoval.xci

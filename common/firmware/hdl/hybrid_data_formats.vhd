@@ -61,66 +61,68 @@ constant baseTFPphi0 : real := baseDTCphi   * 2.0 ** baseShiftTFPphi0;
 constant baseTFPcot  : real := 1.0          * 2.0 ** baseShiftTFPcot;
 constant baseTFPz0   : real := baseDTCz     * 2.0 ** baseShiftTFPz0;
 
--- ZHT
+-- DR
 
-constant widthZHTmaybe : natural := numLayers;
-constant widthZHTsector: natural := width( numSectors );
-constant widthZHTphiT  : natural := width( numBinsHTphiT  * numBinsMHTphiT  );
-constant widthZHTinv2R : natural := width( numBinsHTinv2R * numBinsMHTinv2R );
-constant widthZHTzT    : natural := width( numBinsZHTZT  ** numStagesZHT    );
-constant widthZHTcot   : natural := width( numBinsZHTCot ** numStagesZHT    );
-constant widthZHTr     : natural := widthDTCr;
+constant widthDRsector: natural := width( numSectors );
+constant widthDRphiT  : natural := width( numBinsHTphiT  * numBinsMHTphiT  );
+constant widthDRinv2R : natural := width( numBinsHTinv2R * numBinsMHTinv2R );
+constant widthDRzT    : natural := width( numBinsZHTZT  ** numStagesZHT    );
+constant widthDRcot   : natural := width( numBinsZHTCot ** numStagesZHT    );
+constant widthDRr     : natural := widthDTCr;
 
-constant rangeZHTinv2R: real := rangeDTCinv2R;
-constant rangeZHTphiT : real := rangeDTCphiT;
-constant rangeZHTzT   : real := rangeZHTzT;
-constant rangeZHTcot  : real := ( rangeZHTzT + rangeTFPz0 ) / chosenRofZ;
+constant rangeDRinv2R: real := rangeDTCinv2R;
+constant rangeDRphiT : real := rangeDTCphiT;
+constant rangeDRzT   : real := rangeZHTzT;
+constant rangeDRcot  : real := ( rangeZHTzT + rangeTFPz0 ) / chosenRofZ;
 
-constant baseZHTinv2R: real := baseDTCinv2R / real( numBinsMHTinv2R );
-constant baseZHTphiT : real := baseDTCphiT  / real( numBinsMHTphiT  );
+constant baseDRinv2R: real := baseDTCinv2R / real( numBinsMHTinv2R );
+constant baseDRphiT : real := baseDTCphiT  / real( numBinsMHTphiT  );
 
-constant baseShiftZHTcot: integer := width( rangeZHTcot / 1.0      ) - widthZHTcot;
-constant baseShiftZHTzT : integer := width( rangeZHTzT  / baseDTCz ) - widthZHTzT;
+constant baseShiftDRcot: integer := width( rangeDRcot / 1.0      ) - widthDRcot;
+constant baseShiftDRzT : integer := width( rangeDRzT  / baseDTCz ) - widthDRzT;
 
-constant baseZHTcot: real := 1.0      * 2.0 ** baseShiftZHTcot;
-constant baseZHTzT : real := baseDTCz * 2.0 ** baseShiftZHTzT;
+constant baseDRcot: real := 1.0      * 2.0 ** baseShiftDRcot;
+constant baseDRzT : real := baseDTCz * 2.0 ** baseShiftDRzT;
 
-constant rangeZHTr   : real := rangeDTCr;
-constant rangeZHTphi : real := 4.0 * (baseZHTphiT + baseZHTinv2R * 2.0 * maxRphi + maxdPhi);
-constant rangeZHTz   : real := 2.0 * (baseZHTzT + baseZHTcot * 2.0 * maxRz + maxdZ);
-constant rangeZHTdPhi: real := maxdPhi;
-constant rangeZHTdZ  : real := maxdZ;
+constant rangeDRr   : real := rangeDTCr;
+constant rangeDRphi : real := 4.0 * (baseDRphiT + baseDRinv2R * 2.0 * maxRphi + maxdPhi);
+constant rangeDRz   : real := 2.0 * (baseDRzT   + baseDRcot   * 2.0 * maxRz   + maxdZ  );
+constant rangeDRdPhi: real := maxdPhi;
+constant rangeDRdZ  : real := maxdZ;
 
-constant baseZHTr   : real := baseDTCr;
-constant baseZHTphi : real := baseDTCphi;
-constant baseZHTz   : real := baseDTCz;
-constant baseZHTdPhi: real := baseDTCphi;
-constant baseZHTdZ  : real := baseDTCz;
+constant baseDRr   : real := baseDTCr;
+constant baseDRphi : real := baseDTCphi;
+constant baseDRz   : real := baseDTCz;
+constant baseDRdPhi: real := baseDTCphi;
+constant baseDRdZ  : real := baseDTCz;
 
-constant widthZHTphi : natural := width( rangeZHTphi  / baseZHTphi  );
-constant widthZHTz   : natural := width( rangeZHTz    / baseZHTz    );
-constant widthZHTdPhi: natural := width( rangeZHTdPhi / baseZHTdPhi );
-constant widthZHTdZ  : natural := width( rangeZHTdZ   / baseZHTdZ   );
+constant widthDRphi : natural := width( rangeDRphi  / baseDRphi  );
+constant widthDRz   : natural := width( rangeDRz    / baseDRz    );
+constant widthDRdPhi: natural := width( rangeDRdPhi / baseDRdPhi );
+constant widthDRdZ  : natural := width( rangeDRdZ   / baseDRdZ   );
+
+constant widthDRStubId : natural := 7;
+constant widthDRLayerId: natural := 4;
 
 -- KF
 
-constant rangeKFinv2R: real := rangeZHTinv2R + rangeFactor * baseZHTinv2R;
-constant rangeKFphiT : real := rangeZHTphiT  + rangeFactor * baseZHTphiT;
-constant rangeKFcot  : real := rangeZHTcot   + rangeFactor * baseZHTcot;
-constant rangeKFzT   : real := rangeZHTzT    + rangeFactor * baseZHTzT;
-constant rangeKFr    : real := rangeZHTr;
-constant rangeKFphi  : real := rangeFactor * rangeZHTphi;
-constant rangeKFz    : real := rangeFactor * rangeZHTz;
+constant rangeKFinv2R: real := rangeDRinv2R + rangeFactor * baseDRinv2R;
+constant rangeKFphiT : real := rangeDRphiT  + rangeFactor * baseDRphiT;
+constant rangeKFcot  : real := rangeDRcot   + rangeFactor * baseDRcot;
+constant rangeKFzT   : real := rangeDRzT    + rangeFactor * baseDRzT;
+constant rangeKFr    : real := rangeDRr;
+constant rangeKFphi  : real := rangeFactor * rangeDRphi;
+constant rangeKFz    : real := rangeFactor * rangeDRz;
 
 constant baseKFinv2R: real := baseTFPinv2R;
 constant baseKFphiT : real := baseTFPphi0;
 constant baseKFcot  : real := baseTFPcot;
 constant baseKFzT   : real := baseTFPz0;
-constant baseKFr    : real := baseZHTr;
-constant baseKFphi  : real := baseZHTphi;
-constant baseKFz    : real := baseZHTz;
-constant baseKFdPhi : real := baseZHTdPhi;
-constant baseKFdZ   : real := baseZHTdZ;
+constant baseKFr    : real := baseDRr;
+constant baseKFphi  : real := baseDRphi;
+constant baseKFz    : real := baseDRz;
+constant baseKFdPhi : real := baseDRdPhi;
+constant baseKFdZ   : real := baseDRdZ;
 
 constant widthKFinv2R: natural := width( rangeKFinv2R / baseKFinv2R );
 constant widthKFphiT : natural := width( rangeKFphiT  / baseKFphiT  );
@@ -128,8 +130,8 @@ constant widthKFzT   : natural := width( rangeKFzT    / baseKFzT    );
 constant widthKFcot  : natural := width( rangeKFcot   / baseKFcot   );
 --constant widthKFphi  : natural := width( rangeKFphi   / baseKFphi   );
 --constant widthKFz    : natural := width( rangeKFz     / baseKFz     );
-constant widthKFphi  : natural := widthZHTphi;
-constant widthKFz    : natural := widthZHTz;
+constant widthKFphi  : natural := widtDRphi;
+constant widthKFz    : natural := widtDRz;
 
 constant widthKFhits  : natural := numLayers;
 constant widthKFsector: natural := widthZHTsector;

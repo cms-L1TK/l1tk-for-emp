@@ -1,0 +1,11 @@
+setup ../ucf/vsim.tcl
+
+include -c emp-fwk:boards/testbench top.dep
+
+include payload.dep
+src tb_decl.vhd
+src emp_project_decl.vhd 
+
+setup ../ucf/ip.tcl
+
+include -c emp-fwk:boards/apollo/cm_v2/vu13p device.dep packages_cm_v2.dep
