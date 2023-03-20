@@ -168,7 +168,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>e49cc631</spirit:value>
+            <spirit:value>87205f76</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -184,7 +184,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>0f8f477a</spirit:value>
+            <spirit:value>6c33de3d</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -200,7 +200,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>17c7ae3e</spirit:value>
+            <spirit:value>9671c913</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -216,7 +216,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>8d55280a</spirit:value>
+            <spirit:value>3786a696</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -355,7 +355,7 @@
         <spirit:wire>
           <spirit:direction>in</spirit:direction>
           <spirit:vector>
-            <spirit:left spirit:format="long">384</spirit:left>
+            <spirit:left spirit:format="long">372</spirit:left>
             <spirit:right spirit:format="long">0</spirit:right>
           </spirit:vector>
           <spirit:wireTypeDefs>
@@ -398,7 +398,7 @@
         <spirit:wire>
           <spirit:direction>out</spirit:direction>
           <spirit:vector>
-            <spirit:left spirit:format="long">335</spirit:left>
+            <spirit:left spirit:format="long">323</spirit:left>
             <spirit:right spirit:format="long">0</spirit:right>
           </spirit:vector>
           <spirit:wireTypeDefs>
@@ -447,11 +447,11 @@
         <spirit:userFileType>USED_IN_out_of_context</spirit:userFileType>
       </spirit:file>
       <spirit:file>
-        <spirit:name>hdl/verilog/DuplicateRemovalTop_mux_164_386_1_1.v</spirit:name>
+        <spirit:name>hdl/verilog/DuplicateRemovalTop_mux_164_374_1_1.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
       </spirit:file>
       <spirit:file>
-        <spirit:name>hdl/verilog/DuplicateRemovalTop_mux_175_386_1_1.v</spirit:name>
+        <spirit:name>hdl/verilog/DuplicateRemovalTop_mux_175_374_1_1.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
       </spirit:file>
       <spirit:file>
@@ -462,12 +462,12 @@
     <spirit:fileSet>
       <spirit:name>xilinx_verilogbehavioralsimulation_view_fileset</spirit:name>
       <spirit:file>
-        <spirit:name>hdl/verilog/DuplicateRemovalTop_mux_164_386_1_1.v</spirit:name>
+        <spirit:name>hdl/verilog/DuplicateRemovalTop_mux_164_374_1_1.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
         <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
       </spirit:file>
       <spirit:file>
-        <spirit:name>hdl/verilog/DuplicateRemovalTop_mux_175_386_1_1.v</spirit:name>
+        <spirit:name>hdl/verilog/DuplicateRemovalTop_mux_175_374_1_1.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
         <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
       </spirit:file>
@@ -485,28 +485,28 @@
         <spirit:userFileType>USED_IN_out_of_context</spirit:userFileType>
       </spirit:file>
       <spirit:file>
-        <spirit:name>hdl/vhdl/DuplicateRemovalTop_mux_164_386_1_1.vhd</spirit:name>
+        <spirit:name>hdl/vhdl/DuplicateRemovalTop_mux_164_374_1_1.vhd</spirit:name>
         <spirit:fileType>vhdlSource</spirit:fileType>
       </spirit:file>
       <spirit:file>
-        <spirit:name>hdl/vhdl/DuplicateRemovalTop_mux_175_386_1_1.vhd</spirit:name>
+        <spirit:name>hdl/vhdl/DuplicateRemovalTop_mux_175_374_1_1.vhd</spirit:name>
         <spirit:fileType>vhdlSource</spirit:fileType>
       </spirit:file>
       <spirit:file>
         <spirit:name>hdl/vhdl/DuplicateRemovalTop.vhd</spirit:name>
         <spirit:fileType>vhdlSource</spirit:fileType>
-        <spirit:userFileType>CHECKSUM_8294310e</spirit:userFileType>
+        <spirit:userFileType>CHECKSUM_32c22e31</spirit:userFileType>
       </spirit:file>
     </spirit:fileSet>
     <spirit:fileSet>
       <spirit:name>xilinx_vhdlbehavioralsimulation_view_fileset</spirit:name>
       <spirit:file>
-        <spirit:name>hdl/vhdl/DuplicateRemovalTop_mux_164_386_1_1.vhd</spirit:name>
+        <spirit:name>hdl/vhdl/DuplicateRemovalTop_mux_164_374_1_1.vhd</spirit:name>
         <spirit:fileType>vhdlSource</spirit:fileType>
         <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
       </spirit:file>
       <spirit:file>
-        <spirit:name>hdl/vhdl/DuplicateRemovalTop_mux_175_386_1_1.vhd</spirit:name>
+        <spirit:name>hdl/vhdl/DuplicateRemovalTop_mux_175_374_1_1.vhd</spirit:name>
         <spirit:fileType>vhdlSource</spirit:fileType>
         <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
       </spirit:file>
@@ -585,14 +585,14 @@
       </xilinx:taxonomies>
       <xilinx:displayName>Duplicateremovaltop</xilinx:displayName>
       <xilinx:definitionSource>HLS</xilinx:definitionSource>
-      <xilinx:coreRevision>2112945486</xilinx:coreRevision>
-      <xilinx:coreCreationDateTime>2023-03-16T16:07:12Z</xilinx:coreCreationDateTime>
+      <xilinx:coreRevision>2112945603</xilinx:coreRevision>
+      <xilinx:coreCreationDateTime>2023-03-16T18:03:44Z</xilinx:coreCreationDateTime>
     </xilinx:coreExtensions>
     <xilinx:packagingInfo>
       <xilinx:xilinxVersion>2020.1</xilinx:xilinxVersion>
       <xilinx:checksum xilinx:scope="busInterfaces" xilinx:value="1d0b70ac"/>
-      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="5b94497e"/>
-      <xilinx:checksum xilinx:scope="ports" xilinx:value="143a792e"/>
+      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="b3c49eb5"/>
+      <xilinx:checksum xilinx:scope="ports" xilinx:value="f641f5e7"/>
       <xilinx:checksum xilinx:scope="parameters" xilinx:value="10087d86"/>
     </xilinx:packagingInfo>
   </spirit:vendorExtensions>

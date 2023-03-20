@@ -7,7 +7,7 @@ library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.NUMERIC_STD.all;
 
-entity DuplicateRemovalTop_mux_164_386_1_1 is
+entity DuplicateRemovalTop_mux_164_374_1_1 is
 generic (
     ID            :integer := 0;
     NUM_STAGE     :integer := 1;
@@ -30,48 +30,48 @@ generic (
     din16_WIDTH       :integer := 32;
     dout_WIDTH        :integer := 32);
 port (
-    din0   :in  std_logic_vector(385 downto 0);
-    din1   :in  std_logic_vector(385 downto 0);
-    din2   :in  std_logic_vector(385 downto 0);
-    din3   :in  std_logic_vector(385 downto 0);
-    din4   :in  std_logic_vector(385 downto 0);
-    din5   :in  std_logic_vector(385 downto 0);
-    din6   :in  std_logic_vector(385 downto 0);
-    din7   :in  std_logic_vector(385 downto 0);
-    din8   :in  std_logic_vector(385 downto 0);
-    din9   :in  std_logic_vector(385 downto 0);
-    din10   :in  std_logic_vector(385 downto 0);
-    din11   :in  std_logic_vector(385 downto 0);
-    din12   :in  std_logic_vector(385 downto 0);
-    din13   :in  std_logic_vector(385 downto 0);
-    din14   :in  std_logic_vector(385 downto 0);
-    din15   :in  std_logic_vector(385 downto 0);
+    din0   :in  std_logic_vector(373 downto 0);
+    din1   :in  std_logic_vector(373 downto 0);
+    din2   :in  std_logic_vector(373 downto 0);
+    din3   :in  std_logic_vector(373 downto 0);
+    din4   :in  std_logic_vector(373 downto 0);
+    din5   :in  std_logic_vector(373 downto 0);
+    din6   :in  std_logic_vector(373 downto 0);
+    din7   :in  std_logic_vector(373 downto 0);
+    din8   :in  std_logic_vector(373 downto 0);
+    din9   :in  std_logic_vector(373 downto 0);
+    din10   :in  std_logic_vector(373 downto 0);
+    din11   :in  std_logic_vector(373 downto 0);
+    din12   :in  std_logic_vector(373 downto 0);
+    din13   :in  std_logic_vector(373 downto 0);
+    din14   :in  std_logic_vector(373 downto 0);
+    din15   :in  std_logic_vector(373 downto 0);
     din16   :in  std_logic_vector(3 downto 0);
-    dout     :out std_logic_vector(385 downto 0));
+    dout     :out std_logic_vector(373 downto 0));
 end entity;
 
-architecture rtl of DuplicateRemovalTop_mux_164_386_1_1 is
+architecture rtl of DuplicateRemovalTop_mux_164_374_1_1 is
     -- puts internal signals
     signal sel    : std_logic_vector(3 downto 0);
     -- level 1 signals
-    signal mux_1_0    : std_logic_vector(385 downto 0);
-    signal mux_1_1    : std_logic_vector(385 downto 0);
-    signal mux_1_2    : std_logic_vector(385 downto 0);
-    signal mux_1_3    : std_logic_vector(385 downto 0);
-    signal mux_1_4    : std_logic_vector(385 downto 0);
-    signal mux_1_5    : std_logic_vector(385 downto 0);
-    signal mux_1_6    : std_logic_vector(385 downto 0);
-    signal mux_1_7    : std_logic_vector(385 downto 0);
+    signal mux_1_0    : std_logic_vector(373 downto 0);
+    signal mux_1_1    : std_logic_vector(373 downto 0);
+    signal mux_1_2    : std_logic_vector(373 downto 0);
+    signal mux_1_3    : std_logic_vector(373 downto 0);
+    signal mux_1_4    : std_logic_vector(373 downto 0);
+    signal mux_1_5    : std_logic_vector(373 downto 0);
+    signal mux_1_6    : std_logic_vector(373 downto 0);
+    signal mux_1_7    : std_logic_vector(373 downto 0);
     -- level 2 signals
-    signal mux_2_0    : std_logic_vector(385 downto 0);
-    signal mux_2_1    : std_logic_vector(385 downto 0);
-    signal mux_2_2    : std_logic_vector(385 downto 0);
-    signal mux_2_3    : std_logic_vector(385 downto 0);
+    signal mux_2_0    : std_logic_vector(373 downto 0);
+    signal mux_2_1    : std_logic_vector(373 downto 0);
+    signal mux_2_2    : std_logic_vector(373 downto 0);
+    signal mux_2_3    : std_logic_vector(373 downto 0);
     -- level 3 signals
-    signal mux_3_0    : std_logic_vector(385 downto 0);
-    signal mux_3_1    : std_logic_vector(385 downto 0);
+    signal mux_3_0    : std_logic_vector(373 downto 0);
+    signal mux_3_1    : std_logic_vector(373 downto 0);
     -- level 4 signals
-    signal mux_4_0    : std_logic_vector(385 downto 0);
+    signal mux_4_0    : std_logic_vector(373 downto 0);
 begin
 
 sel <= din16;

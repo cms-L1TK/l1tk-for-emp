@@ -130,14 +130,14 @@ constant widthKFzT   : natural := width( rangeKFzT    / baseKFzT    );
 constant widthKFcot  : natural := width( rangeKFcot   / baseKFcot   );
 --constant widthKFphi  : natural := width( rangeKFphi   / baseKFphi   );
 --constant widthKFz    : natural := width( rangeKFz     / baseKFz     );
-constant widthKFphi  : natural := widtDRphi;
-constant widthKFz    : natural := widtDRz;
+constant widthKFphi  : natural := widthDRphi;
+constant widthKFz    : natural := widthDRz;
 
 constant widthKFhits  : natural := numLayers;
-constant widthKFsector: natural := widthZHTsector;
-constant widthKFr     : natural := widthZHTr;
-constant widthKFdPhi  : natural := widthZHTdPhi;
-constant widthKFdZ    : natural := widthZHTdZ;
+constant widthKFsector: natural := widthDRsector;
+constant widthKFr     : natural := widthDRr;
+constant widthKFdPhi  : natural := widthDRdPhi;
+constant widthKFdZ    : natural := widthDRdZ;
 
 -- IR
 

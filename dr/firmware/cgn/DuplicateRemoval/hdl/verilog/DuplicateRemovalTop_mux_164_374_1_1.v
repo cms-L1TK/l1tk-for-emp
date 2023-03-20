@@ -5,7 +5,7 @@
 
 `timescale 1ns/1ps
 
-module DuplicateRemovalTop_mux_164_386_1_1 #(
+module DuplicateRemovalTop_mux_164_374_1_1 #(
 parameter
     ID                = 0,
     NUM_STAGE         = 1,
@@ -28,46 +28,46 @@ parameter
     din16_WIDTH         = 32,
     dout_WIDTH            = 32
 )(
-    input  [385 : 0]     din0,
-    input  [385 : 0]     din1,
-    input  [385 : 0]     din2,
-    input  [385 : 0]     din3,
-    input  [385 : 0]     din4,
-    input  [385 : 0]     din5,
-    input  [385 : 0]     din6,
-    input  [385 : 0]     din7,
-    input  [385 : 0]     din8,
-    input  [385 : 0]     din9,
-    input  [385 : 0]     din10,
-    input  [385 : 0]     din11,
-    input  [385 : 0]     din12,
-    input  [385 : 0]     din13,
-    input  [385 : 0]     din14,
-    input  [385 : 0]     din15,
+    input  [373 : 0]     din0,
+    input  [373 : 0]     din1,
+    input  [373 : 0]     din2,
+    input  [373 : 0]     din3,
+    input  [373 : 0]     din4,
+    input  [373 : 0]     din5,
+    input  [373 : 0]     din6,
+    input  [373 : 0]     din7,
+    input  [373 : 0]     din8,
+    input  [373 : 0]     din9,
+    input  [373 : 0]     din10,
+    input  [373 : 0]     din11,
+    input  [373 : 0]     din12,
+    input  [373 : 0]     din13,
+    input  [373 : 0]     din14,
+    input  [373 : 0]     din15,
     input  [3 : 0]    din16,
-    output [385 : 0]   dout);
+    output [373 : 0]   dout);
 
 // puts internal signals
 wire [3 : 0]     sel;
 // level 1 signals
-wire [385 : 0]         mux_1_0;
-wire [385 : 0]         mux_1_1;
-wire [385 : 0]         mux_1_2;
-wire [385 : 0]         mux_1_3;
-wire [385 : 0]         mux_1_4;
-wire [385 : 0]         mux_1_5;
-wire [385 : 0]         mux_1_6;
-wire [385 : 0]         mux_1_7;
+wire [373 : 0]         mux_1_0;
+wire [373 : 0]         mux_1_1;
+wire [373 : 0]         mux_1_2;
+wire [373 : 0]         mux_1_3;
+wire [373 : 0]         mux_1_4;
+wire [373 : 0]         mux_1_5;
+wire [373 : 0]         mux_1_6;
+wire [373 : 0]         mux_1_7;
 // level 2 signals
-wire [385 : 0]         mux_2_0;
-wire [385 : 0]         mux_2_1;
-wire [385 : 0]         mux_2_2;
-wire [385 : 0]         mux_2_3;
+wire [373 : 0]         mux_2_0;
+wire [373 : 0]         mux_2_1;
+wire [373 : 0]         mux_2_2;
+wire [373 : 0]         mux_2_3;
 // level 3 signals
-wire [385 : 0]         mux_3_0;
-wire [385 : 0]         mux_3_1;
+wire [373 : 0]         mux_3_0;
+wire [373 : 0]         mux_3_1;
 // level 4 signals
-wire [385 : 0]         mux_4_0;
+wire [373 : 0]         mux_4_0;
 
 assign sel = din16;
 

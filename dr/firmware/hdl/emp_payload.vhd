@@ -9,8 +9,6 @@ use work.emp_slink_types.all;
 use work.hybrid_config.all;
 use work.hybrid_tools.all;
 use work.hybrid_data_types.all;
-use work.tracklet_config.all;
-use work.tracklet_data_types.all;
 
 
 entity emp_payload is

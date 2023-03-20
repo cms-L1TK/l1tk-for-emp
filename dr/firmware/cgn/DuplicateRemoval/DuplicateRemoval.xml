@@ -296,7 +296,7 @@
         <spirit:wire>
           <spirit:direction>in</spirit:direction>
           <spirit:vector>
-            <spirit:left spirit:format="long">384</spirit:left>
+            <spirit:left spirit:format="long">372</spirit:left>
             <spirit:right spirit:format="long">0</spirit:right>
           </spirit:vector>
           <spirit:wireTypeDefs>
@@ -336,7 +336,7 @@
         <spirit:wire>
           <spirit:direction>out</spirit:direction>
           <spirit:vector>
-            <spirit:left spirit:format="long">335</spirit:left>
+            <spirit:left spirit:format="long">323</spirit:left>
             <spirit:right spirit:format="long">0</spirit:right>
           </spirit:vector>
           <spirit:wireTypeDefs>
@@ -439,13 +439,13 @@
     <xilinx:coreExtensions>
       <xilinx:displayName>Duplicateremovaltop</xilinx:displayName>
       <xilinx:definitionSource>HLS</xilinx:definitionSource>
-      <xilinx:coreRevision>2112945486</xilinx:coreRevision>
+      <xilinx:coreRevision>2112945603</xilinx:coreRevision>
     </xilinx:coreExtensions>
     <xilinx:packagingInfo>
       <xilinx:xilinxVersion>2020.1</xilinx:xilinxVersion>
       <xilinx:checksum xilinx:scope="busInterfaces" xilinx:value="1d0b70ac"/>
-      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="5b94497e"/>
-      <xilinx:checksum xilinx:scope="ports" xilinx:value="143a792e"/>
+      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="b3c49eb5"/>
+      <xilinx:checksum xilinx:scope="ports" xilinx:value="f641f5e7"/>
       <xilinx:checksum xilinx:scope="parameters" xilinx:value="10087d86"/>
     </xilinx:packagingInfo>
   </spirit:vendorExtensions>
