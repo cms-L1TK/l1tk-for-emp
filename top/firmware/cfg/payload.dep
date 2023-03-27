@@ -3,5 +3,7 @@ src emp_payload.vhd
 include -c l1tk-for-emp:tracklet components.dep
 include -c l1tk-for-emp:kfin components.dep
 include -c l1tk-for-emp:kf components.dep
+include -c l1tk-for-emp:kfout components.dep
+include -c l1tk-for-emp:tq components.dep
 
 include -c l1tk-for-emp:common components.dep

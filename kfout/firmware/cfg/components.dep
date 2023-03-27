@@ -1,0 +1,13 @@
+src kfout_top.vhd
+src kfout_isolation.vhd
+src --vhdl2008 kfout_router.vhd
+src --vhdl2008 kfout_trackQuality.vhd
+src --vhdl2008 kfout_trackTransform.vhd
+src --vhdl2008 kfout_trackTransform_helper.vhd
+src kfout_objectsToLinks.vhd
+src --vhdl2008 kfout_pkgArrayTypes.vhd
+src kfout_dataRam.vhd
+src kfout_pkgTrack.vhd
+src --vhdl2008 kfout_luts.vhd
+src --vhdl2008 kfout_config.vhd
+src kfout_data_formats.vhd

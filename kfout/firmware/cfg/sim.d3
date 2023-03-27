@@ -1,0 +1,20 @@
+# emp-fwk testbench
+include -c emp-fwk:boards/serenity/dc_vu9p device_a2577.dep packages_so2.dep
+
+
+src emp_project_decl.vhd
+
+include payload.dep
+src emp_payload.vhd
+
+
+src -c emp-fwk:components/payload ../ucf/emp_simple_payload.tcl
+addrtab -c emp-fwk:components/payload emp_payload.xml
+
+src tb_decl.vhd
+
+include -c emp-fwk:boards/testbench top.dep
+
+# Change the default simulation library so that modules in other libraries
+# can refer to it. see https://insights.sigasi.com/tech/work-not-vhdl-library/
+@sim.library = 'xil_defaultlib'

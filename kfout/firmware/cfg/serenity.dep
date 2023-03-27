@@ -1,0 +1,18 @@
+setup ../ucf/settings.tcl
+
+src emp_payload.vhd
+include payload.dep
+
+
+src emp_project_decl_ku15p.vhd
+
+#src -c emp-fwk:components/datapath emp_data_types.vhd
+#src -c ipbus-firmware:components/ipbus_slaves ipbus_reg_v.vhd ipbus_ctrlreg_v.vhd ipbus_reg_types.vhd
+#src -c ipbus-firmware:components/ipbus_core ipbus_fabric_sel.vhd ipbus_package.vhd 
+
+src -c emp-fwk:components/payload ../ucf/emp_simple_payload.tcl
+
+addrtab -c emp-fwk:components/payload emp_payload.xml
+include -c emp-fwk:boards/serenity/dc_vu13p dc_vu13p_so2.dep
+#include -c emp-fwk:boards/serenity/dc_ku15p  dc_ku15p_sm1_v2.dep
+
