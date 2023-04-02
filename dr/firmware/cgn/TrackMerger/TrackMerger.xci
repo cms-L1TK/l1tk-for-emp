@@ -1,17 +1,17 @@
 {
   "schema": "xilinx.com:schema:json_instance:1.0",
   "ip_inst": {
-    "xci_name": "DuplicateRemoval",
-    "component_reference": "xilinx.com:hls:DuplicateRemovalTop:1.0",
-    "ip_revision": "2112969964",
+    "xci_name": "TrackMerger",
+    "component_reference": "xilinx.com:hls:TrackMergerTop:1.0",
+    "ip_revision": "2112964031",
     "gen_directory": ".",
     "parameters": {
       "component_parameters": {
-        "Component_Name": [ { "value": "DuplicateRemoval", "resolve_type": "user", "usage": "all" } ],
-        "clk_period": [ { "value": "4.167", "enabled": false, "usage": "all" } ],
+        "Component_Name": [ { "value": "TrackMerger", "resolve_type": "user", "usage": "all" } ],
+        "clk_period": [ { "value": "4", "enabled": false, "usage": "all" } ],
         "machine": [ { "value": "64", "enabled": false, "usage": "all" } ],
         "combinational": [ { "value": "0", "enabled": false, "usage": "all" } ],
-        "latency": [ { "value": "0", "enabled": false, "usage": "all" } ],
+        "latency": [ { "value": "315", "enabled": false, "usage": "all" } ],
         "II": [ { "value": "x", "enabled": false, "usage": "all" } ]
       },
       "project_parameters": {
@@ -31,7 +31,7 @@
       },
       "runtime_parameters": {
         "IPCONTEXT": [ { "value": "IP_Flow" } ],
-        "IPREVISION": [ { "value": "2112969964" } ],
+        "IPREVISION": [ { "value": "2112964031" } ],
         "MANAGED": [ { "value": "TRUE" } ],
         "OUTPUTDIR": [ { "value": "." } ],
         "SELECTEDSIMMODEL": [ { "value": "" } ],
@@ -48,8 +48,12 @@
         "ap_done": [ { "direction": "out" } ],
         "ap_idle": [ { "direction": "out" } ],
         "ap_ready": [ { "direction": "out" } ],
-        "trackIn": [ { "direction": "in", "size_left": "377", "size_right": "0" } ],
-        "trackOut": [ { "direction": "out", "size_left": "328", "size_right": "0" } ]
+        "din_V_dout": [ { "direction": "in", "size_left": "372", "size_right": "0" } ],
+        "din_V_empty_n": [ { "direction": "in" } ],
+        "din_V_read": [ { "direction": "out" } ],
+        "dout_V_din": [ { "direction": "out", "size_left": "323", "size_right": "0" } ],
+        "dout_V_full_n": [ { "direction": "in" } ],
+        "dout_V_write": [ { "direction": "out" } ]
       },
       "interfaces": {
         "ap_clk": {
@@ -93,26 +97,24 @@
             "ready": [ { "physical_name": "ap_ready" } ]
           }
         },
-        "trackIn": {
-          "vlnv": "xilinx.com:signal:data:1.0",
-          "abstraction_type": "xilinx.com:signal:data_rtl:1.0",
-          "mode": "slave",
-          "parameters": {
-            "LAYERED_METADATA": [ { "value": "undef", "resolve_type": "generated", "is_ips_inferred": true, "is_static_object": false } ]
-          },
+        "din_V": {
+          "vlnv": "xilinx.com:interface:acc_fifo_read:1.0",
+          "abstraction_type": "xilinx.com:interface:acc_fifo_read_rtl:1.0",
+          "mode": "master",
           "port_maps": {
-            "DATA": [ { "physical_name": "trackIn" } ]
+            "RD_DATA": [ { "physical_name": "din_V_dout" } ],
+            "EMPTY_N": [ { "physical_name": "din_V_empty_n" } ],
+            "RD_EN": [ { "physical_name": "din_V_read" } ]
           }
         },
-        "trackOut": {
-          "vlnv": "xilinx.com:signal:data:1.0",
-          "abstraction_type": "xilinx.com:signal:data_rtl:1.0",
+        "dout_V": {
+          "vlnv": "xilinx.com:interface:acc_fifo_write:1.0",
+          "abstraction_type": "xilinx.com:interface:acc_fifo_write_rtl:1.0",
           "mode": "master",
-          "parameters": {
-            "LAYERED_METADATA": [ { "value": "undef", "resolve_type": "generated", "is_ips_inferred": true, "is_static_object": false } ]
-          },
           "port_maps": {
-            "DATA": [ { "physical_name": "trackOut" } ]
+            "WR_DATA": [ { "physical_name": "dout_V_din" } ],
+            "FULL_N": [ { "physical_name": "dout_V_full_n" } ],
+            "WR_EN": [ { "physical_name": "dout_V_write" } ]
           }
         }
       }
