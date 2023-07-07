@@ -172,6 +172,12 @@ constant limitsChannelTB: naturals( 0 to numSeedTypes );
 
 constant numLinksTB: natural := 1 + maxNumProjectionLayers;
 
+-- DR
+
+constant numNodesDR          : natural := 12;
+constant minSharedStubs      : natural :=  3;
+constant numComparisonModules: natural := 16;
+
 -- KF
 
 constant rangeFactor: real    := 2.0; -- search window of each track parameter in initial uncertainties
