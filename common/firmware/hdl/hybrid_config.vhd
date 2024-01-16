@@ -135,12 +135,17 @@ constant numBarrelLayersPS: natural := 3;
 constant tiltedLayerLimitsZ: reals( 0 to numBarrelLayersPS - 1 ) := ( 15.5, 24.9, 34.3 ); -- barrel layer limit z value in cm to partition into tilted and untilted region
 
 --type t_seedTypes is ( L1L2, L2L3, L3L4, L5L6, D1D2, D3D4, L1D1, L2D1 ); -- seed types used in tracklet algorithm (position gives int value)
-type t_seedTypes is ( L1L2 ); -- seed types used in tracklet algorithm (position gives int value)
+--type t_seedTypes is ( L1L2 ); -- seed types used in tracklet algorithm (position gives int value)
+type t_seedTypes is ( L1L2, L2L3, L3L4, L5L6); -- seed types used in tracklet algorithm (position gives int value)
 constant numSeedTypes: natural := t_seedTypes'pos( t_seedTypes'high ) + 1;
 constant maxNumSeedingLayer: natural := 2;                               --
 type t_seedingLayers is array ( natural range <> ) of naturals( 0 to maxNumSeedingLayer - 1 ); 
 constant seedTypesSeedLayers: t_seedingLayers( 0 to numSeedTypes - 1 ) := (                    -- seeding layers of seed types using default layer id [barrel: 1-6, discs: 11-15]
-  t_seedTypes'pos( L1L2 ) => (  1,  2 )
+  t_seedTypes'pos( L1L2 ) => (  1,  2 ),
+  t_seedTypes'pos( L2L3 ) => (  2,  3 ),
+  t_seedTypes'pos( L3L4 ) => (  3,  4 ),
+  t_seedTypes'pos( L5L6 ) => (  5,  6 )
+--  t_seedTypes'pos( L1L2 ) => (  1,  2 )
 --  t_seedTypes'pos( L1L2 ) => (  1,  2 ),
 --  t_seedTypes'pos( L2L3 ) => (  2,  3 ),
 --  t_seedTypes'pos( L3L4 ) => (  3,  4 ),
@@ -150,11 +155,16 @@ constant seedTypesSeedLayers: t_seedingLayers( 0 to numSeedTypes - 1 ) := (     
 --  t_seedTypes'pos( L1D1 ) => (  1, 11 ),
 --  t_seedTypes'pos( L2D1 ) => (  2, 11 )
 );
+constant maxNumProjectionLayers: natural := 15;                        -- max number layers a sedd type may project to
 --constant maxNumProjectionLayers: natural := 8;                        -- max number layers a sedd type may project to
-constant maxNumProjectionLayers: natural := 4;                        -- max number layers a sedd type may project to
+--constant maxNumProjectionLayers: natural := 4;                        -- max number layers a sedd type may project to
 type t_projectionLayers is array ( natural range <> ) of naturals( 0 to maxNumProjectionLayers - 1 );
 constant seedTypesProjectionLayers: t_projectionLayers( 0 to numSeedTypes - 1 ) := (           -- layers a seed types can project to using default layer id [barrel: 1-6, discs: 11-15]
-  t_seedTypes'pos( L1L2 ) => (  3,  4,  5,  6, others => 0 )
+  t_seedTypes'pos( L1L2 ) => (  3,  4,  5,  6, others => 0 ),
+  t_seedTypes'pos( L2L3 ) => (  1,  4,  5,  6, others => 0 ),
+  t_seedTypes'pos( L3L4 ) => (  1,  2,  5,  6, others => 0 ),
+  t_seedTypes'pos( L5L6 ) => (  1,  2,  3,  4, others => 0 )
+--  t_seedTypes'pos( L1L2 ) => (  3,  4,  5,  6, others => 0 )
 --  t_seedTypes'pos( L1L2 ) => (  3,  4,  5,  6, 11, 12, 13, 14, others => 0 ),
 --  t_seedTypes'pos( L2L3 ) => (  1,  4,  5,  6, 11, 12, 13, 14, others => 0 ),
 --  t_seedTypes'pos( L3L4 ) => (  1,  2,  5,  6, 11, 12,         others => 0 ),
