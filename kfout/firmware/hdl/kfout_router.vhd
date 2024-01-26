@@ -70,6 +70,8 @@ END kfout_router;
 
    SUBTYPE tAddress        IS INTEGER RANGE 0 TO PacketBufferLength - 1;
    TYPE tAddressArray      IS ARRAY( 0 TO DataIn'LENGTH-1 ) OF tAddress;
+   
+   TYPE tBooleanArray      IS ARRAY( 0 to DataIn'LENGTH-1 ) OF BOOLEAN;
 
    BEGIN
    g1 : FOR j IN 0 TO DataOut'LENGTH-1 GENERATE
@@ -77,6 +79,7 @@ END kfout_router;
      SIGNAL RamCells       : Vector( 0 TO DataIn'LENGTH-1 )                          := NullVector( DataIn'Length );
 
      SIGNAL Input          : Vector( 0 TO DataIn'LENGTH-1 )                          := NullVector( DataIn'LENGTH );
+     SIGNAL WriteEnable    : tBooleanArray := (OTHERS => FALSE);
 
      SIGNAL Addresses_ram : INTEGER_VECTOR( 0 TO 107) := (OTHERS=>0);
      SIGNAL Addresses_ram_delay : INTEGER_VECTOR( 0 TO 107) := (OTHERS=>0);
@@ -101,7 +104,7 @@ END kfout_router;
        clk         => clk ,
        WriteAddr   => WriteAddr( i ),
        DataIn      => Input( i ) ,
-       WriteEnable => Input( i ) .DataValid ,
+       WriteEnable => WriteEnable( i ) ,
        ReadAddr    => ReadAddr( i ) ,
        DataOut     => RamCells( i ) 
      );
@@ -120,19 +123,23 @@ END kfout_router;
          buffer_counter := 0;
          --Addresses_ram <= (OTHERS=>0);
          WriteAddr <= ( OTHERS => 0 );
-       ELSE
-         FOR ram IN Input'RANGE LOOP
-           IF (DataIn( DataIn'LENGTH - 1 - ram ).sortkey  = j) AND ( DataIn( DataIn'LENGTH - 1 - ram ) .DataValid ) THEN
-             Input( ram )  <= DataIn( DataIn'LENGTH - 1 - ram );
-             WriteAddr( ram ) <= ( WriteAddr( ram ) + 1 ) MOD PacketBufferLength;
-            
-             Addresses_ram( buffer_counter ) <= ram;
-             buffer_counter := buffer_counter + 1;
-
-           END IF;
-         END LOOP;
-
        END IF;
+
+       FOR ram IN Input'RANGE LOOP
+
+         Input( ram )  <= DataIn( DataIn'LENGTH - 1 - ram );
+         IF ( ( DataIn( DataIn'LENGTH - 1 - ram ).sortkey = j ) AND ( DataIn( DataIn'LENGTH - 1 - ram).DataValid ) ) OR ( DataIn( DataIn'LENGTH - 1 - ram ) .Reset = '1' ) THEN
+           WriteEnable( ram ) <= TRUE;
+           WriteAddr( ram ) <= ( WriteAddr( ram ) + 1 ) MOD PacketBufferLength;
+          
+           Addresses_ram( buffer_counter ) <= ram;
+           buffer_counter := buffer_counter + 1;
+         ELSE
+           WriteEnable( ram ) <= FALSE;
+
+         END IF;
+       END LOOP;
+
 
        Addresses_ram_delay <= Addresses_ram;
 
