@@ -36,6 +36,7 @@ signal cm_dout: t_track := nulll;
 begin
 
 cm_din <= tracks( k );
+-- Wait until all CMs have been filled before outputting tracks
 tracks( k + 1 ) <= cm_dout;
 
 c: dr_cm port map ( clk, cm_din, cm_dout );

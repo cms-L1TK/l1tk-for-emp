@@ -80,6 +80,9 @@ record
   phi0    : std_logic_vector( widthTBphi0     - 1 downto 0 );
   z0      : std_logic_vector( widthTBz0       - 1 downto 0 );
   cot     : std_logic_vector( widthTBcot      - 1 downto 0 );
+  chi2    : std_logic_vector( widthDRchi2     - 1 downto 0 );
+  seedId  : std_logic_vector( widthDRseedId   - 1 downto 0 );
+  lastTrk : std_logic;
   stubs   : t_stubsTB( maxNumProjectionLayers - 1 downto 0 );
 end record;
 type t_tracksTB is array ( natural range <> ) of t_trackTB;
@@ -100,14 +103,17 @@ function nulll return t_stubDRin;
 
 type t_trackDRin is
 record
-  reset : std_logic;
-  valid : std_logic;
-  sector: std_logic_vector( widthDRsector - 1 downto 0 );
-  inv2R : std_logic_vector( widthDRinv2R  - 1 downto 0 );
-  phiT  : std_logic_vector( widthDRphiT   - 1 downto 0 );
-  zT    : std_logic_vector( widthDRzT     - 1 downto 0 );
-  cot   : std_logic_vector( widthDRcot    - 1 downto 0 );
-  stubs : t_stubsDRin( numLayers - 1 downto 0 );
+  reset  : std_logic;
+  valid  : std_logic;
+  sector : std_logic_vector( widthDRsector - 1 downto 0 );
+  inv2R  : std_logic_vector( widthDRinv2R  - 1 downto 0 );
+  phiT   : std_logic_vector( widthDRphiT   - 1 downto 0 );
+  zT     : std_logic_vector( widthDRzT     - 1 downto 0 );
+  cot    : std_logic_vector( widthDRcot    - 1 downto 0 );
+  chi2   : std_logic_vector( widthDRchi2   - 1 downto 0 );
+  seedId : std_logic_vector( widthDRseedId - 1 downto 0 );
+  lastTrk: std_logic;
+  stubs  : t_stubsDRin( numLayers - 1 downto 0 );
 end record;
 type t_tracksDRin is array ( natural range <> ) of t_trackDRin;
 function nulll return t_trackDRin;
@@ -133,7 +139,10 @@ record
   phiT  : std_logic_vector( widthDRphiT   - 1 downto 0 );
   zT    : std_logic_vector( widthDRzT     - 1 downto 0 );
   cot   : std_logic_vector( widthDRcot    - 1 downto 0 );
-  stubs : t_stubsDR( numLayers - 1 downto 0 );
+  -- chi2  : std_logic_vector( widthDRchi2   - 1 downto 0 );
+  -- seedId: std_logic_vector( widthDRseedId - 1 downto 0 );
+  -- lastTrk: std_logic;
+  stubs  : t_stubsDR( numLayers - 1 downto 0 );
 end record;
 type t_tracksDR is array ( natural range <> ) of t_trackDR;
 function nulll return t_trackDR;
