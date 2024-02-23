@@ -69,8 +69,8 @@ constant widthDRinv2R : natural := width( numBinsHTinv2R * numBinsMHTinv2R );
 constant widthDRzT    : natural := width( numBinsZHTZT  ** numStagesZHT    );
 constant widthDRcot   : natural := width( numBinsZHTCot ** numStagesZHT    );
 constant widthDRr     : natural := widthDTCr;
-constant widthDRchi2  : natural := 3;
-constant widthDRseedId: natural := 3;
+constant widthDRchi2  : natural := 3; -- TODO: choose the width
+constant widthDRseedId: natural := 7;
 
 constant rangeDRinv2R: real := rangeDTCinv2R;
 constant rangeDRphiT : real := rangeDTCphiT;

@@ -19,6 +19,7 @@ record
   phiT  : std_logic_vector( widthDRphiT   - 1 downto 0 );
   zT    : std_logic_vector( widthDRzT     - 1 downto 0 );
   cot   : std_logic_vector( widthDRcot    - 1 downto 0 );
+  chi2  : std_logic_vector( widthDRchi2   - 1 downto 0 );
   stubs : t_stubsDRin( numLayers - 1 downto 0 );
 end record;
 type t_tracks is array ( natural range <> ) of t_track;
@@ -32,9 +33,11 @@ end record;
 type t_stubs is array ( natural range <> ) of t_stub;
 function nulll return t_stub;
 
+-- TODO: t_cm not needed anymore?!
 type t_cm is
 record
   valid : std_logic;
+  chi2  : std_logic_vector( widthDRchi2 - 1 downto 0 );
   stubs : t_stubs( numLayers - 1 downto 0 );
 end record;
 type t_cms is array ( natural range <> ) of t_cm;
@@ -51,18 +54,18 @@ end;
 package body dr_data_types is
 
 
-function nulll return t_track is begin return ( '0', '0', '0', ( others => '0' ), ( others => '0' ), ( others => '0' ), ( others => '0' ), ( others => '0' ), ( others => nulll ) ); end function;
+function nulll return t_track is begin return ( '0', '0', '0', ( others => '0' ), ( others => '0' ), ( others => '0' ), ( others => '0' ), ( others => '0' ), ( others => '0' ), ( others => nulll ) ); end function;
 function nulll return t_stub is begin return ( '0', ( others => '0' ) ); end function;
-function nulll return t_cm is begin return ( '0', ( others => nulll ) ); end function;
+function nulll return t_cm is begin return ( '0', ( others => '0' ), ( others => nulll ) ); end function;
 
 function conv( t: t_trackDRin ) return t_track is
-  variable res: t_track := ( t.reset, t.valid, '0', t.sector, t.inv2R, t.phiT, t.zT, t.cot, t.stubs );
+  variable res: t_track := ( t.reset, t.valid, '0', t.sector, t.inv2R, t.phiT, t.zT, t.cot, t.chi2, t.stubs );
 begin
   return res;
 end function;
 
 function conv( t: t_track ) return t_cm is
-  variable res: t_cm := ( t.valid, ( others => nulll ) );
+  variable res: t_cm := ( t.valid, t.chi2, ( others => nulll ) );
   variable s: t_stubDRin;
 begin
   for k in res.stubs'range loop
@@ -73,7 +76,7 @@ begin
 end function;
 
 function conv( t: t_track ) return t_trackDR is
-  variable res: t_trackDR := ( t.reset, t.valid, t.sector, t.inv2R, t.phiT, t.zT, t.cot, ( others => nulll ) );
+  variable res: t_trackDR := ( t.reset, t.valid, t.sector, t.inv2R, t.phiT, t.zT, t.cot, t.chi2, ( others => nulll ) );
   variable s: t_stubDRin;
 begin
   for k in res.stubs'range loop
@@ -82,6 +85,5 @@ begin
   end loop;
   return res;
 end function;
-
 
 end;

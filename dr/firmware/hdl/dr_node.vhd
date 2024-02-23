@@ -19,7 +19,8 @@ component dr_cm
 port (
   clk: in std_logic;
   cm_din: in t_track;
-  cm_dout: out t_track
+  cm_dout: out t_track;
+  cm_lastdin: in std_logic
 );
 end component;
 
@@ -32,6 +33,7 @@ g: for k in 0 to numComparisonModules - 1 generate
 
 signal cm_din: t_track := nulll;
 signal cm_dout: t_track := nulll;
+signal cm_lastdin: std_logic := '0'; -- TODO: MAKE THIS COME FROM SOMEHWERE
 
 begin
 
@@ -39,7 +41,7 @@ cm_din <= tracks( k );
 -- Wait until all CMs have been filled before outputting tracks
 tracks( k + 1 ) <= cm_dout;
 
-c: dr_cm port map ( clk, cm_din, cm_dout );
+c: dr_cm port map ( clk, cm_din, cm_dout, cm_lastdin );
 
 end generate;
 
