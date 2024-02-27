@@ -128,7 +128,7 @@ END kfout_router;
        FOR ram IN Input'RANGE LOOP
 
          Input( ram )  <= DataIn( DataIn'LENGTH - 1 - ram );
-         IF ( ( DataIn( DataIn'LENGTH - 1 - ram ).sortkey = j ) AND ( DataIn( DataIn'LENGTH - 1 - ram).DataValid ) ) OR ( DataIn( DataIn'LENGTH - 1 - ram ) .Reset = '1' ) THEN
+         IF ( ( DataIn( DataIn'LENGTH - 1 - ram ).sortkey = j ) AND ( DataIn( DataIn'LENGTH - 1 - ram).DataValid ) ) THEN
            WriteEnable( ram ) <= TRUE;
            WriteAddr( ram ) <= ( WriteAddr( ram ) + 1 ) MOD PacketBufferLength;
           
