@@ -75,11 +75,12 @@ PORT MAP(
 -- Output 64-bit partial tracks in correct link structure
 OutObjectsToPacketsInstance : ENTITY work.kfout_outObjectsToPackets
 PORT MAP(
-  clk                 => clk ,
-  reset               => reset( reset_delay - 1 ),
-  sortedtracks        => TTTracksTQ,
-  packetdata          => kfout_dout
+  clk_i                 => clk ,
+  rst_i               => reset( reset_delay - 1 ),
+  sorted_tracks_i        => TTTracksTQ,
+  packet_data_o          => kfout_dout
 );
+
 -- ------------------------------------------------------------------------
 -- ------------------------------------------------------------------------
 END rtl;

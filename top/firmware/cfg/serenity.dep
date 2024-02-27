@@ -4,7 +4,7 @@ setup ../ucf/settings.tcl
 src emp_payload_kfchain.vhd
 include payload.dep
 
-setup ../../../tracklet/firmware/ucf/ip.tcl
+#setup ../../../tracklet/firmware/ucf/ip.tcl
 
 src emp_project_decl_vu13p.vhd
 

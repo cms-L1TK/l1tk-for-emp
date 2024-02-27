@@ -1,5 +1,7 @@
 library ieee;
-use ieee.std_logic_1164.all;
+use IEEE.STD_LOGIC_1164.all;
+use IEEE.STD_LOGIC_MISC.ALL; -- or_reduce
+
 use work.ipbus.all;
 use work.emp_data_types.all;
 use work.emp_device_decl.all;
@@ -11,31 +13,30 @@ use work.hybrid_data_types.all;
 
 
 entity emp_payload is
-  port (
-    clk: in std_logic;
-    rst: in std_logic;
-    ipb_in: in ipb_wbus;
-    clk_payload: in std_logic_vector( 2 downto 0 );
-    rst_payload: in std_logic_vector( 2 downto 0 );
-    clk40: in  std_logic;
-    clk_p: in std_logic;
-    rst_loc: in std_logic_vector( N_REGION - 1 downto 0 );
-    clken_loc: in std_logic_vector( N_REGION - 1 downto 0 );
-    ctrs: in ttc_stuff_array;
-    d: in ldata( 4 * N_REGION - 1 downto 0 );
-    backpressure: in std_logic_vector( SLINK_MAX_QUADS - 1 downto 0 );
-    ipb_out: out ipb_rbus;
-    bc0: out std_logic;
-    q: out ldata( 4 * N_REGION - 1 downto 0 );
-    gpio: out std_logic_vector( 29 downto 0 );
-    gpio_en: out std_logic_vector( 29 downto 0 );
-    slink_q: out slink_input_data_quad_array( SLINK_MAX_QUADS - 1 downto 0 )
-  );
-  end;
+  port(
+    clk         : in  std_logic;        -- ipbus signals
+    rst         : in  std_logic;
+    ipb_in      : in  ipb_wbus;
+    ipb_out     : out ipb_rbus;
+    clk40       : in  std_logic;	
+    clk_payload : in  std_logic_vector(2 downto 0);
+    rst_payload : in  std_logic_vector(2 downto 0);
+    clk_p       : in  std_logic;        -- data clock
+    rst_loc     : in  std_logic_vector(N_REGION - 1 downto 0);
+    clken_loc   : in  std_logic_vector(N_REGION - 1 downto 0);
+    ctrs        : in  ttc_stuff_array;
+    bc0         : out std_logic;
+    d           : in  ldata(4 * N_REGION - 1 downto 0);  -- data in
+    q           : out ldata(4 * N_REGION - 1 downto 0);  -- data out
+    gpio        : out std_logic_vector(29 downto 0);  -- IO to mezzanine connector
+    gpio_en     : out std_logic_vector(29 downto 0);  -- IO to mezzanine connector (three-state enables)
+    slink_q : out slink_input_data_quad_array(SLINK_MAX_QUADS-1 downto 0);
+    backpressure : in std_logic_vector(SLINK_MAX_QUADS-1 downto 0)
+    );
+
+end emp_payload;
 
 architecture rtl of emp_payload is
-
-
 -- signal d_mapped : ldata( numInputLinks - 1 downto 0);   -- mapped data in
 -- signal q_mapped : ldata( numLinksTFP - 1 downto 0);  -- mapped data out
 
@@ -103,6 +104,29 @@ begin
     return s;
 end;
 
+signal ipb_w : ipb_wbus;
+signal ipb_r : ipb_rbus;
+signal slink_i : slink_input_data_array;
+signal backpressure_any : std_logic;
+component emp_slink_generator is
+  Generic (
+    channel_mask : std_logic_vector(SLINK_MAX_CHANNELS-1 downto 0)
+    );
+  Port (
+    ipb_clk      : in std_logic;
+    ipb_rst      : in std_logic;
+    ipb_in       : in ipb_wbus;
+    ipb_out      : out ipb_rbus;
+
+    rst_p        : in std_logic;
+    clk_p        : in std_logic;
+
+    data_q       : out slink_input_data_array;
+    backpressure : in std_logic
+    );
+end component;
+
+
 begin
 
 -- LinkMapInstance : entity work.link_map
@@ -124,14 +148,14 @@ out_packet <=  conv( d );
 out_din <= kfout_dout;
 
 
-q(4) <= out_dout(0);
-q(5) <= out_dout(1);
-q(4) <= out_dout(0);
-q(5) <= out_dout(1);
-q(4).strobe <= '1';
-q(4).start  <= '0';
-q(5).strobe <= '1';
-q(5).start  <= '0';
+q(68) <= out_dout(0);
+q(69) <= out_dout(1);
+q(68) <= out_dout(0);
+q(69) <= out_dout(1);
+q(68).strobe <= '1';
+q(68).start  <= '0';
+q(69).strobe <= '1';
+q(69).start  <= '0';
 
 
 fin: kfin_isolation_in port map ( clk_p, in_din, in_dout );
@@ -144,12 +168,33 @@ kfout: kfout_top port map ( clk_p, kfout_din, kfout_dout);
 
 fout: kfout_isolation_out port map ( clk_p, out_packet, out_din, out_dout );
 
-
-ipb_out <= IPB_RBUS_NULL;
 bc0 <= '0';
-gpio <= (others => '0');
+
+gpio    <= (others => '0');
 gpio_en <= (others => '0');
-slink_q <= ( others => SLINK_INPUT_DATA_ARRAY_NULL );
+  --
+  -- SLINK
+  --
+  dummy : entity work.emp_slink_generator
+    generic map ( channel_mask => x"F" )
+    port map (
+      ipb_clk      => clk,
+      ipb_rst      => rst,
+      ipb_in       => ipb_in,
+      ipb_out      => ipb_out,
+
+      rst_p        => '0',
+      clk_p        => clk_p,
+
+      data_q       => slink_i,
+      backpressure => backpressure_any
+      );
+
+  slink_q_gen : for q in SLINK_MAX_QUADS-1 downto 0 generate
+  begin
+    slink_q(q) <= slink_i;
+  end generate;
+  backpressure_any <= or_reduce(backpressure(SLINK_MAX_QUADS-1 downto 0));
 
 
-end;
+end rtl;

@@ -23,7 +23,7 @@ package body kfin_layerEncoding is
 
 
 impure function init_layerEncodings return t_layerEncodings is
-  file f: text open read_mode is "/mnt/scratch1/mco62/emp_project_barrel/src/firmware-hls/KalmanFilter/kfin/firmware/luts/layerEncoding.mem";
+  file f: text open read_mode is "/home/cb719/Documents/L1Trigger/Tracker/Firmware/work/src/l1tk-for-emp/kfin/firmware/luts/layerEncoding.mem";
   variable l: line;
   variable w: bit_vector( 1 + widthRlayer + 1 - 1 downto 0 );
   variable le: t_layerEncoding := ( others => ( others => '0' ) );

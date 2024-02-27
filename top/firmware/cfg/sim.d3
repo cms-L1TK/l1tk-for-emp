@@ -1,0 +1,9 @@
+include -c Apollo_empfwk/emp-fwk:boards/serenity/dc_vu13p device.dep packages_so2.dep
+src emp_project_decl_apollo.vhd 
+src tb_decl.vhd
+include -c Apollo_empfwk/emp-fwk:components/links/slink slink_sim.dep
+include payload.dep
+src --vhdl2008 emp_payload_kfchain.vhd
+include -c Apollo_empfwk/emp-fwk:boards/testbench top.dep
+
+@sim.library = 'xil_defaultlib'

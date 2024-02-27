@@ -1,5 +1,6 @@
-library ieee;
-use ieee.std_logic_1164.ALL;
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.all;
 
 use work.emp_framework_decl.all;
 use work.emp_device_types.all;
@@ -7,47 +8,63 @@ use work.emp_slink_types.all;
 
 package emp_project_decl is
 
+  constant PAYLOAD_REV : std_logic_vector(31 downto 0) := X"cafebeef";
 
-constant PAYLOAD_REV: std_logic_vector(31 downto 0) := X"12345678";
+  -- Latency buffer size
+  constant LB_ADDR_WIDTH : integer             := 10;
 
-constant LB_ADDR_WIDTH  : integer := 10;
+  -- Clock setup
+  constant CLOCK_COMMON_RATIO : integer               := 36;
+  constant CLOCK_RATIO        : integer               := 9;
+  constant CLOCK_AUX_DIV      : clock_divisor_array_t := (18, 9, 4); -- Dividers of CLOCK_COMMON_RATIO * 40 MHz
 
-constant CLOCK_AUX_DIV     : clock_divisor_array_t := (18, 9, 4);
-constant CLOCK_COMMON_RATIO: integer               := 36;
-constant CLOCK_RATIO       : integer               :=  6;
+  -- Only used by nullalgo
+  constant PAYLOAD_LATENCY : integer := 5;
 
-constant PAYLOAD_LATENCY: integer :=  326 + 2;--1143 ;-- 8 * 108 + 239 + 31 + 2; --2 + 18 + 9 + 5;-
+  constant REGION_CONF : region_conf_array_t := (
+       0   => kDummyRegion,                     -- service c2c
+      --  1   => (gty25, buf, no_fmt, buf, gty25), -- fpga-fpga
+      --  2   => (gty25, buf, no_fmt, buf, gty25), -- fpga-fpga
+      --  3   => (gty25, buf, no_fmt, buf, gty25), -- fpga-fpga
+       4   => kDummyRegion,                     -- not routed
+      --  5   => (gty25, buf, no_fmt, buf, gty25), -- fpga-fpga
+      --  6   => (gty25, buf, no_fmt, buf, gty25), -- fpga-fpga
+      --  7   => (gty25, buf, no_fmt, buf, gty25), -- fpga-fpga
+      --  8   => (gty25, buf, no_fmt, buf, gty25), -- fpga-fpga
+      --  9   => (gty25, buf, no_fmt, buf, gty25), -- fpga-fpga
+      --  10  => (gty25, buf, no_fmt, buf, gty25), -- fpga-fpga
+      --  11  => (gty25, buf, no_fmt, buf, gty25), -- fpga-fpga
+      --  12  => (gty25, buf, no_fmt, buf, gty25), -- fpga-fpga
+      --  13  => (gty25, buf, no_fmt, buf, gty25), -- fpga-fpga
+      --  14  => (gty25, buf, no_fmt, buf, gty25), -- fpga-fpga
+       15  => kDummyRegion,                     -- not routed
+       ------cross
+       16  => kDummyRegion,                      -- not routed
+       17  => (no_mgt, no_buf, no_fmt, buf, gty25),  -- firefly
+      --  18  => (gty25, buf, no_fmt, buf, gty25),  -- firefly
+      --  19  => (gty25, buf, no_fmt, buf, gty25),  -- firefly
+       20  => kDummyRegion,                      -- not routed
+      --  21  => (gty25, buf, no_fmt, buf, gty25),  -- firefly
+      --  22  => (gty25, buf, no_fmt, buf, gty25),  -- firefly
+      --  23  => (gty25, buf, no_fmt, buf, gty25),  -- firefly
+      --  24  => (gty25, buf, no_fmt, buf, gty25),  -- firefly
+      --  25  => (gty25, buf, no_fmt, buf, gty25),  -- firefly
+      --  26  => (gty25, buf, no_fmt, buf, gty25),  -- firefly
+      --  27  => (gty25, buf, no_fmt, buf, gty25),  -- firefly
+      --  28  => (gty25, buf, no_fmt, buf, gty25),  -- firefly
+      --  29  => (gty25, buf, no_fmt, buf, gty25),  -- firefly
+      --  30  => (gty25, buf, no_fmt, buf, gty25),  -- firefly
+       31 => kDummyRegion,                       -- service tcds
 
--- mgt -> chk -> buf -> fmt -> (algo) -> (fmt) -> buf -> chk -> mgt -> clk -> altclk
-constant REGION_CONF : region_conf_array_t :=  (
-    0  => kDummyRegion, -- not used in apollo  -224 A, reserved: util-0 / c2c
-    1  => (no_mgt, buf, no_fmt, buf, gty25),    --225 B, clk from 225 B
-    2  => (no_mgt, buf, no_fmt, buf, gty25),    --226 C, clk from 227 D
-    3  => (no_mgt, buf, no_fmt, buf, gty25),    --227 D, clk from 227 D
-    4  => (no_mgt, buf, no_fmt, buf, no_mgt), --  --228 E, reserved: tcds2
-    5  => (no_mgt, buf, no_fmt, buf, no_mgt),    --229 F, clk from 230 G
-    6  => (no_mgt, no_buf, no_fmt, no_buf, no_mgt),    --230 G, clk from 230 G
-    7  => (no_mgt, no_buf, no_fmt, no_buf, no_mgt),    --231 H, clk from 230 G
-    8  => (no_mgt, no_buf, no_fmt, no_buf, no_mgt),    --232 I, clk from 232 I
-    9  => (no_mgt, no_buf, no_fmt, no_buf, no_mgt),    --233 J, clk from 232 I    
-    ------cross
-    10  => (no_mgt, no_buf, no_fmt, no_buf, no_mgt),   --133 S, clk from 132 R
-    11  => (no_mgt, no_buf, no_fmt, no_buf, no_mgt),   --132 R, clk from 132 R
-    12  => (no_mgt, no_buf, no_fmt, no_buf, no_mgt),   --131 Q, clk from 132 R
-    13  => (no_mgt, no_buf, no_fmt, no_buf, no_mgt),   --130 P, clk from 130 P
-    14 => kDummyRegion, -- not used in apollo  --129 O,
-    15  => (no_mgt, no_buf, no_fmt, no_buf, no_mgt),   --128 N, clk from 128 N
-    16  => (no_mgt, no_buf, no_fmt, no_buf, no_mgt),   --127 M, clk from 128 N
-    17  => (no_mgt, no_buf, no_fmt, no_buf, no_mgt),   --126 L, clk from 126 L
-    --18 => (no_mgt, buf, no_fmt, buf, no_mgt), --kDummyRegion -- service             --125 K, reserved: util-1
-    others => kDummyRegion
-  );
+       others => kDummyRegion
+    );
 
-      -- Specify the slink quad using the corresponding region conf ID
+  -- Specify the slink quad using the corresponding region conf ID
   -- Specify slink channels to enable using the channel mask
   constant SLINK_CONF : slink_conf_array_t := (
+    --0 => (27, x"3"),
     others      => kNoSlink
-    );  
+    );
 
 
-end;
+end emp_project_decl;

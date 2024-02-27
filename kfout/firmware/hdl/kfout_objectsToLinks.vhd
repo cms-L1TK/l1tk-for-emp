@@ -1,159 +1,193 @@
-LIBRARY IEEE;
-USE IEEE.STD_LOGIC_1164.ALL;
-USE IEEE.NUMERIC_STD.ALL;
+-------------------------------------------------------------------------------
+-- Title      : kfout_outObjectsToPackets
+-- Project    : 
+-------------------------------------------------------------------------------
+-- File       : kfout_outObjectsToPackets.vhd
+-- Author     : Filippo Marini  <filippo.marini@cern.ch>
+-- Company    : University of Colorado Boulder
+-- Created    : 2022-11-21
+-- Last update: 2022-11-23
+-- Platform   : 
+-- Standard   : VHDL'93/02
+-------------------------------------------------------------------------------
+-- Description: 
+-------------------------------------------------------------------------------
+-- Copyright (c) 2022 University of Colorado Boulder
+-------------------------------------------------------------------------------
+-- Revisions  :
+-- Date        Version  Author  Description
+-- 2022-11-21  1.0      fmarini Created
+-------------------------------------------------------------------------------
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
 
-LIBRARY work;
-USE work.kfout_data_formats.all;
-USE work.kfout_config.all;
-
----------------------------------------------------------------------
-ENTITY PacketRam IS
-  GENERIC(
-    Count : NATURAL := 128;
-    Style : STRING  := "block"
-  );
-  PORT(
-    clk          : IN STD_LOGIC; -- The algorithm clock
-    reset        : IN STD_LOGIC;
-    Packet1      : IN STD_LOGIC_VECTOR( widthpartialTTTrack*2  - 1 DOWNTO 0 )  := (OTHERS=> '0');
-    Packet2      : IN STD_LOGIC_VECTOR( widthpartialTTTrack*2  - 1 DOWNTO 0 )  := (OTHERS=> '0');
-    Packet3      : IN STD_LOGIC_VECTOR( widthpartialTTTrack*2  - 1 DOWNTO 0 )  := (OTHERS=> '0');
-    WriteAddr    : IN NATURAL RANGE 0 TO( Count -1 )                            := 0;
-    ReadAddr     : IN NATURAL RANGE 0 TO( Count -1 )                            := 0;
-    PacketOut    : OUT STD_LOGIC_VECTOR( widthpartialTTTrack*2  - 1 DOWNTO 0 ) := (OTHERS=> '0')
-  );
-END PacketRam;
--- -------------------------------------------------------------------------
-
--- -------------------------------------------------------------------------
-ARCHITECTURE rtl OF PacketRam IS
-    TYPE mem_extendable IS ARRAY( 0 TO( Count-1 ) ) OF STD_LOGIC_VECTOR( ( widthpartialTTTrack*2 - 1 ) DOWNTO 0 );
-    SIGNAL RAM                 : mem_extendable := ( OTHERS => ( OTHERS => '0' ) );
-    ATTRIBUTE ram_style        : STRING;
-    ATTRIBUTE ram_style OF RAM : SIGNAL IS Style;
-BEGIN
-
-  PROCESS( clk )
-    VARIABLE positive_read_addr : INTEGER := 0;
-  BEGIN
-    
-    IF RISING_EDGE( clk ) THEN
-        RAM( (WriteAddr) MOD count  ) <= Packet1;
-        RAM( (WriteAddr + 1 ) MOD count ) <= Packet2;
-        RAM( (WriteAddr + 2 ) MOD count ) <= Packet3;
-
-        IF ReadAddr < 1 THEN
-          positive_read_addr := 0;
-        ELSE
-          positive_read_addr := ReadAddr MOD count;
-        END IF;
-
-        PacketOut <= RAM ( positive_read_addr );  --Put packet on output link
-        
-        IF reset = '1' THEN
-          RAM <= ( OTHERS => ( OTHERS => '0' ) );
-        END IF;
-
-    END IF;
-  END PROCESS;
-
-END ARCHITECTURE rtl;
-
-
-LIBRARY IEEE;
-USE IEEE.STD_LOGIC_1164.ALL;
-USE IEEE.STD_LOGIC_MISC.ALL;
-USE IEEE.NUMERIC_STD.ALL;
-
-LIBRARY work;
+library work;
 use work.hybrid_data_types.all;
-USE work.kfout_data_formats.ALL;
-USE work.kfout_config.ALL;
-USE work.DataType.ALL;
-USE work.ArrayTypes.ALL;
-
-ENTITY kfout_outObjectsToPackets IS
-PORT(
-  clk          : IN STD_LOGIC; -- The algorithm clock
-  reset        : IN STD_LOGIC;
-  SortedTracks : IN VECTOR;
-  PacketData   : OUT t_frames
-);
-END kfout_outObjectsToPackets;
-
--- -------------------------------------------------------------------------
--- -------------------------------------------------------------------------
-ARCHITECTURE rtl OF kfout_outObjectsToPackets IS
-
-  TYPE PacketArray IS ARRAY( INTEGER RANGE <> ) of STD_LOGIC_VECTOR( widthpartialTTTrack*2  - 1 DOWNTO 0 );
-  TYPE TrackArray IS ARRAY( INTEGER RANGE <> )  of STD_LOGIC_VECTOR( widthTTTrack - 1           DOWNTO 0 );
-
-BEGIN
-  g1 : FOR i IN 0 TO numOutLinks-1 GENERATE
-    SIGNAL frame_signal : STD_LOGIC := '0';
-    SIGNAL RAMreset     : STD_LOGIC := '0';
-
-    SIGNAL Packets : PacketArray( 2 DOWNTO 0 ) := ( OTHERS => ( OTHERS => '0' ));  -- 3 packets for every 2 tracks
-    SIGNAL Tracks  : TrackArray(  1 DOWNTO 0 ) := ( OTHERS => ( OTHERS => '0' ));  -- 2 tracks for every 3 packets
-
-    SIGNAL packet_counter : INTEGER := 0;  -- Count packets created
-    SIGNAL out_counter    : INTEGER := 0;  -- Count packets out
-
-    SIGNAL OutBuffer   : STD_LOGIC_VECTOR( widthpartialTTTrack*2  - 1 DOWNTO 0 );
+use work.kfout_data_formats.all;
+use work.kfout_config.all;
+use work.DataType.all;
+use work.ArrayTypes.all;
+use work.emp_data_types.all;
 
 
-  BEGIN
-
-    DataRamInstance : ENTITY work.PacketRam
-    GENERIC MAP ( Count => PacketBufferLength+2)
-    PORT MAP(
-      clk         => clk ,
-      reset       => RAMreset,
-      WriteAddr   => packet_counter ,
-      Packet1     => Packets( 0 ),
-      Packet2     => Packets( 1 ),
-      Packet3     => Packets( 2 ),
-      ReadAddr    => Out_counter ,
-      PacketOut   => OutBuffer
+entity kfout_outObjectsToPackets is
+  port (
+    clk_i           : in  std_logic;
+    rst_i           : in  std_logic;
+    sorted_tracks_i : in  vector;
+    packet_data_o   : out t_frames
     );
+end entity kfout_outObjectsToPackets;
 
-    PROCESS( clk )
-      VARIABLE odd_even       : INTEGER := 0;  --Put tracks onto packet structure every two clocks
+architecture rtl of kfout_outObjectsToPackets is
 
-    BEGIN
-      IF RISING_EDGE( clk ) THEN
-          
-          Tracks ( 0 ) <=  ToStdLogicVector( SortedTracks( i ) )( widthTTTrack - 1 DOWNTO 0);
-          Tracks ( 1 ) <=  Tracks ( 0 );
+begin  -- architecture rtl
 
-          odd_even := odd_even + 1;
+  GEN_FOR_TRACKS : for i in 0 to numOutLinks - 1 generate
 
-          IF odd_even = 2 THEN
-            Packets ( 2 )                                                          <= Tracks ( 0 )( widthpartialTTTrack*2  - 1 DOWNTO 0  );                     -- First 64 bits of track 1
-            Packets ( 1 )( widthpartialTTTrack    - 1 DOWNTO 0 )                   <= Tracks ( 0 )( widthTTTrack - 1           DOWNTO widthpartialTTTrack*2 );  -- Last 32 bits of track 1
-            Packets ( 1 )( widthpartialTTTrack*2  - 1 DOWNTO widthpartialTTTrack ) <= Tracks ( 1 )( widthpartialTTTrack - 1    DOWNTO 0  );                     -- First 32 bits of track 2
-            Packets ( 0 )                                                          <= Tracks ( 1 )( widthTTTrack - 1           DOWNTO widthpartialTTTrack );    -- Last 64 bits of track 2
-            odd_even := 0;
+    signal s_track_in      : std_logic_vector(widthTTTrack - 1 downto 0) := (OTHERS => '0');
+    signal s_track_out     : std_logic_vector(widthTTTrack - 1 downto 0) := (OTHERS => '0');
+    signal s_track_reset   : std_logic := '0';
+    signal s_track_wr_en   : std_logic := '0';
+    signal s_rd_en         : std_logic := '0';
+    signal s_wc            : unsigned(1 downto 0) := (OTHERS => '0');
+    signal s_track_tmp_32  : std_logic_vector(31 downto 0) := (OTHERS => '0');
+    signal s_track_tmp_64  : std_logic_vector(63 downto 0) := (OTHERS => '0');
+    signal s_track         : std_logic_vector(LWORD_WIDTH - 1 downto 0) := (OTHERS => '0');
+    signal s_write_addr    : integer range 0 to PacketBufferLength := 0;
+    signal s_read_addr_tmp : integer range 0 to PacketBufferLength := 0;
+    signal s_read_addr     : integer range 0 to PacketBufferLength := 0;
 
-            packet_counter <= (packet_counter + 3) MOD (PacketBufferLength+1);
+    type mem_extendable is array(0 to PacketBufferLength) of std_logic_vector(widthTTTrack - 1 downto 0);
+    signal ram                 : mem_extendable := ( OTHERS => ( OTHERS => '0' ) );
+    attribute ram_style        : string;
+    attribute ram_style of ram : signal is "block";
 
-          END IF;
 
-          RAMreset <= reset;
+  begin
+---------------------------------------------------
+    -- Save words in FIFO
+    -----------------------------------------------------------------------------
+    s_track_in    <= ToStdLogicVector(sorted_tracks_i(i))(widthTTTrack - 1 downto 0);
+    s_track_reset <= rst_i; --sorted_tracks_i(i).Reset;
+    s_track_wr_en <= '1' when sorted_tracks_i(i).DataValid else
+                     '0';
 
-          IF reset = '1' or out_counter >= PacketBufferLength + 1 THEN
-            packet_counter <= 0;
-            out_counter <= 0;
-            odd_even := 0;
-            PacketData( i ) <= (OTHERS => '0');
-          ELSE
-            Out_counter <= out_counter + 1;
-            PacketData( i )  <= OutBuffer;
-          END IF;
+    -- FifoSync_1 : entity surf.FifoSync
+    --   generic map (
+    --     MEMORY_TYPE_G => "block",
+    --     FWFT_EN_G     => true,
+    --     PIPE_STAGES_G => 0,
+    --     DATA_WIDTH_G  => 96,
+    --     ADDR_WIDTH_G  => 6
+    --     )
+    --   port map (
+    --     rst          => s_track_reset,
+    --     clk          => clk_i,
+    --     wr_en        => s_track_wr_en,
+    --     rd_en        => s_rd_en,
+    --     din          => s_track_in,
+    --     dout         => s_track_out,
+    --     data_count   => open,
+    --     wr_ack       => open,
+    --     valid        => open,
+    --     overflow     => open,
+    --     underflow    => open,
+    --     prog_full    => open,
+    --     prog_empty   => open,
+    --     almost_full  => open,
+    --     almost_empty => open,
+    --     full         => open,
+    --     not_full     => open,
+    --     empty        => open
+    --     );
 
-        END IF;
-    END PROCESS;
+    p_ram_write : process (clk_i) is
+    begin  -- process p_ram
+      if rising_edge(clk_i) then        -- rising clock edge
+        if s_track_reset = '1' then
+          ram <= (others => (others => '0'));
+        else
+          if s_track_wr_en = '1' then
+            ram(s_write_addr) <= s_track_in;
+          end if;
+        end if;
+      end if;
+    end process p_ram_write;
 
-  END GENERATE;
+    p_ram_read : process (clk_i) is
+    begin  -- process p_ram_read
+      if rising_edge(clk_i) then        -- rising clock edge
+        s_track_out <= ram(s_read_addr);
+      end if;
+    end process p_ram_read;
 
-END RTL;
+    ---------------------------------------------------------------------------
+    -- Counter
+    ---------------------------------------------------------------------------
+    p_96to64_counter : process (clk_i, s_track_reset) is
+    begin  -- process p_96to64_counter
+      if s_track_reset = '1' then       -- asynchronous reset (active high)
+        s_wc <= "01";
+      elsif rising_edge(clk_i) then     -- rising clock edge
+        if s_wc >= 2 then
+          s_wc <= (others => '0');
+        else
+          s_wc <= s_wc + 1;
+        end if;
+      end if;
+    end process p_96to64_counter;
+
+    p_write_addr : process (clk_i, s_track_reset) is
+    begin  -- process p_write_addr
+      if s_track_reset = '1' then       -- asynchronous reset (active high)
+        s_write_addr <= 0;
+      elsif rising_edge(clk_i) then     -- rising clock edge
+        if s_write_addr < PacketBufferLength - 1 then
+          s_write_addr <= s_write_addr + 1;
+        end if;
+      end if;
+    end process p_write_addr;
+
+    p_read_addr : process (clk_i, s_track_reset) is
+    begin  -- process p_read_addr
+      if s_track_reset = '1' then
+        s_read_addr_tmp <= 0;
+      elsif rising_edge(clk_i) then     -- rising clock edge
+        if s_wc < 2 and s_read_addr < PacketBufferLength - 1 then
+          s_read_addr_tmp <= s_read_addr_tmp + 1;
+        end if;
+      end if;
+    end process p_read_addr;
+
+    p_read_addr_delay : process (clk_i) is
+    begin  -- process p_read_addr_delay
+      if rising_edge(clk_i) then        -- rising clock edge
+        s_read_addr <= s_read_addr_tmp;
+      end if;
+    end process p_read_addr_delay;
+
+    p_96to64_conv : process (clk_i) is
+    begin  -- process p_96to64_conv
+      if rising_edge(clk_i) then        -- rising clock edge
+        case s_wc is
+          when "00" =>
+            s_track        <= s_track_out(95 downto 32);
+            s_track_tmp_32 <= s_track_out(31 downto 0);
+          when "01" =>
+            s_track        <= s_track_tmp_32 & s_track_out(95 downto 64);
+            s_track_tmp_64 <= s_track_out(63 downto 0);
+          when "10" =>
+            s_track <= s_track_tmp_64;
+          when others => null;
+        end case;
+      end if;
+    end process p_96to64_conv;
+
+    packet_data_o(i) <= s_track;
+
+  end generate GEN_FOR_TRACKS;
+
+
+end architecture rtl;
