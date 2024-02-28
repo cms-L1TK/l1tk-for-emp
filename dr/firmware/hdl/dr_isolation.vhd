@@ -76,9 +76,8 @@ begin
   t.zT     := l( 0 ).data(                                              widthDRzT + widthDRcot - 1 downto                                          widthDRcot );
   t.cot    := l( 0 ).data(                                                          widthDRcot - 1 downto                                                   0 );
   for k in 0 to numLayers - 1 loop
-    t.stubs( k ).valid   := l( k + 1 ).data( 1 + widthDRlayerId + widthDRstubId + widthDRr + widthDRphi + widthDRz + widthDRdPhi + widthDRdZ);
-    t.stubs( k ).tilt    := l( k + 1 ).data(     widthDRlayerId + widthDRstubId + widthDRr + widthDRphi + widthDRz + widthDRdPhi + widthDRdZ);
-    t.stubs( k ).layerId := l( k + 1 ).data(     widthDRlayerId + widthDRstubId + widthDRr + widthDRphi + widthDRz + widthDRdPhi + widthDRdZ - 1 downto widthDRstubId + widthDRr + widthDRphi + widthDRz + widthDRdPhi + widthDRdZ );
+    t.stubs( k ).valid   := l( k + 1 ).data( 1 + widthDRstubId + widthDRr + widthDRphi + widthDRz + widthDRdPhi + widthDRdZ);
+    t.stubs( k ).tilt    := l( k + 1 ).data(     widthDRstubId + widthDRr + widthDRphi + widthDRz + widthDRdPhi + widthDRdZ);
     t.stubs( k ).stubId  := l( k + 1 ).data(                      widthDRstubId + widthDRr + widthDRphi + widthDRz + widthDRdPhi + widthDRdZ - 1 downto                 widthDRr + widthDRphi + widthDRz + widthDRdPhi + widthDRdZ );
     t.stubs( k ).r       := l( k + 1 ).data(                                      widthDRr + widthDRphi + widthDRz + widthDRdPhi + widthDRdZ - 1 downto                            widthDRphi + widthDRz + widthDRdPhi + widthDRdZ );
     t.stubs( k ).phi     := l( k + 1 ).data(                                                 widthDRphi + widthDRz + widthDRdPhi + widthDRdZ - 1 downto                                         widthDRz + widthDRdPhi + widthDRdZ );
@@ -86,13 +85,6 @@ begin
     t.stubs( k ).dPhi    := l( k + 1 ).data(                                                                         widthDRdPhi + widthDRdZ - 1 downto                                                                  widthDRdZ );
     t.stubs( k ).dZ      := l( k + 1 ).data(                                                                                       widthDRdZ - 1 downto                                                                          0 );
   end loop;
-    -- report "layerId: " & integer'image(widthDRlayerId); -- PRINT
-    -- report "stubId: " & integer'image(widthDRstubId); -- PRINT
-    -- report "r: " & integer'image(widthDRr); -- PRINT
-    -- report "phi: " & integer'image(widthDRphi); -- PRINT
-    -- report "z: " & integer'image(widthDRz); -- PRINT
-    -- report "dPhi: " & integer'image(widthDRdPhi); -- PRINT
-    -- report "dZ: " & integer'image(widthDRdZ); -- PRINT
   return t;
 end function;
 
