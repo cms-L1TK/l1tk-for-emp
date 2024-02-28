@@ -27,7 +27,7 @@ end component;
 begin
 
 tracks( 0 ) <= conv( node_din );
-node_dout <= conv( tracks( numComparisonModules ) );
+node_dout <= conv( tracks( numComparisonModules ) ); -- output track comes from the last CM
 
 g: for k in 0 to numComparisonModules - 1 generate
 
