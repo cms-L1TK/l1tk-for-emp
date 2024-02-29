@@ -99,13 +99,13 @@ constant baseDRz   : real := baseDTCz;
 constant baseDRdPhi: real := baseDTCphi;
 constant baseDRdZ  : real := baseDTCz;
 
-constant widthDRphi : natural := width( rangeDRphi  / baseDRphi  );
-constant widthDRz   : natural := width( rangeDRz    / baseDRz    );
+constant widthDRphi : natural := width( rangeDRphi  / baseDRphi  ); -- phi residual
+constant widthDRz   : natural := width( rangeDRz    / baseDRz    ); -- z residual
 constant widthDRdPhi: natural := width( rangeDRdPhi / baseDRdPhi );
 constant widthDRdZ  : natural := width( rangeDRdZ   / baseDRdZ   );
 
-constant widthDRStubId : natural := 1;
-constant widthDRLayerId: natural := 1;
+constant widthDRStubId : natural := 7;
+constant widthDRLayerId: natural := 4;
 
 -- KF
 

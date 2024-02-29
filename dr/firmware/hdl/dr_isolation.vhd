@@ -77,13 +77,13 @@ begin
   t.cot    := l( 0 ).data(                                                          widthDRcot - 1 downto                                                   0 );
   for k in 0 to numLayers - 1 loop
     t.stubs( k ).valid   := l( k + 1 ).data( 1 + widthDRstubId + widthDRr + widthDRphi + widthDRz + widthDRdPhi + widthDRdZ);
-    t.stubs( k ).tilt    := l( k + 1 ).data(     widthDRstubId + widthDRr + widthDRphi + widthDRz + widthDRdPhi + widthDRdZ);
-    t.stubs( k ).stubId  := l( k + 1 ).data(                      widthDRstubId + widthDRr + widthDRphi + widthDRz + widthDRdPhi + widthDRdZ - 1 downto                 widthDRr + widthDRphi + widthDRz + widthDRdPhi + widthDRdZ );
-    t.stubs( k ).r       := l( k + 1 ).data(                                      widthDRr + widthDRphi + widthDRz + widthDRdPhi + widthDRdZ - 1 downto                            widthDRphi + widthDRz + widthDRdPhi + widthDRdZ );
-    t.stubs( k ).phi     := l( k + 1 ).data(                                                 widthDRphi + widthDRz + widthDRdPhi + widthDRdZ - 1 downto                                         widthDRz + widthDRdPhi + widthDRdZ );
-    t.stubs( k ).z       := l( k + 1 ).data(                                                              widthDRz + widthDRdPhi + widthDRdZ - 1 downto                                                    widthDRdPhi + widthDRdZ );
-    t.stubs( k ).dPhi    := l( k + 1 ).data(                                                                         widthDRdPhi + widthDRdZ - 1 downto                                                                  widthDRdZ );
-    t.stubs( k ).dZ      := l( k + 1 ).data(                                                                                       widthDRdZ - 1 downto                                                                          0 );
+    t.stubs( k ).tilt    := l( k + 1 ).data(     widthDRstubId + widthDRr + widthDRphi + widthDRz + widthDRdPhi + widthDRdZ); -- is tilt needed?!
+    t.stubs( k ).stubId  := l( k + 1 ).data(     widthDRstubId + widthDRr + widthDRphi + widthDRz + widthDRdPhi + widthDRdZ - 1 downto widthDRr + widthDRphi + widthDRz + widthDRdPhi + widthDRdZ );
+    t.stubs( k ).r       := l( k + 1 ).data(                     widthDRr + widthDRphi + widthDRz + widthDRdPhi + widthDRdZ - 1 downto            widthDRphi + widthDRz + widthDRdPhi + widthDRdZ );
+    t.stubs( k ).phi     := l( k + 1 ).data(                                widthDRphi + widthDRz + widthDRdPhi + widthDRdZ - 1 downto                         widthDRz + widthDRdPhi + widthDRdZ );
+    t.stubs( k ).z       := l( k + 1 ).data(                                             widthDRz + widthDRdPhi + widthDRdZ - 1 downto                                    widthDRdPhi + widthDRdZ );
+    t.stubs( k ).dPhi    := l( k + 1 ).data(                                                        widthDRdPhi + widthDRdZ - 1 downto                                                  widthDRdZ );
+    t.stubs( k ).dZ      := l( k + 1 ).data(                                                                      widthDRdZ - 1 downto                                                          0 );
   end loop;
   return t;
 end function;
