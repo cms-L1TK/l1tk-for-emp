@@ -20,9 +20,9 @@ architecture rtl of dr_cm is
 signal din: t_track := nulll;
 signal dout: t_track := nulll;
 signal kill: std_logic := '0';
-signal cm: t_cm := nulll;
+signal cm: t_track := nulll;
 
-function f_equalEnough( track: t_track; cm: t_cm ) return boolean is
+function f_equalEnough( track: t_track; cm: t_track ) return boolean is
   variable layer: std_logic_vector( numLayers - 1 downto 0 ) := ( others => '0' );
 begin
   for k in track.stubs'range loop
@@ -48,7 +48,7 @@ if rising_edge( clk ) then
   dout <= din;
   if din.valid = '1' and din.cm = '0' and cm.valid = '0' then
     dout.cm <= '1';
-    cm <= conv( din );
+    cm <= din;
   end if;
 
   if din.reset = '1' then

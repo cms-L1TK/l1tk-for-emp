@@ -32,16 +32,7 @@ end record;
 type t_stubs is array ( natural range <> ) of t_stub;
 function nulll return t_stub;
 
-type t_cm is
-record
-  valid : std_logic;
-  stubs : t_stubs( numLayers - 1 downto 0 );
-end record;
-type t_cms is array ( natural range <> ) of t_cm;
-function nulll return t_cm;
-
 function conv( t: t_trackDRin ) return t_track;
-function conv( t: t_track ) return t_cm;
 function conv( t: t_track ) return t_trackDR;
 
 
@@ -53,22 +44,10 @@ package body dr_data_types is
 
 function nulll return t_track is begin return ( '0', '0', '0', ( others => '0' ), ( others => '0' ), ( others => '0' ), ( others => '0' ), ( others => '0' ), ( others => nulll ) ); end function;
 function nulll return t_stub is begin return ( '0', ( others => '0' ) ); end function;
-function nulll return t_cm is begin return ( '0', ( others => nulll ) ); end function;
 
 function conv( t: t_trackDRin ) return t_track is
   variable res: t_track := ( t.reset, t.valid, '0', t.sector, t.inv2R, t.phiT, t.zT, t.cot, t.stubs );
 begin
-  return res;
-end function;
-
-function conv( t: t_track ) return t_cm is
-  variable res: t_cm := ( t.valid, ( others => nulll ) );
-  variable s: t_stubDRin;
-begin
-  for k in res.stubs'range loop
-    s := t.stubs( k );
-    res.stubs( k ) := ( s.valid, s.stubId );
-  end loop;
   return res;
 end function;
 
