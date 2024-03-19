@@ -88,8 +88,6 @@ function nulll return t_trackTB;
 type t_stubDRin is
 record
   valid  : std_logic;
-  -- tilt   : std_logic;
-  -- layerId: std_logic_vector( widthDRlayerId - 1 downto 0 );
   stubId : std_logic_vector( widthDRstubId  - 1 downto 0 );
   r      : std_logic_vector( widthDRr       - 1 downto 0 );
   phi    : std_logic_vector( widthDRphi     - 1 downto 0 );
@@ -117,9 +115,6 @@ function nulll return t_trackDRin;
 type t_stubDR is
 record
   valid  : std_logic;
-  -- tilt   : std_logic;
-  -- layerId: std_logic_vector( widthDRlayerId - 1 downto 0 );
-  stubId : std_logic_vector( widthDRstubId  - 1 downto 0 );
   r      : std_logic_vector( widthDRr       - 1 downto 0 );
   phi    : std_logic_vector( widthDRphi     - 1 downto 0 );
   z      : std_logic_vector( widthDRz       - 1 downto 0 );

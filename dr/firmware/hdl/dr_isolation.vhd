@@ -77,12 +77,12 @@ begin
   t.cot    := l( 0 ).data(                                                          widthDRcot - 1 downto                                                   0 );
   for k in 0 to numLayers - 1 loop
     t.stubs( k ).valid   := l( k + 1 ).data( widthDRstubId + widthDRr + widthDRphi + widthDRz + widthDRdPhi + widthDRdZ);
-    t.stubs( k ).stubId  := l( k + 1 ).data(     widthDRstubId + widthDRr + widthDRphi + widthDRz + widthDRdPhi + widthDRdZ - 1 downto widthDRr + widthDRphi + widthDRz + widthDRdPhi + widthDRdZ );
-    t.stubs( k ).r       := l( k + 1 ).data(                     widthDRr + widthDRphi + widthDRz + widthDRdPhi + widthDRdZ - 1 downto            widthDRphi + widthDRz + widthDRdPhi + widthDRdZ );
-    t.stubs( k ).phi     := l( k + 1 ).data(                                widthDRphi + widthDRz + widthDRdPhi + widthDRdZ - 1 downto                         widthDRz + widthDRdPhi + widthDRdZ );
-    t.stubs( k ).z       := l( k + 1 ).data(                                             widthDRz + widthDRdPhi + widthDRdZ - 1 downto                                    widthDRdPhi + widthDRdZ );
-    t.stubs( k ).dPhi    := l( k + 1 ).data(                                                        widthDRdPhi + widthDRdZ - 1 downto                                                  widthDRdZ );
-    t.stubs( k ).dZ      := l( k + 1 ).data(                                                                      widthDRdZ - 1 downto                                                          0 );
+    t.stubs( k ).stubId  := l( k + 1 ).data( widthDRstubId + widthDRr + widthDRphi + widthDRz + widthDRdPhi + widthDRdZ - 1 downto widthDRr + widthDRphi + widthDRz + widthDRdPhi + widthDRdZ );
+    t.stubs( k ).r       := l( k + 1 ).data(                 widthDRr + widthDRphi + widthDRz + widthDRdPhi + widthDRdZ - 1 downto            widthDRphi + widthDRz + widthDRdPhi + widthDRdZ );
+    t.stubs( k ).phi     := l( k + 1 ).data(                            widthDRphi + widthDRz + widthDRdPhi + widthDRdZ - 1 downto                         widthDRz + widthDRdPhi + widthDRdZ );
+    t.stubs( k ).z       := l( k + 1 ).data(                                         widthDRz + widthDRdPhi + widthDRdZ - 1 downto                                    widthDRdPhi + widthDRdZ );
+    t.stubs( k ).dPhi    := l( k + 1 ).data(                                                    widthDRdPhi + widthDRdZ - 1 downto                                                  widthDRdZ );
+    t.stubs( k ).dZ      := l( k + 1 ).data(                                                                  widthDRdZ - 1 downto                                                          0 );
   end loop;
   return t;
 end function;
@@ -191,7 +191,7 @@ end;
 architecture rtl of dr_isolation_out_node is
 
 constant widthTrack: natural := 1 + widthDRsector + widthDRinv2R + widthDRphiT + widthDRzT + widthDRcot;
-constant widthStub: natural := 1 + widthDRStubId + widthDRr + widthDRphi + widthDRz + widthDRdPhi + widthDRdZ;
+constant widthStub: natural := 1 + widthDRr + widthDRphi + widthDRz + widthDRdPhi + widthDRdZ;
 type t_sr is array ( PAYLOAD_LATENCY - 1 downto 0 ) of t_packets( 0 to numLayers );
 -- sr
 signal sr: t_sr := ( others => ( others => ( others => '0' ) ) );
@@ -207,7 +207,7 @@ end function;
 
 function conv( s: t_stubDR ) return std_logic_vector is
 begin
-  return s.valid & s.stubId & s.r & s.phi & s.z & s.dPhi & s.dZ;
+  return s.valid & s.r & s.phi & s.z & s.dPhi & s.dZ;
 end function;
 
 begin
