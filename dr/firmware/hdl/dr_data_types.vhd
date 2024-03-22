@@ -12,15 +12,16 @@ package dr_data_types is
 
 type t_track is
 record
-  reset : std_logic;
-  valid : std_logic;
-  cm    : std_logic;
-  sector: std_logic_vector( widthDRsector - 1 downto 0 );
-  inv2R : std_logic_vector( widthDRinv2R  - 1 downto 0 );
-  phiT  : std_logic_vector( widthDRphiT   - 1 downto 0 );
-  zT    : std_logic_vector( widthDRzT     - 1 downto 0 );
-  cot   : std_logic_vector( widthDRcot    - 1 downto 0 );
-  chi2  : std_logic_vector( widthDRchi2   - 1 downto 0 );
+  reset     : std_logic;
+  valid     : std_logic;
+  cm        : std_logic;
+  lastTrack : std_logic;
+  sector    : std_logic_vector( widthDRsector - 1 downto 0 );
+  inv2R     : std_logic_vector( widthDRinv2R  - 1 downto 0 );
+  phiT      : std_logic_vector( widthDRphiT   - 1 downto 0 );
+  zT        : std_logic_vector( widthDRzT     - 1 downto 0 );
+  cot       : std_logic_vector( widthDRcot    - 1 downto 0 );
+  chi2      : std_logic_vector( widthDRchi2   - 1 downto 0 );
   noConsistentStubs: std_logic_vector( widthDRConsistentStubs - 1 downto 0);
   stubs : t_stubsDRin( numLayers - 1 downto 0 );
 end record;
@@ -45,11 +46,11 @@ end;
 package body dr_data_types is
 
 
-function nulll return t_track is begin return ( '0', '0', '0', ( others => '0' ), ( others => '0' ), ( others => '0' ), ( others => '0' ), ( others => '0' ), ( others => '0' ), ( others => '0' ), ( others => nulll ) ); end function;
+function nulll return t_track is begin return ( '0', '0', '0', '0', ( others => '0' ), ( others => '0' ), ( others => '0' ), ( others => '0' ), ( others => '0' ), ( others => '0' ), ( others => '0' ), ( others => nulll ) ); end function;
 function nulll return t_stub is begin return ( '0', ( others => '0' ) ); end function; -- is it used?
 
 function conv( t: t_trackDRin ) return t_track is
-  variable res: t_track := ( t.reset, t.valid, '0', t.sector, t.inv2R, t.phiT, t.zT, t.cot, ( others => '0' ), ( others => '0' ), t.stubs );
+  variable res: t_track := ( t.reset, t.valid, '0', t.lastTrack, t.sector, t.inv2R, t.phiT, t.zT, t.cot, ( others => '0' ), ( others => '0' ), t.stubs );
   variable s: t_stubDRin;
   variable chi2: signed( widthDRchi2 - 1 downto 0 ) := ( others => '0' );
   variable noConsistentStubs: signed( widthDRConsistentStubs - 1 downto 0) := ( others => '0' );

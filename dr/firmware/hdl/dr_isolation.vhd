@@ -69,12 +69,13 @@ signal dout: t_trackDRin := nulll;
 function conv( l: ldata( 1 + numLayers - 1 downto 0 ) ) return t_trackDRin is
   variable t: t_trackDRin := nulll;
 begin
-  t.valid  := l( 0 ).data( widthDRsector + widthDRinv2R + widthDRphiT + widthDRzT + widthDRcot );
-  t.sector := l( 0 ).data( widthDRsector + widthDRinv2R + widthDRphiT + widthDRzT + widthDRcot - 1 downto widthDRinv2R + widthDRphiT + widthDRzT + widthDRcot );
-  t.inv2R  := l( 0 ).data(                 widthDRinv2R + widthDRphiT + widthDRzT + widthDRcot - 1 downto                widthDRphiT + widthDRzT + widthDRcot );
-  t.phiT   := l( 0 ).data(                                widthDRphiT + widthDRzT + widthDRcot - 1 downto                              widthDRzT + widthDRcot );
-  t.zT     := l( 0 ).data(                                              widthDRzT + widthDRcot - 1 downto                                          widthDRcot );
-  t.cot    := l( 0 ).data(                                                          widthDRcot - 1 downto                                                   0 );
+  t.valid     := l( 0 ).data( widthDRsector + widthDRinv2R + widthDRphiT + widthDRzT + widthDRcot + 1);
+  t.sector    := l( 0 ).data( widthDRsector + widthDRinv2R + widthDRphiT + widthDRzT + widthDRcot downto widthDRinv2R + widthDRphiT + widthDRzT + widthDRcot + 1 );
+  t.inv2R     := l( 0 ).data(                 widthDRinv2R + widthDRphiT + widthDRzT + widthDRcot downto                widthDRphiT + widthDRzT + widthDRcot + 1 );
+  t.phiT      := l( 0 ).data(                                widthDRphiT + widthDRzT + widthDRcot downto                              widthDRzT + widthDRcot + 1 );
+  t.zT        := l( 0 ).data(                                              widthDRzT + widthDRcot downto                                          widthDRcot + 1 );
+  t.cot       := l( 0 ).data(                                                          widthDRcot downto                                                       1 );
+  t.lastTrack := l( 0 ).data(                                                                                                                                  0 );
   for k in 0 to numLayers - 1 loop
     t.stubs( k ).valid   := l( k + 1 ).data( widthDRstubId + widthDRr + widthDRphi + widthDRz + widthDRdPhi + widthDRdZ);
     t.stubs( k ).stubId  := l( k + 1 ).data( widthDRstubId + widthDRr + widthDRphi + widthDRz + widthDRdPhi + widthDRdZ - 1 downto widthDRr + widthDRphi + widthDRz + widthDRdPhi + widthDRdZ );
