@@ -30,7 +30,7 @@ constant numFrames     : natural := tmp * integer( freqTFP / freqLHC ); -- numbe
 constant widthFrames   : natural := width( numFrames );                 -- number of bits used to represent frame number within one TMP
 
 constant chosenRofPhi: real := 55.0;           -- offest radius used for phi sector definitionmaxRtimesMoverBend21.
-constant chosenRofZ  : real := 50.0;           -- offest radius used for eta sector definition
+constant chosenRofZ  : real := 57.76;          -- offest radius used for eta sector definition
 constant minPt       : real :=  1.34;          -- minimum pt of tracks considered as reconstructable
 constant beamWindowZ : real := 15.0;           -- halve lumi region in z
 constant maxEta      : real :=  2.5;           -- maximum |eta| of tracks considered as reconstructable
