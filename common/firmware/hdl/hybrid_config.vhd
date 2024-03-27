@@ -176,7 +176,7 @@ constant numLinksTB: natural := 1 + maxNumProjectionLayers;
 
 constant numNodesDR          : natural := 12;
 constant minSharedStubs      : natural :=  3;
-constant numComparisonModules: natural := 16;
+constant numComparisonModules: natural := 32; -- was 16
 
 -- KF
 

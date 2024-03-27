@@ -103,11 +103,9 @@ record
   reset    : std_logic;
   valid    : std_logic;
   lastTrack: std_logic;
-  sector   : std_logic_vector( widthDRsector - 1 downto 0 );
   inv2R    : std_logic_vector( widthDRinv2R  - 1 downto 0 );
   phiT     : std_logic_vector( widthDRphiT   - 1 downto 0 );
   zT       : std_logic_vector( widthDRzT     - 1 downto 0 );
-  cot      : std_logic_vector( widthDRcot    - 1 downto 0 );
   stubs : t_stubsDRin( numLayers - 1 downto 0 );
 end record;
 type t_tracksDRin is array ( natural range <> ) of t_trackDRin;
@@ -129,11 +127,9 @@ type t_trackDR is
 record
   reset : std_logic;
   valid : std_logic;
-  sector: std_logic_vector( widthDRsector - 1 downto 0 );
   inv2R : std_logic_vector( widthDRinv2R  - 1 downto 0 );
   phiT  : std_logic_vector( widthDRphiT   - 1 downto 0 );
   zT    : std_logic_vector( widthDRzT     - 1 downto 0 );
-  cot   : std_logic_vector( widthDRcot    - 1 downto 0 );
   stubs : t_stubsDR( numLayers - 1 downto 0 );
 end record;
 type t_tracksDR is array ( natural range <> ) of t_trackDR;
@@ -220,9 +216,9 @@ function nulll return t_stubsDTC is begin return ( ( others => nulll ), ( others
 function nulll return t_stubTB is begin return ( '0', others => ( others => '0' ) ); end function;
 function nulll return t_trackTB is begin return ( '0', '0', ( others => '0' ), ( others => '0' ), ( others => '0' ), ( others => '0' ), ( others => '0' ), ( others => nulll ) ); end function;
 function nulll return t_stubDRin is begin return ( '0', others => ( others => '0' ) ); end function;
-function nulll return t_trackDRin is begin return ( '0', '0', ( others => '0' ), ( others => '0' ), ( others => '0' ), ( others => '0' ), ( others => '0' ), '0', ( others => nulll ) ); end function;
+function nulll return t_trackDRin is begin return ( '0', '0', '0', ( others => '0' ), ( others => '0' ), ( others => '0' ), ( others => nulll ) ); end function;
 function nulll return t_stubDR is begin return ( '0', others => ( others => '0' ) ); end function;
-function nulll return t_trackDR is begin return ( '0', '0', ( others => '0' ), ( others => '0' ), ( others => '0' ), ( others => '0' ), ( others => '0' ), ( others => nulll ) ); end function;
+function nulll return t_trackDR is begin return ( '0', '0', ( others => '0' ), ( others => '0' ), ( others => '0' ), ( others => nulll ) ); end function;
 function nulll return t_stubKFin is begin return ( '0', '0', others => ( others => '0' ) ); end function;
 function nulll return t_trackKFin is begin return ( '0', '0', ( others => '0' ), ( others => '0' ), ( others => '0' ), ( others => '0' ), ( others => '0' ), ( others => '0' ), ( others => nulll ) ); end function;
 function nulll return t_stubKF is begin return ( '0', '0', others => ( others => '0' ) ); end function;

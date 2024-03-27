@@ -69,13 +69,11 @@ signal dout: t_trackDRin := nulll;
 function conv( l: ldata( 1 + numLayers - 1 downto 0 ) ) return t_trackDRin is
   variable t: t_trackDRin := nulll;
 begin
-  t.valid     := l( 0 ).data( widthDRsector + widthDRinv2R + widthDRphiT + widthDRzT + widthDRcot + 1);
-  t.sector    := l( 0 ).data( widthDRsector + widthDRinv2R + widthDRphiT + widthDRzT + widthDRcot downto widthDRinv2R + widthDRphiT + widthDRzT + widthDRcot + 1 );
-  t.inv2R     := l( 0 ).data(                 widthDRinv2R + widthDRphiT + widthDRzT + widthDRcot downto                widthDRphiT + widthDRzT + widthDRcot + 1 );
-  t.phiT      := l( 0 ).data(                                widthDRphiT + widthDRzT + widthDRcot downto                              widthDRzT + widthDRcot + 1 );
-  t.zT        := l( 0 ).data(                                              widthDRzT + widthDRcot downto                                          widthDRcot + 1 );
-  t.cot       := l( 0 ).data(                                                          widthDRcot downto                                                       1 );
-  t.lastTrack := l( 0 ).data(                                                                                                                                  0 );
+  t.valid     := l( 0 ).data( widthDRinv2R + widthDRphiT + widthDRzT + 1);
+  t.inv2R     := l( 0 ).data( widthDRinv2R + widthDRphiT + widthDRzT downto widthDRphiT + widthDRzT + 1 );
+  t.phiT      := l( 0 ).data(                widthDRphiT + widthDRzT downto               widthDRzT + 1 );
+  t.zT        := l( 0 ).data(                              widthDRzT downto                           1 );
+  t.lastTrack := l( 0 ).data(                                                                         0 );
   for k in 0 to numLayers - 1 loop
     t.stubs( k ).valid   := l( k + 1 ).data( widthDRstubId + widthDRr + widthDRphi + widthDRz + widthDRdPhi + widthDRdZ);
     t.stubs( k ).stubId  := l( k + 1 ).data( widthDRstubId + widthDRr + widthDRphi + widthDRz + widthDRdPhi + widthDRdZ - 1 downto widthDRr + widthDRphi + widthDRz + widthDRdPhi + widthDRdZ );
@@ -98,7 +96,6 @@ begin
 if rising_edge( clk ) then
 
   -- step 1
-
   din <= node_din;
 
   -- step 2
@@ -191,7 +188,7 @@ end;
 
 architecture rtl of dr_isolation_out_node is
 
-constant widthTrack: natural := 1 + widthDRsector + widthDRinv2R + widthDRphiT + widthDRzT + widthDRcot;
+constant widthTrack: natural := 1 + widthDRinv2R + widthDRphiT + widthDRzT;
 constant widthStub: natural := 1 + widthDRr + widthDRphi + widthDRz + widthDRdPhi + widthDRdZ;
 type t_sr is array ( PAYLOAD_LATENCY - 1 downto 0 ) of t_packets( 0 to numLayers );
 -- sr
@@ -203,7 +200,7 @@ signal dout: ldata( 1 + numLayers - 1 downto 0 ) := ( others => nulll );
 
 function conv( t: t_trackDR ) return std_logic_vector is
 begin
-  return t.valid & t.sector & t.inv2R & t.phiT & t.zT & t.cot;
+  return t.valid & t.inv2R & t.phiT & t.zT;
 end function;
 
 function conv( s: t_stubDR ) return std_logic_vector is
@@ -220,6 +217,16 @@ node_dout <= dout;
 process( clk ) is
 begin
 if rising_edge( clk ) then
+
+  -- report "valid = " & std_logic'image(din.valid);
+  -- report "inv2R = " & integer'image(to_integer(signed(din.inv2R)));
+  -- report "phiT = " & integer'image(to_integer(signed(din.phiT)));
+  -- report "zT = " & integer'image(to_integer(signed(din.zT)));
+  -- report "lastTrack = " & std_logic'image(din.lastTrack);
+
+  -- report natural'image(widthDRinv2R);
+  -- report natural'image(widthDRphiT);
+  -- report natural'image(widthDRzT);
 
   -- sr
 
