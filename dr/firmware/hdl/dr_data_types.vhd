@@ -51,7 +51,6 @@ function conv( t: t_trackDRin ) return t_track is
   variable res: t_track := ( t.reset, t.valid, '0', t.lastTrack, t.inv2R, t.phiT, t.zT, ( others => '0' ), ( others => '0' ), t.stubs );
   variable s: t_stubDRin;
   variable chi2: signed( widthDRchi2 - 1 downto 0 ) := ( others => '0' );
-  -- variable chi2: real;
   variable noConsistentStubs: unsigned( widthDRConsistentStubs - 1 downto 0) := ( others => '0' );
   variable phi: signed( widthDRphi + 5 - 1 downto 0) :=  ( others => '0' ); -- 5 bit padding?!
   variable z: signed( widthDRz + 5 - 1 downto 0) :=  ( others => '0' );
