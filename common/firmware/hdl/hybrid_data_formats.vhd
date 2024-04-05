@@ -70,7 +70,6 @@ constant widthDRzT    : natural := width( numBinsZHTZT  ** numStagesZHT    );
 constant widthDRcot   : natural := width( numBinsZHTCot ** numStagesZHT    );
 constant widthDRr     : natural := widthDTCr;
 constant widthDRchi2  : natural := 32; -- TODO: choose the width
-constant widthDRseedId: natural := 7;
 constant widthDRConsistentStubs : natural := 4; -- Tracks can have 8 stubs, i.e. at least 4 bits
 
 constant rangeDRinv2R: real := rangeDTCinv2R;

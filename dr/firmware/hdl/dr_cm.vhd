@@ -44,7 +44,7 @@ begin
   elsif signed(cm_track.chi2) > signed(track.chi2) and signed(cm_track.noConsistentStubs) = signed(track.noConsistentStubs) then
     killCM := true;
   end if;
-  return killCM;
+  return track.valid = '1' and track.cm = '0' and cm_track.valid = '1' and killCM;
 end function;
 
 begin

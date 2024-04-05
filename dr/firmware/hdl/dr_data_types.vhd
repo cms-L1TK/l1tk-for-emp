@@ -37,6 +37,8 @@ function nulll return t_stub;
 function conv( t: t_trackDRin ) return t_track;
 function conv( t: t_track ) return t_trackDR;
 
+-- Padding?
+constant padding : integer := 0;
 
 end;
 
@@ -52,10 +54,11 @@ function conv( t: t_trackDRin ) return t_track is
   variable s: t_stubDRin;
   variable chi2: signed( widthDRchi2 - 1 downto 0 ) := ( others => '0' );
   variable noConsistentStubs: unsigned( widthDRConsistentStubs - 1 downto 0) := ( others => '0' );
-  variable phi: signed( widthDRphi + 5 - 1 downto 0) :=  ( others => '0' ); -- 5 bit padding?!
-  variable z: signed( widthDRz + 5 - 1 downto 0) :=  ( others => '0' );
+  variable phi: signed( widthDRphi + padding - 1 downto 0) :=  ( others => '0' ); -- add extra bits for padding?
+  variable z: signed( widthDRz + padding - 1 downto 0) :=  ( others => '0' );
   variable dPhi: signed( widthDRdPhi + 1 - 1 downto 0) :=  ( others => '0' ); -- extra bit for signed
   variable dZ: signed( widthDRdZ + 1 - 1 downto 0) :=  ( others => '0' );
+  -- DO EVERYTHING AS UNSIGNED INSTEAD?!
 begin
 
   -- Calculate things if track is valid
@@ -67,17 +70,19 @@ begin
 
       if s.valid = '1' then
 
-        phi(widthDRphi + 5 - 1 downto 5) := signed(s.phi); -- padded with 5 bits
-        z(widthDRz + 5 - 1 downto 5) := signed(s.z);
+        phi(widthDRphi + padding - 1 downto padding) := signed(s.phi);
+        z(widthDRz + padding - 1 downto padding) := signed(s.z);
         dPhi := signed('0' & s.dPhi); -- convert unsigned to signed
         dZ := signed('0' & s.dZ);
-
-        -- Calculate the chi2
+        
+        if dPhi > 0 and dZ > 0 then
+          -- Calculate the chi2
           chi2 := chi2 + resize((phi*phi)/(dPhi*dPhi), chi2'length) + resize((z*z)/(dZ*dZ), chi2'length); -- multiply by 2^-10 and divide by 2 to get the real value....
 
-        -- Calculate the number of consistent stubs
-        if abs(signed(s.phi)) < dPhi/2 and abs(signed(s.z)) < dZ/2 then -- Check that the residuals are smaller than half the resolution
-          noConsistentStubs := noConsistentStubs + 1;
+          -- Calculate the number of consistent stubs
+          if shift_left( abs('0' & signed(s.phi) ) , 1 ) < dPhi and shift_left( abs('0' & signed(s.z) ) , 1 ) < dZ then -- Check that the residuals are smaller than half the resolution
+            noConsistentStubs := noConsistentStubs + 1;
+          end if;
         end if;
       end if;
 

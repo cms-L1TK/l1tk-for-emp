@@ -218,16 +218,6 @@ process( clk ) is
 begin
 if rising_edge( clk ) then
 
-  -- report "valid = " & std_logic'image(din.valid);
-  -- report "inv2R = " & integer'image(to_integer(signed(din.inv2R)));
-  -- report "phiT = " & integer'image(to_integer(signed(din.phiT)));
-  -- report "zT = " & integer'image(to_integer(signed(din.zT)));
-  -- report "lastTrack = " & std_logic'image(din.lastTrack);
-
-  -- report natural'image(widthDRinv2R);
-  -- report natural'image(widthDRphiT);
-  -- report natural'image(widthDRzT);
-
   -- sr
 
   sr <= sr( sr'high - 1 downto 0 ) & node_packet;
