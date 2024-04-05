@@ -80,7 +80,7 @@ begin
           chi2 := chi2 + resize((phi*phi)/(dPhi*dPhi), chi2'length) + resize((z*z)/(dZ*dZ), chi2'length); -- multiply by 2^-10 and divide by 2 to get the real value....
 
           -- Calculate the number of consistent stubs
-          if shift_left( abs('0' & signed(s.phi) ) , 1 ) < dPhi and shift_left( abs('0' & signed(s.z) ) , 1 ) < dZ then -- Check that the residuals are smaller than half the resolution
+          if shift_left( abs('0' & signed(s.phi) ), 1 ) < dPhi and shift_left( abs('0' & signed(s.z) ), 1 ) < dZ then -- Check that the residuals are smaller than half the resolution
             noConsistentStubs := noConsistentStubs + 1;
           end if;
         end if;
