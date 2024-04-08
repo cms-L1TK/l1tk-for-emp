@@ -23,9 +23,14 @@ port (
 );
 end component;
 
+-- Initialise RAM for division
+attribute ram_style: string;
+signal ramInv: t_ramInv := init_ramInv;
+attribute ram_style of ramInv: signal is "block";
+
 begin
 
-tracks( 0 ) <= conv( node_din );
+tracks( 0 ) <= conv( node_din, ramInv);
 node_dout <= conv( tracks( numComparisonModules ) );
 
 g: for k in 0 to numComparisonModules - 1 generate

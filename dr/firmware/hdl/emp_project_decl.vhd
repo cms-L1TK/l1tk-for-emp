@@ -20,7 +20,7 @@ constant CLOCK_AUX_DIV     : clock_divisor_array_t := (18, 9, 4);
 constant CLOCK_COMMON_RATIO: integer               := 36;
 constant CLOCK_RATIO       : integer               :=  6;
 
-constant PAYLOAD_LATENCY: integer := 32*2 + 2; -- Because have 32 CMs?
+constant PAYLOAD_LATENCY: integer := 32 * 2 + 2; -- Because have 32 CMs?
 
 constant REGION_CONF : region_conf_array_t := (
   0 to 23 => ( no_mgt, buf, no_fmt, buf,    no_mgt ),
