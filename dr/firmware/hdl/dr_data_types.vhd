@@ -80,27 +80,13 @@ begin
         invdZ := signed(ram(to_integer(dZ)));
 
         -- Calculate the chi2
-
-        -- OLD
-        -- if dPhi > 0 and dZ > 0 then
-        --   chi2 := chi2 + resize((phi*phi)/(dPhi*dPhi), chi2'length) + resize((z*z)/(dZ*dZ), chi2'length);
-        -- end if; -- else add a large number to make it "infinate"?
-
-        -- NEW
         chi2 := chi2 + resize( phi * invdPhi * phi * invdPhi, chi2'length) + resize( z * invdZ * z * invdZ, chi2'length); -- Technically should be divided by 2 because of the number of degrees of freedom
 
 
         -- Calculate the number of consistent stubs
-
-        -- NEW
         if shift_left( '0' & abs( phi ), 1 ) < dPhi and shift_left( '0' & abs( z ), 1 ) < dZ then -- Check that the residuals are smaller than half the resolution
           noConsistentStubs := noConsistentStubs + 1;
         end if;
-
-        -- OLD
-        -- if abs(phi) < dPhi/2 and abs(z) < dZ/2 then -- Check that the residuals are smaller than half the resolution
-        --   noConsistentStubs := noConsistentStubs + 1;
-        -- end if;
 
       end if;
 
