@@ -15,6 +15,7 @@ end;
 architecture rtl of dr_node is
 
 signal tracks: t_tracks( numComparisonModules downto 0 ) := ( others => nulll );
+
 component dr_cm
 port (
   clk: in std_logic;
@@ -23,17 +24,20 @@ port (
 );
 end component;
 
--- Initialise RAM for division
-attribute ram_style: string;
-signal ramInv: t_ramInv := init_ramInv;
-attribute ram_style of ramInv: signal is "block";
+component track_conversion
+port (
+  clk: in std_logic;
+  t_in: in t_trackDRin;
+  t_out: out t_track
+);
+end component;
 
 begin
 
-tracks( 0 ) <= conv( node_din, ramInv);
+tc: track_conversion port map ( clk, node_din, tracks( 0 ) );
 node_dout <= conv( tracks( numComparisonModules ) );
 
-g: for k in 0 to numComparisonModules - 1 generate
+g_cm: for k in 0 to numComparisonModules - 1 generate
 
 signal cm_din: t_track := nulll;
 signal cm_dout: t_track := nulll;
