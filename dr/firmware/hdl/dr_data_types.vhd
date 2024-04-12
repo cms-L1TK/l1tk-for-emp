@@ -104,7 +104,7 @@ entity track_conversion is
   
   -- Tracks storage
   signal t   : t_track := nulll;
-  signal t_sr: t_tracks( 0 to 4 - 1 ) := ( others => nulll ); -- latency of this 
+  signal t_array: t_tracks( 0 to 4 - 1 ) := ( others => nulll ); -- latency of this 
   
   -- Signals for chi2
   type chi2_tmps is array ( 0 to numLayers - 1 ) of unsigned( widthDRchi2 - 1 downto 0 );
@@ -117,28 +117,36 @@ entity track_conversion is
   begin
   
   -- Store and shift tracks
-  t_sr( 0 ) <= ( t_in.reset, t_in.valid, '0', t_in.lastTrack, t_in.inv2R, t_in.phiT, t_in.zT, ( others => '0' ), ( others => '0' ), t_in.stubs );
+  t_array( 0 ) <= ( t_in.reset, t_in.valid, '0', t_in.lastTrack, t_in.inv2R, t_in.phiT, t_in.zT, ( others => '0' ), ( others => '0' ), t_in.stubs );
   t_out <= t;
-  g_shift : for i in 0 to 4 - 2 generate -- latency of this
+
+  g_shift : for i in 0 to 4 - 2 generate -- 4 = latency of this thing
   begin
     process ( clk ) is
     begin
     if rising_edge( clk ) then
-      t_sr( i + 1 ) <= t_sr( i );
+
+      t_array( i + 1 ) <= t_array( i );
+
+      -- Reset
+      -- if t_in.reset = '1' then
+      --   t_array( i + 1 ) <= nulll;
+      -- end if;
+
     end if;
   end process;
   end generate;
 
 -- Loop over all stubs in track
-  g_stub: for k in t_sr( 0 ).stubs'range generate
+  g_stub: for k in t_array( 0 ).stubs'range generate
 
     -- clk 1
-    signal phi    : signed( widthDRphi - 1 downto 0)      := ( others => '0' );
-    signal z      : signed( widthDRz - 1 downto 0)        := ( others => '0' );
-    signal dPhi   : signed( widthDRdPhi + 1 - 1 downto 0) := ( others => '0' ); -- extra bit for signed
-    signal dZ     : signed( widthDRdZ + 1 - 1 downto 0)   := ( others => '0' ); -- extra bit for signed
-    signal invdPhi: signed(widthDRinvdZ - 1 downto 0)     := ( others => '0' );
-    signal invdZ  : signed(widthDRinvdZ - 1 downto 0)     := ( others => '0' );
+    signal phi    : unsigned( widthDRphi - 1 downto 0)      := ( others => '0' ); -- Only need absolute value
+    signal z      : unsigned( widthDRz - 1 downto 0)        := ( others => '0' ); -- Only need absolute value
+    signal dPhi   : unsigned( widthDRdPhi - 1 downto 0) := ( others => '0' );
+    signal dZ     : unsigned( widthDRdZ - 1 downto 0)   := ( others => '0' );
+    signal invdPhi: unsigned(widthDRinvdZ - 1 downto 0)     := ( others => '0' ); -- Use dZ width due to ramInv
+    signal invdZ  : unsigned(widthDRinvdZ - 1 downto 0)     := ( others => '0' );
   
     -- clk 2
     signal chi2_phi_tmp : unsigned(widthDRchi2 - 1 downto 0) := ( others => '0' );
@@ -152,32 +160,37 @@ entity track_conversion is
     begin
     if rising_edge( clk ) then
 
-      consistentStubs( k ) <= '0';
-      chi2_phi_tmp <= ( others => '0' );
-      chi2_z_tmp <= ( others => '0' );
-      chi2_tmp( k ) <= ( others => '0' );
       s := t_in.stubs( k );
+      consistentStubs( k ) <= '0';
 
       -- clk 1: Read values from stub and RAM
-      phi     <= signed(s.phi);
-      z       <= signed(s.z);
-      dPhi    <= signed('0' & s.dPhi); -- convert unsigned to signed
-      dZ      <= signed('0' & s.dZ);
-      invdPhi <= signed(ramInv(to_integer(unsigned(s.dPhi)))); -- should be unsigned...
-      invdZ   <= signed(ramInv(to_integer(unsigned(s.dZ))));
+      phi     <= unsigned(abs(signed(s.phi))); -- The "sign bit" is needed for padding when we left shift later
+      z       <= unsigned(abs(signed(s.z)));
+      dPhi    <= unsigned(s.dPhi);
+      dZ      <= unsigned(s.dZ);
+      invdPhi <= unsigned(ramInv(to_integer(unsigned(s.dPhi))));
+      invdZ   <= unsigned(ramInv(to_integer(unsigned(s.dZ))));
   
       -- clk 2: Check if consistent stub
-      if shift_left( '0' & abs( phi ), 1 ) < dPhi and shift_left( '0' & abs( z ), 1 ) < dZ then -- Check that the residuals are smaller than half the resolution
+      if shift_left( phi, 1 ) < dPhi and shift_left( z, 1 ) < dZ then -- Check that the residuals are smaller than half the resolution
         consistentStubs( k ) <= '1';
       end if;
   
       -- clk 2: Calculate the chi2
-      chi2_phi_tmp <= unsigned(resize( phi * invdPhi * phi * invdPhi, widthDRchi2));
-      chi2_z_tmp <= unsigned(resize( z * invdZ * z * invdZ, widthDRchi2)); 
-      -- Technically should be divided by 2 because of the number of degrees of freedom
+      chi2_phi_tmp <= resize( phi * invdPhi * phi * invdPhi, widthDRchi2);
+      chi2_z_tmp <= resize( z * invdZ * z * invdZ, widthDRchi2); 
+      -- Technically should be divided by 2 because of the number of degrees of freedom but doesn't matter atm
 
       -- clk 3: Add phi and z chi2
       chi2_tmp( k ) <= chi2_phi_tmp + chi2_z_tmp;
+
+      -- Reset
+      if t_in.reset = '1' then
+        chi2_phi_tmp <= ( others => '0' );
+        chi2_z_tmp  <= ( others => '0' );
+        chi2_tmp( k ) <= ( others => '0' );
+        consistentStubs( k ) <= '0';
+      end if;
 
     end if; -- clk
     end process;
@@ -211,15 +224,15 @@ entity track_conversion is
       end loop;
       
       -- clk 4: Set values to track
-      t <= ( t_sr( 4 - 1 ).reset, t_sr( 4 - 1 ).valid, '0', t_sr( 4 - 1 ).lastTrack, t_sr( 4 - 1 ).inv2R, t_sr( 4 - 1 ).phiT, t_sr( 4 - 1 ).zT, std_logic_vector(chi2_sum_tmp), noConsistentStubs, t_sr( 4 - 1 ).stubs );
+      t <= ( t_array( 4 - 1 ).reset, t_array( 4 - 1 ).valid, '0', t_array( 4 - 1 ).lastTrack, t_array( 4 - 1 ).inv2R, t_array( 4 - 1 ).phiT, t_array( 4 - 1 ).zT, std_logic_vector(chi2_sum_tmp), noConsistentStubs, t_array( 4 - 1 ).stubs );
 
-      -- if t_in.reset = '1' then
-      --   t <= nulll;
-      --   t_sr <= ( others => nulll );
-      --   chi2_tmp <= ( others => ( others => '0' ) );
-      --   consistentStubs <= ( others => '0');
-      --   noConsistentStubs <= (others => '0');
-      -- end if;
+      -- Reset
+      if t_in.reset = '1' then
+        t <= nulll;
+        noConsistentStubs <= (others => '0');
+        stub_count_tmp := ( others => '0' );
+        chi2_sum_tmp := ( others => '0' );
+      end if;
 
     end if;
   end process;
