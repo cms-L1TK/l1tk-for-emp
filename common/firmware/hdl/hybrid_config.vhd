@@ -174,9 +174,9 @@ constant numLinksTB: natural := 1 + maxNumProjectionLayers;
 
 -- DR
 
-constant numNodesDR          : natural := 12;
+constant numNodesDR          : natural :=  1; -- no pT bins
 constant minSharedStubs      : natural :=  3;
-constant numComparisonModules: natural := 32; -- was 16
+constant numComparisonModules: natural := 32; -- was 16 when we had 12 pT bins
 
 -- KF
 

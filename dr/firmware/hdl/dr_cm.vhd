@@ -39,9 +39,9 @@ end function;
 function f_killCM( track: t_track; cm_track: t_track) return boolean is
   variable killCM: boolean := false;
 begin
-  if unsigned(cm_track.noConsistentStubs) < unsigned(track.noConsistentStubs) then
+  if unsigned(cm_track.nConsistentStubs) < unsigned(track.nConsistentStubs) then
     killCM := true;
-  elsif signed(cm_track.chi2) > signed(track.chi2) and signed(cm_track.noConsistentStubs) = signed(track.noConsistentStubs) then
+  elsif signed(cm_track.chi2) > signed(track.chi2) and signed(cm_track.nConsistentStubs) = signed(track.nConsistentStubs) then
     killCM := true;
   end if;
   return track.valid = '1' and track.cm = '0' and cm_track.valid = '1' and killCM;

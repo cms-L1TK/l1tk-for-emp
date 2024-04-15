@@ -22,7 +22,7 @@ record
   phiT      : std_logic_vector( widthDRphiT   - 1 downto 0 );
   zT        : std_logic_vector( widthDRzT     - 1 downto 0 );
   chi2      : std_logic_vector( widthDRchi2   - 1 downto 0 );
-  noConsistentStubs: std_logic_vector( widthDRConsistentStubs - 1 downto 0);
+  nConsistentStubs: std_logic_vector( widthDRConsistentStubs - 1 downto 0);
   stubs : t_stubsDRin( numLayers - 1 downto 0 );
 end record;
 type t_tracks is array ( natural range <> ) of t_track;
@@ -97,15 +97,18 @@ entity track_conversion is
   end;
   
   architecture rtl of track_conversion is
-  
+
+  -- Latency of this track conversion thingy
+  constant latency: natural := 5;
+
   -- Initialise RAM for division
-  attribute ram_style: string;
   signal ramInv: t_ramInv := init_ramInv;
+  attribute ram_style: string;
   attribute ram_style of ramInv: signal is "block";
   
   -- Tracks storage
-  signal t   : t_track := nulll;
-  signal t_array: t_tracks( 0 to 5 - 1 ) := ( others => nulll ); -- latency of this 
+  signal t      : t_track := nulll;
+  signal t_array: t_tracks( 0 to latency - 1 ) := ( others => nulll ); -- latency of this 
   
   -- Signals for chi2
   type chi2_tmps is array ( 0 to numLayers - 1 ) of unsigned( widthDRchi2 - 1 downto 0 );
@@ -114,7 +117,7 @@ entity track_conversion is
   -- Signals for number of consistent stubs
   type nStubsArray is array ( 0 to 1 ) of std_logic_vector( widthDRConsistentStubs - 1 downto 0 );
   signal consistentStubs: std_logic_vector( 0 to numLayers - 1 ) := ( others => '0'); -- Each bit represent a consistent stub
-  signal noConsistentStubs: nStubsArray := ( others => ( others => '0' ) ); -- The number of consistent stubs, i.e. the number of 1s in the above vector
+  signal nConsistentStubs: nStubsArray := ( others => ( others => '0' ) ); -- The number of consistent stubs, i.e. the number of 1s in the above vector
   
   begin
   
@@ -122,7 +125,7 @@ entity track_conversion is
   t_array( 0 ) <= ( t_in.reset, t_in.valid, '0', t_in.lastTrack, t_in.inv2R, t_in.phiT, t_in.zT, ( others => '0' ), ( others => '0' ), t_in.stubs );
   t_out <= t;
 
-  g_shift : for i in 0 to 5 - 2 generate -- 4 = latency of this thing
+  g_shift : for i in 0 to latency - 2 generate
   begin
     process ( clk ) is
     begin
@@ -143,24 +146,24 @@ entity track_conversion is
   g_stub: for k in t_array( 0 ).stubs'range generate
 
     -- clk 1
-    signal phi    : unsigned( widthDRphi - 2 downto 0)      := ( others => '0' ); -- Only need absolute value
-    signal z      : unsigned( widthDRz - 2 downto 0)        := ( others => '0' ); -- Only need absolute value
+    signal phi    : unsigned( widthDRphi  - 2 downto 0) := ( others => '0' ); -- Only need absolute value
+    signal z      : unsigned( widthDRz    - 2 downto 0) := ( others => '0' ); -- Only need absolute value
     signal dPhi   : unsigned( widthDRdPhi - 1 downto 0) := ( others => '0' );
-    signal dZ     : unsigned( widthDRdZ - 1 downto 0)   := ( others => '0' );
-    signal invdPhi: unsigned(widthDRinvdZ - 1 downto 0)     := ( others => '0' ); -- Use dZ width due to ramInv
-    signal invdZ  : unsigned(widthDRinvdZ - 1 downto 0)     := ( others => '0' );
+    signal dZ     : unsigned( widthDRdZ   - 1 downto 0) := ( others => '0' );
+    signal invdPhi: unsigned(widthDRinvdZ - 1 downto 0) := ( others => '0' ); -- Use dZ width due to ramInv
+    signal invdZ  : unsigned(widthDRinvdZ - 1 downto 0) := ( others => '0' );
   
     -- clk 2
     constant widthPhiDiv: integer := widthDRphi + widthDRinvdZ - 1;
-    constant widthZDiv  : integer := widthDRz + widthDRinvdZ - 1;
+    constant widthZDiv  : integer := widthDRz   + widthDRinvdZ - 1;
     signal phi_div_tmp: unsigned(widthPhiDiv - 1 downto 0) := ( others => '0' ); -- choose bit widths
-    signal z_div_tmp  : unsigned(widthZDiv - 1 downto 0) := ( others => '0' );
+    signal z_div_tmp  : unsigned(widthZDiv   - 1 downto 0) := ( others => '0' );
 
     -- clk 3
     constant widthChi2Phi: integer := widthPhiDiv * 2;
     constant widthChi2Z  : integer := widthZDiv * 2;
     signal chi2_phi_tmp: unsigned(widthChi2Phi - 1 downto 0) := ( others => '0' );
-    signal chi2_z_tmp  : unsigned(widthChi2Z - 1 downto 0) := ( others => '0' );
+    signal chi2_z_tmp  : unsigned(widthChi2Z   - 1 downto 0) := ( others => '0' );
   
   begin
     process ( clk ) is
@@ -174,12 +177,12 @@ entity track_conversion is
       consistentStubs( k ) <= '0';
 
       -- clk 1: Read values from stub and RAM
-      phi     <= unsigned(abs(s.phi)); -- The "sign bit" is needed for padding when we left shift later
-      z       <= unsigned(abs(s.z));
-      dPhi    <= unsigned(s.dPhi);
-      dZ      <= unsigned(s.dZ);
-      invdPhi <= unsigned(ramInv(uint(s.dPhi)));
-      invdZ   <= unsigned(ramInv(uint(s.dZ)));
+      phi     <= unsigned( abs( s.phi ) ); -- The "sign bit" is needed for padding when we left shift later
+      z       <= unsigned( abs( s.z ) );
+      dPhi    <= unsigned( s.dPhi );
+      dZ      <= unsigned( s.dZ );
+      invdPhi <= unsigned( ramInv( uint( s.dPhi ) ) );
+      invdZ   <= unsigned( ramInv( uint( s.dZ ) ) );
   
       -- clk 2: Check if consistent stub
       if phi & '0' < dPhi and z & '0' < dZ then -- Check that the residuals are smaller than half the resolution
@@ -195,7 +198,7 @@ entity track_conversion is
       chi2_z_tmp   <= z_div_tmp   * z_div_tmp;
       -- Technically should be divided by 2 because of the number of degrees of freedom but doesn't matter atm
 
-      -- clk 3: Add phi and z chi2
+      -- clk 4: Add phi and z chi2
       chi2_tmp( k ) <= resize( chi2_phi_tmp + chi2_z_tmp, widthDRchi2 );
 
       -- Reset
@@ -216,8 +219,6 @@ entity track_conversion is
   -- Save values to output track
   process ( clk ) is
 
-  -- clk 3
-  variable stub_count_tmp: unsigned( widthDRConsistentStubs - 1 downto 0 ) := ( others => '0' );
   -- clk 4
   variable chi2_sum_tmp: unsigned( widthDRchi2 - 1 downto 0 ) := ( others => '0' );
 
@@ -225,16 +226,10 @@ entity track_conversion is
     if rising_edge( clk ) then
 
       -- clk 3: Sum the number of consistent stubs
-      stub_count_tmp := ( others => '0' );
-      for k in 0 to numLayers - 1 loop
-        if consistentStubs( k ) = '1' then
-          stub_count_tmp := stub_count_tmp + 1;
-        end if;
-      end loop;
-        noConsistentStubs( 0 ) <= std_logic_vector(stub_count_tmp);
+      nConsistentStubs( 0 ) <= stdu( count( consistentStubs, '1' ), widthDRConsistentStubs );
 
-      -- clk 4: Shift the noConsistentStubs
-      noConsistentStubs( 1 ) <= noConsistentStubs( 0 );
+      -- clk 4: Shift the nConsistentStubs
+      nConsistentStubs( 1 ) <= nConsistentStubs( 0 );
 
       -- clk 5: Sum the temporary chi2 values
       chi2_sum_tmp := ( others => '0' );
@@ -243,13 +238,12 @@ entity track_conversion is
       end loop;
       
       -- clk 5: Set values to track
-      t <= ( t_array( 5 - 1 ).reset, t_array( 5 - 1 ).valid, '0', t_array( 5 - 1 ).lastTrack, t_array( 5 - 1 ).inv2R, t_array( 5 - 1 ).phiT, t_array( 5 - 1 ).zT, std_logic_vector( chi2_sum_tmp ), noConsistentStubs( 1 ), t_array( 5 - 1 ).stubs );
+      t <= ( t_array( latency - 1 ).reset, t_array( latency - 1 ).valid, '0', t_array( latency - 1 ).lastTrack, t_array( latency - 1 ).inv2R, t_array( latency - 1 ).phiT, t_array( latency - 1 ).zT, std_logic_vector( chi2_sum_tmp ), nConsistentStubs( 1 ), t_array( latency - 1 ).stubs );
 
       -- Reset
       if t_in.reset = '1' then
         t <= nulll;
-        noConsistentStubs <= ( others => (others => '0' ) );
-        stub_count_tmp := ( others => '0' );
+        nConsistentStubs <= ( others => (others => '0' ) );
         chi2_sum_tmp := ( others => '0' );
       end if;
 
