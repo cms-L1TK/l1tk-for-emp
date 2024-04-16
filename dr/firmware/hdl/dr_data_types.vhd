@@ -9,8 +9,8 @@ use ieee.numeric_std.all;
 package dr_data_types is
 
 -- RAM things
-type t_ramInv is array ( 0 to 2 ** widthDRdZ - 1 ) of std_logic_vector( widthDRinvdZ - 1 downto 0 ); -- use width of dZ as it is wider than dPhi
-function init_ramInv return t_ramInv;
+type t_ramInv2 is array ( 0 to 2 ** widthDRdZ - 1 ) of std_logic_vector( widthDRinvdZ2 - 1 downto 0 ); -- use width of dZ as it is wider than dPhi
+function init_ramInv2 return t_ramInv2;
 
 type t_track is
 record
@@ -58,17 +58,17 @@ begin
   return res;
 end function;
 
-function init_ramInv return t_ramInv is
-  variable ram: t_ramInv := ( others => ( others => '0' ) );
-  variable inv: real;
+function init_ramInv2 return t_ramInv2 is
+  variable ram: t_ramInv2 := ( others => ( others => '0' ) );
+  variable inv2: real;
 begin
   for i in ram'range loop
       if i = 0 then
         ram( i ) := ( others => '1' ); -- Division by 0...
         next;
       end if;
-      inv := 1.0 / real( i ) * real( 2 ** widthDRinvdZ - 1); -- left shift with the number of bits that is representing the inverse
-      ram( i ) := std_logic_vector( to_unsigned( integer( inv ), widthDRinvdZ) );
+      inv2 := 1.0 / real( i ) ** 2 * real( 2 ** widthDRinvdZ2 - 1); -- left shift with the number of bits that is representing the inverse
+      ram( i ) := std_logic_vector( to_unsigned( integer( inv2 ), widthDRinvdZ2) );
   end loop;
   return ram;
 end function;
@@ -102,9 +102,9 @@ entity track_conversion is
   constant latency: natural := 5;
 
   -- Initialise RAM for division
-  signal ramInv: t_ramInv := init_ramInv;
+  signal ramInv2: t_ramInv2 := init_ramInv2;
   attribute ram_style: string;
-  attribute ram_style of ramInv: signal is "block";
+  attribute ram_style of ramInv2: signal is "block";
   
   -- Tracks storage
   signal t      : t_track := nulll;
@@ -150,20 +150,21 @@ entity track_conversion is
     signal z      : unsigned( widthDRz    - 2 downto 0) := ( others => '0' ); -- Only need absolute value
     signal dPhi   : unsigned( widthDRdPhi - 1 downto 0) := ( others => '0' );
     signal dZ     : unsigned( widthDRdZ   - 1 downto 0) := ( others => '0' );
-    signal invdPhi: unsigned(widthDRinvdZ - 1 downto 0) := ( others => '0' ); -- Use dZ width due to ramInv
-    signal invdZ  : unsigned(widthDRinvdZ - 1 downto 0) := ( others => '0' );
+    signal invdPhi2: unsigned(widthDRinvdZ2 - 1 downto 0) := ( others => '0' ); -- Use dZ width due to ramInv2
+    signal invdZ2  : unsigned(widthDRinvdZ2 - 1 downto 0) := ( others => '0' );
   
     -- clk 2
-    constant widthPhiDiv: integer := widthDRphi + widthDRinvdZ - 1;
-    constant widthZDiv  : integer := widthDRz   + widthDRinvdZ - 1;
-    signal phi_div_tmp: unsigned(widthPhiDiv - 1 downto 0) := ( others => '0' ); -- choose bit widths
-    signal z_div_tmp  : unsigned(widthZDiv   - 1 downto 0) := ( others => '0' );
+    constant widthPhi2: integer := widthDRphi * 2 - 2;
+    constant widthZ2  : integer := widthDRz * 2 - 2;
+    signal phi2_tmp: unsigned(widthPhi2 - 1 downto 0) := ( others => '0' ); -- choose bit widths
+    signal z2_tmp  : unsigned(widthZ2   - 1 downto 0) := ( others => '0' );
 
     -- clk 3
-    constant widthChi2Phi: integer := widthPhiDiv * 2;
-    constant widthChi2Z  : integer := widthZDiv * 2;
-    signal chi2_phi_tmp: unsigned(widthChi2Phi - 1 downto 0) := ( others => '0' );
-    signal chi2_z_tmp  : unsigned(widthChi2Z   - 1 downto 0) := ( others => '0' );
+    constant widthChi2Phi: integer := widthPhi2 + widthDRinvdZ2;
+    constant widthChi2Z  : integer := widthZ2 + widthDRinvdZ2;
+    signal chi2_phi_tmp: unsigned( widthChi2Phi - 1 downto 0 ) := ( others => '0' );
+    signal chi2_z_tmp  : unsigned( widthChi2Z   - 1 downto 0 ) := ( others => '0' );
+
   
   begin
     process ( clk ) is
@@ -181,21 +182,23 @@ entity track_conversion is
       z       <= unsigned( abs( s.z ) );
       dPhi    <= unsigned( s.dPhi );
       dZ      <= unsigned( s.dZ );
-      invdPhi <= unsigned( ramInv( uint( s.dPhi ) ) );
-      invdZ   <= unsigned( ramInv( uint( s.dZ ) ) );
-  
+
       -- clk 2: Check if consistent stub
       if phi & '0' < dPhi and z & '0' < dZ then -- Check that the residuals are smaller than half the resolution
         consistentStubs( k ) <= '1';
       end if;
   
-      -- clk 2: Calculate phi/dPhi
-      phi_div_tmp <= phi * invdPhi;
-      z_div_tmp   <=   z * invdZ;
+      -- clk 2: Calculate squared phi and z
+      phi2_tmp <= phi * phi;
+      z2_tmp   <=   z * z;
 
-      -- clk 3: Calculate the chi2
-      chi2_phi_tmp <= phi_div_tmp * phi_div_tmp;
-      chi2_z_tmp   <= z_div_tmp   * z_div_tmp;
+      -- clk 2: Read the inverse RAM
+      invdPhi2 <= unsigned( ramInv2( to_integer( dPhi ) ) );
+      invdZ2   <= unsigned( ramInv2( to_integer( dZ ) ) );
+
+      -- clk 3: Calculate the chi2 seperately
+      chi2_phi_tmp <= phi2_tmp * invdPhi2;
+      chi2_z_tmp   <= z2_tmp   * invdZ2;
       -- Technically should be divided by 2 because of the number of degrees of freedom but doesn't matter atm
 
       -- clk 4: Add phi and z chi2
@@ -203,8 +206,8 @@ entity track_conversion is
 
       -- Reset
       if t_in.reset = '1' then
-        phi_div_tmp          <= ( others => '0' );
-        z_div_tmp            <= ( others => '0' );
+        phi2_tmp          <= ( others => '0' );
+        z2_tmp            <= ( others => '0' );
         chi2_phi_tmp         <= ( others => '0' );
         chi2_z_tmp           <= ( others => '0' );
         chi2_tmp( k )        <= ( others => '0' );

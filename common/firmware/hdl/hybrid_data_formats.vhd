@@ -103,7 +103,7 @@ constant widthDRphi   : natural := width( rangeDRphi  / baseDRphi  ); -- phi res
 constant widthDRz     : natural := width( rangeDRz    / baseDRz    ); -- z residual
 constant widthDRdPhi  : natural := width( rangeDRdPhi / baseDRdPhi );
 constant widthDRdZ    : natural := width( rangeDRdZ   / baseDRdZ   );
-constant widthDRinvdZ : natural := widthDRdZ * 2; -- Can go down to 10 bits without getting errors in sim...
+constant widthDRinvdZ2 : natural := 18; -- 18 or 27 since we have 27 x 18 DSP
 
 constant widthDRStubId : natural := 10; -- or 7?
 constant widthDRLayerId: natural := 4;
