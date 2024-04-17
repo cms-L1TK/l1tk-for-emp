@@ -4,14 +4,14 @@ use ieee.std_logic_1164.all;
 use work.hybrid_config.all;
 use work.hybrid_data_formats.all;
 use work.hybrid_data_types.all;
--- use work.hybrid_tools.all;
+use work.hybrid_tools.all;
 use ieee.numeric_std.all;
 
 package dr_data_types is
 
 -- RAM things
-constant widthDRinvRAM        : natural := 18; -- 18 or 27 since we have 27 x 18 DSP
-constant widthDRinvAddressRAM : natural := widthDRdZ; -- max(widthDRdZ, widthDRdPhi);
+constant widthDRinvRAM        : natural := 18; -- Because it would fit in an 18k BRAM (when the address is 10 bits) and we have 27 x 18 bits DSPs
+constant widthDRinvAddressRAM : natural := max(widthDRdZ, widthDRdPhi);
 type t_ramInv2 is array ( 0 to 2 ** widthDRinvAddressRAM - 1 ) of unsigned( widthDRinvRAM - 1 downto 0 );
 function init_ramInv2 return t_ramInv2;
 
@@ -33,8 +33,8 @@ function nulll return t_track;
 
 type t_stub is
 record
-    valid : std_logic;
-    stubId: std_logic_vector( widthDRstubId - 1 downto 0 );
+  valid : std_logic;
+  stubId: std_logic_vector( widthDRstubId - 1 downto 0 );
 end record;
 type t_stubs is array ( natural range <> ) of t_stub;
 function nulll return t_stub;
@@ -71,7 +71,7 @@ begin
         next;
       end if;
       inv2 := 1.0 / real( i ) ** 2 * real( 2 ** widthDRinvRAM - 1); -- left shift with the number of bits that is representing the inverse
-      ram( i ) := to_unsigned( integer( inv2 ), widthDRinvRAM);
+      ram( i ) := to_unsigned( integer( inv2 ), widthDRinvRAM );
   end loop;
   return ram;
 end function;
@@ -120,7 +120,7 @@ entity track_conversion is
   
   -- Signals for number of consistent stubs
   type nStubsArray is array ( 0 to 1 ) of std_logic_vector( widthDRConsistentStubs - 1 downto 0 );
-  signal consistentStubs: std_logic_vector( 0 to numLayers - 1 ) := ( others => '0'); -- Each bit represent a consistent stub
+  signal consistentStubs: std_logic_vector( 0 to numLayers - 1 ) := ( others => '0' ); -- Each bit represent a consistent stub
   signal nConsistentStubs: nStubsArray := ( others => ( others => '0' ) ); -- The number of consistent stubs, i.e. the number of 1s in the above vector
   
   begin
@@ -136,11 +136,6 @@ entity track_conversion is
     if rising_edge( clk ) then
 
       t_array( i + 1 ) <= t_array( i );
-
-      -- Reset - doesn't work
-      -- if t_in.reset = '1' then
-      --   t_array( i + 1 ) <= nulll;
-      -- end if;
 
     end if;
   end process;
@@ -210,16 +205,6 @@ entity track_conversion is
       -- clk 4: Add phi and z chi2
       chi2_tmp( k ) <= resize( chi2_phi_tmp + chi2_z_tmp, widthDRchi2 );
 
-      -- Reset - doesn't meet timing if used
-      -- if t_in.reset = '1' then
-      --   phi2_tmp             <= ( others => '0' );
-      --   z2_tmp               <= ( others => '0' );
-      --   chi2_phi_tmp         <= ( others => '0' );
-      --   chi2_z_tmp           <= ( others => '0' );
-      --   chi2_tmp( k )        <= ( others => '0' );
-      --   consistentStubs( k ) <= '0';
-      -- end if;
-
     end if; -- clk
     end process;
   end generate;
@@ -248,13 +233,6 @@ entity track_conversion is
       
       -- clk 5: Set values to track
       t <= ( t_array( latency - 1 ).reset, t_array( latency - 1 ).valid, '0', t_array( latency - 1 ).lastTrack, t_array( latency - 1 ).inv2R, t_array( latency - 1 ).phiT, t_array( latency - 1 ).zT, std_logic_vector( chi2_sum_tmp ), nConsistentStubs( 1 ), t_array( latency - 1 ).stubs );
-
-      -- Reset
-      -- if t_in.reset = '1' then
-      --   t <= nulll;
-      --   nConsistentStubs <= ( others => (others => '0' ) );
-      --   chi2_sum_tmp := ( others => '0' );
-      -- end if;
 
     end if;
   end process;

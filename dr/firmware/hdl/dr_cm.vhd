@@ -36,13 +36,13 @@ begin
 end function;
 
 -- Compares the chi2 and number of consistent stubs of a track and a CM
-function f_killCM( track: t_track; cm_track: t_track) return boolean is
+function f_killCM( track: t_track; cm_track: t_track ) return boolean is
   variable killCM: boolean := false;
 begin
   if track.valid = '1' and track.cm = '0' and cm_track.valid = '1' then 
-    if unsigned(cm_track.nConsistentStubs) < unsigned(track.nConsistentStubs) then
+    if unsigned( cm_track.nConsistentStubs ) < unsigned( track.nConsistentStubs ) then
       killCM := true;
-    elsif unsigned(cm_track.chi2) > unsigned(track.chi2) and cm_track.nConsistentStubs = track.nConsistentStubs then
+    elsif unsigned( cm_track.chi2 ) > unsigned( track.chi2 ) and cm_track.nConsistentStubs = track.nConsistentStubs then
       killCM := true;
     end if;
     return killCM;
@@ -58,7 +58,7 @@ din     <= cm_din;
 cm_dout <= dout;
 
 kill    <= '1' when f_equalEnough( din, cm ) else '0';
-kill_cm <= '1' when f_killCM( din, cm)       else '0'; -- kill the track with the lowest chi2
+kill_cm <= '1' when f_killCM( din, cm )      else '0'; -- kill the track with the lowest chi2
 
 process ( clk ) is
 begin

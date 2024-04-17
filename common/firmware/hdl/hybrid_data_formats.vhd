@@ -69,7 +69,7 @@ constant widthDRinv2R : natural := width( numBinsHTinv2R );
 constant widthDRzT    : natural := width( numBinsZHTZT  ** numStagesZHT    );
 constant widthDRcot   : natural := width( numBinsZHTCot ** numStagesZHT    );
 constant widthDRr     : natural := widthDTCr;
-constant widthDRchi2  : natural := 42; -- ??
+constant widthDRchi2  : natural := 42;
 constant widthDRConsistentStubs : natural := width( numLayers );
 
 constant rangeDRinv2R: real := rangeDTCinv2R;

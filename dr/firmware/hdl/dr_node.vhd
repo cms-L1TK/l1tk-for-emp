@@ -15,7 +15,6 @@ end;
 architecture rtl of dr_node is
 
 signal tracks: t_tracks( numComparisonModules downto 0 ) := ( others => nulll );
-signal tc_dout: t_track; -- remove?
 
 component dr_cm
 port (
@@ -35,9 +34,9 @@ end component;
 
 begin
 
-tc: track_conversion port map ( clk, node_din, tc_dout );
-tracks( 0 ) <= tc_dout; -- does this help with timing?! I don't knowwwwwwwwww
 node_dout <= conv( tracks( numComparisonModules ) );
+
+tc: track_conversion port map ( clk, node_din, tracks( 0 ) );
 
 g_cm: for k in 0 to numComparisonModules - 1 generate
 
