@@ -27,8 +27,8 @@ end component;
 component track_conversion
 port (
   clk: in std_logic;
-  t_in: in t_trackDRin;
-  t_out: out t_track
+  trk_in: in t_trackDRin;
+  trk_out: out t_track
 );
 end component;
 

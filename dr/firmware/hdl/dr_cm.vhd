@@ -39,16 +39,12 @@ end function;
 function f_killCM( track: t_track; cm_track: t_track ) return boolean is
   variable killCM: boolean := false;
 begin
-  if track.valid = '1' and track.cm = '0' and cm_track.valid = '1' then 
-    if unsigned( cm_track.nConsistentStubs ) < unsigned( track.nConsistentStubs ) then
-      killCM := true;
-    elsif unsigned( cm_track.chi2 ) > unsigned( track.chi2 ) and cm_track.nConsistentStubs = track.nConsistentStubs then
-      killCM := true;
-    end if;
-    return killCM;
-  else
-    return false;
+  if unsigned( cm_track.nConsistentStubs ) < unsigned( track.nConsistentStubs ) then
+    killCM := true;
+  elsif unsigned( cm_track.chi2 ) > unsigned( track.chi2 ) and cm_track.nConsistentStubs = track.nConsistentStubs then
+    killCM := true;
   end if;
+  return killCM;
 end function;
 
 begin
@@ -67,7 +63,7 @@ if rising_edge( clk ) then
   dout <= din;
 
   -- Add track to CM
-  if din.valid = '1' and din.cm = '0' and cm.valid = '0' and din.reset = '0' then
+  if din.valid = '1' and din.cm = '0' and cm.valid = '0' then
     cm    <= din;
     cm.cm <= '1';
     dout  <= nulll; -- don't read out CM track until last track has arrived
