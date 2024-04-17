@@ -67,14 +67,14 @@ if rising_edge( clk ) then
   dout <= din;
 
   -- Add track to CM
-  if din.valid = '1' and din.cm = '0' and cm.valid = '0' then -- and din.lastTrack = '0'
+  if din.valid = '1' and din.cm = '0' and cm.valid = '0' and din.reset = '0' then
     cm    <= din;
     cm.cm <= '1';
     dout  <= nulll; -- don't read out CM track until last track has arrived
   end if;
 
   -- Choose which track to kill
-  if kill = '1' then
+  if kill = '1' and din.reset = '0' then
     if kill_cm = '1' then
       cm    <= din;
       cm.cm <= '1';
