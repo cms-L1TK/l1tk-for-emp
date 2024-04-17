@@ -4,26 +4,29 @@ use ieee.std_logic_1164.all;
 use work.hybrid_config.all;
 use work.hybrid_data_formats.all;
 use work.hybrid_data_types.all;
+-- use work.hybrid_tools.all;
 use ieee.numeric_std.all;
 
 package dr_data_types is
 
 -- RAM things
-type t_ramInv2 is array ( 0 to 2 ** widthDRdZ - 1 ) of std_logic_vector( widthDRinvdZ2 - 1 downto 0 ); -- use width of dZ as it is wider than dPhi
+constant widthDRinvRAM        : natural := 18; -- 18 or 27 since we have 27 x 18 DSP
+constant widthDRinvAddressRAM : natural := widthDRdZ; -- max(widthDRdZ, widthDRdPhi);
+type t_ramInv2 is array ( 0 to 2 ** widthDRinvAddressRAM - 1 ) of unsigned( widthDRinvRAM - 1 downto 0 );
 function init_ramInv2 return t_ramInv2;
 
 type t_track is
 record
-  reset     : std_logic;
-  valid     : std_logic;
-  cm        : std_logic;
-  lastTrack : std_logic;
-  inv2R     : std_logic_vector( widthDRinv2R  - 1 downto 0 );
-  phiT      : std_logic_vector( widthDRphiT   - 1 downto 0 );
-  zT        : std_logic_vector( widthDRzT     - 1 downto 0 );
-  chi2      : std_logic_vector( widthDRchi2   - 1 downto 0 );
-  nConsistentStubs: std_logic_vector( widthDRConsistentStubs - 1 downto 0);
-  stubs : t_stubsDRin( numLayers - 1 downto 0 );
+  reset           : std_logic;
+  valid           : std_logic;
+  cm              : std_logic;
+  lastTrack       : std_logic;
+  inv2R           : std_logic_vector( widthDRinv2R           - 1 downto 0 );
+  phiT            : std_logic_vector( widthDRphiT            - 1 downto 0 );
+  zT              : std_logic_vector( widthDRzT              - 1 downto 0 );
+  chi2            : std_logic_vector( widthDRchi2            - 1 downto 0 );
+  nConsistentStubs: std_logic_vector( widthDRConsistentStubs - 1 downto 0 );
+  stubs           : t_stubsDRin( numLayers - 1 downto 0 );
 end record;
 type t_tracks is array ( natural range <> ) of t_track;
 function nulll return t_track;
@@ -67,8 +70,8 @@ begin
         ram( i ) := ( others => '1' ); -- Division by 0...
         next;
       end if;
-      inv2 := 1.0 / real( i ) ** 2 * real( 2 ** widthDRinvdZ2 - 1); -- left shift with the number of bits that is representing the inverse
-      ram( i ) := std_logic_vector( to_unsigned( integer( inv2 ), widthDRinvdZ2) );
+      inv2 := 1.0 / real( i ) ** 2 * real( 2 ** widthDRinvRAM - 1); -- left shift with the number of bits that is representing the inverse
+      ram( i ) := to_unsigned( integer( inv2 ), widthDRinvRAM);
   end loop;
   return ram;
 end function;
@@ -111,6 +114,7 @@ entity track_conversion is
   signal t_array: t_tracks( 0 to latency - 1 ) := ( others => nulll ); -- latency of this 
   
   -- Signals for chi2
+  -- constant widthChi2tmp : integer := 39;
   type chi2_tmps is array ( 0 to numLayers - 1 ) of unsigned( widthDRchi2 - 1 downto 0 );
   signal chi2_tmp : chi2_tmps := ( others => ( others => '0' ) );
   
@@ -133,7 +137,7 @@ entity track_conversion is
 
       t_array( i + 1 ) <= t_array( i );
 
-      -- Reset
+      -- Reset - doesn't work
       -- if t_in.reset = '1' then
       --   t_array( i + 1 ) <= nulll;
       -- end if;
@@ -146,24 +150,26 @@ entity track_conversion is
   g_stub: for k in t_array( 0 ).stubs'range generate
 
     -- clk 1
-    signal phi    : unsigned( widthDRphi  - 2 downto 0) := ( others => '0' ); -- Only need absolute value
-    signal z      : unsigned( widthDRz    - 2 downto 0) := ( others => '0' ); -- Only need absolute value
-    signal dPhi   : unsigned( widthDRdPhi - 1 downto 0) := ( others => '0' );
-    signal dZ     : unsigned( widthDRdZ   - 1 downto 0) := ( others => '0' );
-    signal invdPhi2: unsigned(widthDRinvdZ2 - 1 downto 0) := ( others => '0' ); -- Use dZ width due to ramInv2
-    signal invdZ2  : unsigned(widthDRinvdZ2 - 1 downto 0) := ( others => '0' );
+    signal phi  : unsigned( widthDRphi  - 2 downto 0 ); -- Only need absolute value
+    signal z    : unsigned( widthDRz    - 2 downto 0 ); -- Only need absolute value
+    signal dPhi : unsigned( widthDRdPhi - 1 downto 0 );
+    signal dZ   : unsigned( widthDRdZ   - 1 downto 0 );
   
     -- clk 2
     constant widthPhi2: integer := widthDRphi * 2 - 2;
-    constant widthZ2  : integer := widthDRz * 2 - 2;
-    signal phi2_tmp: unsigned(widthPhi2 - 1 downto 0) := ( others => '0' ); -- choose bit widths
-    signal z2_tmp  : unsigned(widthZ2   - 1 downto 0) := ( others => '0' );
+    constant widthZ2  : integer := widthDRz   * 2 - 2;
+
+    signal phi2_tmp: unsigned( widthPhi2     - 1 downto 0 );
+    signal z2_tmp  : unsigned( widthZ2       - 1 downto 0 );
+    signal invdPhi2: unsigned( widthDRinvRAM - 1 downto 0 );
+    signal invdZ2  : unsigned( widthDRinvRAM - 1 downto 0 );
 
     -- clk 3
-    constant widthChi2Phi: integer := widthPhi2 + widthDRinvdZ2;
-    constant widthChi2Z  : integer := widthZ2 + widthDRinvdZ2;
-    signal chi2_phi_tmp: unsigned( widthChi2Phi - 1 downto 0 ) := ( others => '0' );
-    signal chi2_z_tmp  : unsigned( widthChi2Z   - 1 downto 0 ) := ( others => '0' );
+    constant widthChi2Phi: integer := widthPhi2 + widthDRinvRAM;
+    constant widthChi2Z  : integer := widthZ2   + widthDRinvRAM;
+
+    signal chi2_phi_tmp: unsigned( widthChi2Phi - 1 downto 0 );
+    signal chi2_z_tmp  : unsigned( widthChi2Z   - 1 downto 0 );
 
   
   begin
@@ -193,8 +199,8 @@ entity track_conversion is
       z2_tmp   <=   z * z;
 
       -- clk 2: Read the inverse RAM
-      invdPhi2 <= unsigned( ramInv2( to_integer( dPhi ) ) );
-      invdZ2   <= unsigned( ramInv2( to_integer( dZ ) ) );
+      invdPhi2 <= ramInv2( to_integer( dPhi ) );
+      invdZ2   <= ramInv2( to_integer( dZ ) );
 
       -- clk 3: Calculate the chi2 seperately
       chi2_phi_tmp <= phi2_tmp * invdPhi2;
@@ -204,15 +210,15 @@ entity track_conversion is
       -- clk 4: Add phi and z chi2
       chi2_tmp( k ) <= resize( chi2_phi_tmp + chi2_z_tmp, widthDRchi2 );
 
-      -- Reset
-      if t_in.reset = '1' then
-        phi2_tmp          <= ( others => '0' );
-        z2_tmp            <= ( others => '0' );
-        chi2_phi_tmp         <= ( others => '0' );
-        chi2_z_tmp           <= ( others => '0' );
-        chi2_tmp( k )        <= ( others => '0' );
-        consistentStubs( k ) <= '0';
-      end if;
+      -- Reset - doesn't meet timing if used
+      -- if t_in.reset = '1' then
+      --   phi2_tmp             <= ( others => '0' );
+      --   z2_tmp               <= ( others => '0' );
+      --   chi2_phi_tmp         <= ( others => '0' );
+      --   chi2_z_tmp           <= ( others => '0' );
+      --   chi2_tmp( k )        <= ( others => '0' );
+      --   consistentStubs( k ) <= '0';
+      -- end if;
 
     end if; -- clk
     end process;
@@ -244,11 +250,11 @@ entity track_conversion is
       t <= ( t_array( latency - 1 ).reset, t_array( latency - 1 ).valid, '0', t_array( latency - 1 ).lastTrack, t_array( latency - 1 ).inv2R, t_array( latency - 1 ).phiT, t_array( latency - 1 ).zT, std_logic_vector( chi2_sum_tmp ), nConsistentStubs( 1 ), t_array( latency - 1 ).stubs );
 
       -- Reset
-      if t_in.reset = '1' then
-        t <= nulll;
-        nConsistentStubs <= ( others => (others => '0' ) );
-        chi2_sum_tmp := ( others => '0' );
-      end if;
+      -- if t_in.reset = '1' then
+      --   t <= nulll;
+      --   nConsistentStubs <= ( others => (others => '0' ) );
+      --   chi2_sum_tmp := ( others => '0' );
+      -- end if;
 
     end if;
   end process;
