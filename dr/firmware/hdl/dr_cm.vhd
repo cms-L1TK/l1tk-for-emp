@@ -67,7 +67,7 @@ if rising_edge( clk ) then
   dout <= din;
 
   -- Add track to CM
-  if din.valid = '1' and din.cm = '0' and cm.valid = '0' and din.reset = '0' then
+  if din.valid = '1' and din.cm = '0' and cm.valid = '0' then
     cm    <= din;
     cm.cm <= '1';
     dout  <= nulll; -- don't read out CM track until last track has arrived
