@@ -102,12 +102,12 @@ entity track_conversion is
   architecture rtl of track_conversion is
 
   -- Latency of this track conversion thingy
-  constant latency : natural := 8;
+  constant latency : natural := 7;
   constant latency2: natural := 3; -- clks used for nConsistentStubs
   
   -- Tracks storage
   signal trk      : t_track := nulll;
-  signal trk_array: t_tracks( 0 to latency - 1 ) := ( others => nulll ); -- latency of this 
+  signal trks: t_tracks( 0 to latency - 1 ) := ( others => nulll ); -- latency of this 
 
   -- Initialise RAM for division
   signal ramInv2: t_ramInv2 := init_ramInv2;
@@ -124,8 +124,6 @@ entity track_conversion is
   constant widthZ2        : integer := widthDRz   * 2 - 2;
   constant widthChi2Phi   : integer := widthPhi2 + widthDRinvRAM;
   constant widthChi2Z     : integer := widthZ2   + widthDRinvRAM;
-  constant widthChi2PhiSum: integer := widthPhi2 + widthDRinvRAM + width(numLayers);
-  constant widthChi2ZSum  : integer := widthZ2   + widthDRinvRAM + width(numLayers);
   -- constant widthChi2tmp : integer := 39;
 
   type t_dspChi2Phi is
@@ -142,20 +140,16 @@ entity track_conversion is
         res : unsigned( widthChi2Z    - 1 downto 0 );
     end record;
 
-  type t_chi2Phi is array ( 0 to numLayers - 1 ) of unsigned( widthChi2Phi - 1 downto 0 );
-  type t_chi2Z   is array ( 0 to numLayers - 1 ) of unsigned( widthChi2Z   - 1 downto 0 );
+  type t_chi2s is array ( 0 to numLayers - 1 ) of unsigned( widthDRchi2 - 1 downto 0 );
 
-  signal chi2Phi   : t_chi2Phi;
-  signal chi2Z     : t_chi2Z;
-  signal chi2PhiSum: unsigned( widthChi2PhiSum - 1 downto 0 );
-  signal chi2ZSum  : unsigned( widthChi2ZSum - 1 downto 0 );
-  signal chi2Sum   : std_logic_vector( widthDRchi2 - 1 downto 0 );
+  signal chi2s   : t_chi2s;
+  signal chi2Sum : unsigned( widthDRchi2 - 1 downto 0 );
 
 
   begin
   
   -- Store and shift tracks
-  trk_array( 0 ) <= ( trk_in.reset, trk_in.valid, '0', trk_in.lastTrack, trk_in.inv2R, trk_in.phiT, trk_in.zT, ( others => '0' ), ( others => '0' ), trk_in.stubs );
+  trks( 0 ) <= ( trk_in.reset, trk_in.valid, '0', trk_in.lastTrack, trk_in.inv2R, trk_in.phiT, trk_in.zT, ( others => '0' ), ( others => '0' ), trk_in.stubs );
   trk_out <= trk;
 
   g_shift : for i in 0 to latency - 2 generate
@@ -163,34 +157,32 @@ entity track_conversion is
     process ( clk ) is
     begin
     if rising_edge( clk ) then
-
-      trk_array( i + 1 ) <= trk_array( i );
-
+      trks( i + 1 ) <= trks( i );
     end if;
   end process;
   end generate;
 
   -- Loop over all stubs in track
-  g_stub: for k in trk_array( 0 ).stubs'range generate
+  g_stub: for k in trks( 0 ).stubs'range generate
 
-    -- clk 1
-    signal phi  : unsigned( widthDRphi  - 2 downto 0 ); -- Only need absolute value
-    signal z    : unsigned( widthDRz    - 2 downto 0 ); -- Only need absolute value
-    signal dPhi : unsigned( widthDRdPhi - 1 downto 0 );
-    signal dZ   : unsigned( widthDRdZ   - 1 downto 0 );
-  
-    -- clk 2
-    signal phi2    : unsigned( widthPhi2     - 1 downto 0 );
-    signal z2      : unsigned( widthZ2       - 1 downto 0 );
-    signal invdPhi2: unsigned( widthDRinvRAM - 1 downto 0 );
-    signal invdZ2  : unsigned( widthDRinvRAM - 1 downto 0 );
+  -- clk 1
+  signal phi  : unsigned( widthDRphi  - 2 downto 0 ); -- Only need absolute value
+  signal z    : unsigned( widthDRz    - 2 downto 0 ); -- Only need absolute value
+  signal dPhi : unsigned( widthDRdPhi - 1 downto 0 );
+  signal dZ   : unsigned( widthDRdZ   - 1 downto 0 );
 
-    attribute use_dsp: string;
-    attribute use_dsp of phi2: signal is "yes"; -- otherwise 9x9 bits are considered too small for DSP
+  -- clk 2
+  signal phi2    : unsigned( widthPhi2     - 1 downto 0 );
+  signal z2      : unsigned( widthZ2       - 1 downto 0 );
+  signal invdPhi2: unsigned( widthDRinvRAM - 1 downto 0 );
+  signal invdZ2  : unsigned( widthDRinvRAM - 1 downto 0 );
 
-    -- clk 3-4
-    signal dspChi2Phi: t_dspChi2Phi;
-    signal dspChi2Z  : t_dspChi2Z;
+  attribute use_dsp: string;
+  attribute use_dsp of phi2: signal is "yes"; -- otherwise 9x9 bits are considered too small for DSP
+
+  -- clk 3-4
+  signal dspChi2Phi: t_dspChi2Phi;
+  signal dspChi2Z  : t_dspChi2Z;
 
   
   begin
@@ -233,8 +225,7 @@ entity track_conversion is
       -- Technically should be divided by 2 because of the number of degrees of freedom but doesn't matter atm
 
       -- clk 5: Save phi and z chi2
-      chi2Phi( k ) <= dspChi2Phi.res;
-      chi2Z( k )   <= dspChi2Z.res;
+      chi2s( k ) <= resize( dspChi2Phi.res + dspChi2Z.res, widthDRchi2 );
 
     end if; -- clk
     end process;
@@ -256,45 +247,38 @@ entity track_conversion is
   -- Save values to output track
   process ( clk ) is
 
-  -- clk 6
-  variable chi2PhiSum_tmp: unsigned( widthChi2PhiSum - 1 downto 0 ) := ( others => '0' );
-  variable chi2ZSum_tmp  : unsigned( widthChi2ZSum   - 1 downto 0 ) := ( others => '0' );
+  -- clk 7
+  variable chi2Sum_tmp: unsigned( widthDRchi2 - 1 downto 0 ) := ( others => '0' );
 
   begin
-    if rising_edge( clk ) then
+  if rising_edge( clk ) then
 
-      -- clk 3: Sum the number of consistent stubs
-      nConsistentStubs( 0 ) <= stdu( count( consistentStubs, '1' ), widthDRConsistentStubs );
+    -- clk 3: Sum the number of consistent stubs
+    nConsistentStubs( 0 ) <= stdu( count( consistentStubs, '1' ), widthDRConsistentStubs );
 
-      -- clk 6: Sum the temporary chi2 values
-      chi2PhiSum_tmp := ( others => '0' );
-      for k in 0 to numLayers - 1 loop
-        chi2PhiSum_tmp := chi2PhiSum_tmp + chi2Phi( k );
-      end loop;
-      chi2PhiSum <= chi2PhiSum_tmp;
+    -- -- clk 6: Sum phi and z
+    -- chi2Sum <= std_logic_vector( chi2Sum_tmp );
 
-      chi2ZSum_tmp := ( others => '0' );
-      for k in 0 to numLayers - 1 loop
-        chi2ZSum_tmp := chi2ZSum_tmp + chi2Z( k );
-      end loop;
-      chi2ZSum <= chi2ZSum_tmp;
+    -- clk 7: Sum the temporary chi2 values
+    chi2Sum_tmp := ( others => '0' );
+    for k in 0 to numLayers - 1 loop
+      chi2Sum_tmp := chi2Sum_tmp + chi2s( k );
+    end loop;
+    chi2Sum <= chi2Sum_tmp;
 
-      -- clk 7: Sum phi and z
-      chi2Sum <= std_logic_vector( resize( chi2PhiSum + chi2ZSum, widthDRchi2 ) );
+    -- clk 8: Set values to track
+    trk.reset            <= trks( latency - 1 ).reset;
+    trk.valid            <= trks( latency - 1 ).valid;
+    trk.cm               <= '0';
+    trk.lastTrack        <= trks( latency - 1 ).lastTrack;
+    trk.inv2R            <= trks( latency - 1 ).inv2R;
+    trk.phiT             <= trks( latency - 1 ).phiT;
+    trk.zT               <= trks( latency - 1 ).zT;
+    trk.chi2             <= std_logic_vector( chi2Sum );
+    trk.nConsistentStubs <= nConsistentStubs( nConsistentStubs'high );
+    trk.stubs            <= trks( latency - 1 ).stubs;
 
-      -- clk 8: Set values to track
-      trk.reset            <= trk_array( latency - 1 ).reset;
-      trk.valid            <= trk_array( latency - 1 ).valid;
-      trk.cm               <= '0';
-      trk.lastTrack        <= trk_array( latency - 1 ).lastTrack;
-      trk.inv2R            <= trk_array( latency - 1 ).inv2R;
-      trk.phiT             <= trk_array( latency - 1 ).phiT;
-      trk.zT               <= trk_array( latency - 1 ).zT;
-      trk.chi2             <= chi2Sum;
-      trk.nConsistentStubs <= nConsistentStubs( nConsistentStubs'high );
-      trk.stubs            <= trk_array( latency - 1 ).stubs;
-
-    end if;
+  end if;
   end process;
 
 end;
