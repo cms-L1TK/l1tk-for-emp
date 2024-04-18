@@ -94,8 +94,8 @@ use work.hybrid_tools.all;
 entity track_conversion is
   port (
     clk: in std_logic;
-    t_in: in t_trackDRin;
-    t_out: out t_track
+    trk_in: in t_trackDRin;
+    trk_out: out t_track
   );
   end;
   
@@ -110,8 +110,8 @@ entity track_conversion is
   attribute ram_style of ramInv2: signal is "block";
   
   -- Tracks storage
-  signal t      : t_track := nulll;
-  signal t_array: t_tracks( 0 to latency - 1 ) := ( others => nulll ); -- latency of this 
+  signal trk : t_track := nulll;
+  signal trks: t_tracks( 0 to latency - 1 ) := ( others => nulll ); -- latency of this 
   
   -- Signals for chi2
   -- constant widthChi2tmp : integer := 39;
@@ -119,15 +119,15 @@ entity track_conversion is
   signal chi2_tmp : chi2_tmps := ( others => ( others => '0' ) );
   
   -- Signals for number of consistent stubs
-  type nStubsArray is array ( 0 to 1 ) of std_logic_vector( widthDRConsistentStubs - 1 downto 0 );
-  signal consistentStubs: std_logic_vector( 0 to numLayers - 1 ) := ( others => '0' ); -- Each bit represent a consistent stub
-  signal nConsistentStubs: nStubsArray := ( others => ( others => '0' ) ); -- The number of consistent stubs, i.e. the number of 1s in the above vector
+  type t_nStubs is array ( 0 to 1 ) of std_logic_vector( widthDRConsistentStubs - 1 downto 0 );
+  signal consistentStubs : std_logic_vector( 0 to numLayers - 1 ) := ( others => '0' ); -- Each bit represent a consistent stub
+  signal nConsistentStubs: t_nStubs := ( others => ( others => '0' ) ); -- The number of consistent stubs, i.e. the number of 1s in the above vector
   
   begin
   
   -- Store and shift tracks
-  t_array( 0 ) <= ( t_in.reset, t_in.valid, '0', t_in.lastTrack, t_in.inv2R, t_in.phiT, t_in.zT, ( others => '0' ), ( others => '0' ), t_in.stubs );
-  t_out <= t;
+  trks( 0 ) <= ( trk_in.reset, trk_in.valid, '0', trk_in.lastTrack, trk_in.inv2R, trk_in.phiT, trk_in.zT, ( others => '0' ), ( others => '0' ), trk_in.stubs );
+  trk_out <= trk;
 
   g_shift : for i in 0 to latency - 2 generate
   begin
@@ -135,14 +135,14 @@ entity track_conversion is
     begin
     if rising_edge( clk ) then
 
-      t_array( i + 1 ) <= t_array( i );
+      trks( i + 1 ) <= trks( i );
 
     end if;
   end process;
   end generate;
 
 -- Loop over all stubs in track
-  g_stub: for k in t_array( 0 ).stubs'range generate
+  g_stub: for k in trks( 0 ).stubs'range generate
 
     -- clk 1
     signal phi  : unsigned( widthDRphi  - 2 downto 0 ); -- Only need absolute value
@@ -175,7 +175,7 @@ entity track_conversion is
     begin
     if rising_edge( clk ) then
 
-      s := t_in.stubs( k );
+      s := trk_in.stubs( k );
       consistentStubs( k ) <= '0';
 
       -- clk 1: Read values from stub and RAM
@@ -232,7 +232,16 @@ entity track_conversion is
       end loop;
       
       -- clk 5: Set values to track
-      t <= ( t_array( latency - 1 ).reset, t_array( latency - 1 ).valid, '0', t_array( latency - 1 ).lastTrack, t_array( latency - 1 ).inv2R, t_array( latency - 1 ).phiT, t_array( latency - 1 ).zT, std_logic_vector( chi2_sum_tmp ), nConsistentStubs( 1 ), t_array( latency - 1 ).stubs );
+      trk.reset            <= trks( latency - 1 ).reset;
+      trk.valid            <= trks( latency - 1 ).valid;
+      trk.cm               <= '0';
+      trk.lastTrack        <= trks( latency - 1 ).lastTrack;
+      trk.inv2R            <= trks( latency - 1 ).inv2R;
+      trk.phiT             <= trks( latency - 1 ).phiT;
+      trk.zT               <= trks( latency - 1 ).zT;
+      trk.chi2             <= std_logic_vector( chi2_sum_tmp );
+      trk.nConsistentStubs <= nConsistentStubs( nConsistentStubs'high );
+      trk.stubs            <= trks( latency - 1 ).stubs;
 
     end if;
   end process;
