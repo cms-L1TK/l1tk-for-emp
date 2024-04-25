@@ -59,7 +59,7 @@ constant widthDSPcu: natural := widthDSPc - 1;     -- usbale width of DSP port C
 constant numRegions      : natural :=  9;                            -- nononants or octants or etc
 constant numOverlap      : natural :=  2;                            -- number of nononans a reconstructable track may cross
 constant numDTCsPerRegion: natural := 24;                            -- max number of DTC per Nonant
-constant numLayers       : natural :=  7;                            -- number of detector layers a reconstructable particle may cross
+constant numLayers       : natural :=  8;                            -- number of detector layers a reconstructable particle may cross
 constant numDTCsPerTFP   : natural := numOverlap * numDTCsPerRegion; -- max number of DTC per Nonant
 
 -- GP
