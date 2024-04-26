@@ -12,7 +12,7 @@ package dr_data_types is
 -- RAM things
 constant widthDRinvRAM        : natural := 18; -- Because it would fit in an 18k BRAM (when the address is 10 bits) and we have 27 x 18 bits DSPs
 constant widthDRinvAddressRAM : natural := max(widthDRdZ, widthDRdPhi);
-type t_ramInv2 is array ( 0 to 2 ** widthDRinvAddressRAM - 1 ) of unsigned( widthDRinvRAM - 1 downto 0 );
+type t_ramInv2 is array ( 0 to 2 ** widthDRinvAddressRAM - 1 ) of std_logic_vector( widthDRinvRAM - 1 downto 0 );
 function init_ramInv2 return t_ramInv2;
 
 type t_track is
@@ -71,7 +71,7 @@ begin
         next;
       end if;
       inv2 := 1.0 / real( i ) ** 2 * real( 2 ** widthDRinvRAM - 1); -- left shift with the number of bits that is representing the inverse
-      ram( i ) := to_unsigned( integer( inv2 ), widthDRinvRAM );
+      ram( i ) := stdu( integer( inv2 ), widthDRinvRAM );
   end loop;
   return ram;
 end function;
@@ -103,7 +103,7 @@ entity track_conversion is
 
   -- Latency of this track conversion thingy
   constant latency : natural := 7;
-  constant latency2: natural := 3; -- clks used for nConsistentStubs
+  constant latency2: natural := 2; -- clks used for nConsistentStubs
   
   -- Tracks storage
   signal trk      : t_track := nulll;
@@ -120,24 +120,26 @@ entity track_conversion is
   signal nConsistentStubs: nStubsArray := ( others => ( others => '0' ) ); -- The number of consistent stubs, i.e. the number of 1s in the above vector
 
   -- Signals for chi2
-  constant widthPhi2      : integer := widthDRphi * 2 - 2;
-  constant widthZ2        : integer := widthDRz   * 2 - 2;
+  constant widthPhi2      : integer := widthDRphi * 2 - 0;
+  constant widthZ2        : integer := widthDRz   * 2 - 0;
   constant widthChi2Phi   : integer := widthPhi2 + widthDRinvRAM;
   constant widthChi2Z     : integer := widthZ2   + widthDRinvRAM;
   -- constant widthChi2tmp : integer := 39;
 
   type t_dspChi2Phi is
     record
-        A   : unsigned( widthPhi2     - 1 downto 0 );
-        B   : unsigned( widthDRinvRAM - 1 downto 0 );
-        res : unsigned( widthChi2Phi  - 1 downto 0 );
+        A   : std_logic_vector( widthPhi2     - 1 downto 0 );
+        B0  : std_logic_vector( widthDRinvRAM - 1 downto 0 );
+        B1  : std_logic_vector( widthDRinvRAM - 1 downto 0 );
+        res : std_logic_vector( widthChi2Phi  - 1 downto 0 );
     end record;
 
   type t_dspChi2Z is
     record
-        A   : unsigned( widthZ2       - 1 downto 0 );
-        B   : unsigned( widthDRinvRAM - 1 downto 0 );
-        res : unsigned( widthChi2Z    - 1 downto 0 );
+        A   : std_logic_vector( widthZ2       - 1 downto 0 );
+        B0  : std_logic_vector( widthDRinvRAM - 1 downto 0 );
+        B1  : std_logic_vector( widthDRinvRAM - 1 downto 0 );
+        res : std_logic_vector( widthChi2Z    - 1 downto 0 );
     end record;
 
   type t_chi2s is array ( 0 to numLayers - 1 ) of unsigned( widthDRchi2 - 1 downto 0 );
@@ -166,21 +168,19 @@ entity track_conversion is
   g_stub: for k in trks( 0 ).stubs'range generate
 
   -- clk 1
-  signal phi  : unsigned( widthDRphi  - 2 downto 0 ); -- Only need absolute value
-  signal z    : unsigned( widthDRz    - 2 downto 0 ); -- Only need absolute value
-  signal dPhi : unsigned( widthDRdPhi - 1 downto 0 );
-  signal dZ   : unsigned( widthDRdZ   - 1 downto 0 );
+  signal phi     : std_logic_vector( widthDRphi  - 2 downto 0 ); -- Only need absolute value
+  signal z       : std_logic_vector( widthDRz    - 2 downto 0 ); -- Only need absolute value
+  signal invdPhi2: std_logic_vector( widthDRinvRAM - 1 downto 0 );
+  signal invdZ2  : std_logic_vector( widthDRinvRAM - 1 downto 0 );
 
   -- clk 2
-  signal phi2    : unsigned( widthPhi2     - 1 downto 0 );
-  signal z2      : unsigned( widthZ2       - 1 downto 0 );
-  signal invdPhi2: unsigned( widthDRinvRAM - 1 downto 0 );
-  signal invdZ2  : unsigned( widthDRinvRAM - 1 downto 0 );
+  signal phi2 : std_logic_vector( widthPhi2     - 1 downto 0 );
+  signal z2   : std_logic_vector( widthZ2       - 1 downto 0 );
 
   attribute use_dsp: string;
   attribute use_dsp of phi2: signal is "yes"; -- otherwise 9x9 bits are considered too small for DSP
 
-  -- clk 3-4
+  -- clk 2-4
   signal dspChi2Phi: t_dspChi2Phi;
   signal dspChi2Z  : t_dspChi2Z;
 
@@ -193,39 +193,39 @@ entity track_conversion is
     begin
     if rising_edge( clk ) then
 
-      s := trk_in.stubs( k );
+      s := trk_in.stubs( k ); -- Get the stub on layer k
+
+      -- clk 1: Check if consistent stub
       consistentStubs( k ) <= '0';
-
-      -- clk 1: Read values from stub and RAM
-      phi     <= unsigned( abs( s.phi ) ); -- The "sign bit" is needed for padding when we left shift later
-      z       <= unsigned( abs( s.z ) );
-      dPhi    <= unsigned( s.dPhi );
-      dZ      <= unsigned( s.dZ );
-
-      -- clk 2: Check if consistent stub
-      if phi & '0' < dPhi and z & '0' < dZ then -- Check that the residuals are smaller than half the resolution
+      if '0' & abs( s.phi ) & '0' < '0' & s.dPhi and '0' & abs( s.z ) & '0' < '0' & s.dZ then -- Check that the residuals are smaller than half the resolution. TODO should be '1'
         consistentStubs( k ) <= '1';
       end if;
+
+      -- clk 1: Read values from stub and RAM
+      phi      <= abs( s.phi );
+      z        <= abs( s.z );
+      invdPhi2 <= ramInv2( uint( s.dPhi ) );
+      invdZ2   <= ramInv2( uint( s.dZ ) );
   
-      -- clk 2: Calculate squared phi and z, and read the inverse RAM
-      phi2 <= phi * phi;
-      z2   <= z * z;
-      invdPhi2 <= ramInv2( to_integer( dPhi ) );
-      invdZ2   <= ramInv2( to_integer( dZ ) );
+      -- clk 2: Calculate squared phi and z
+      phi2          <= ( '0' & phi ) * ( '0' & phi );
+      z2            <= ( '0' & z ) * ( '0' & z );
+      dspChi2Phi.B0 <= invdPhi2;
+      dspChi2Z.B0   <= invdZ2;
 
       -- clk 3: Save signals to DSP registers
-      dspChi2Phi.A <= phi2;
-      dspChi2Phi.B <= invdPhi2;
-      dspChi2Z.A   <= z2;
-      dspChi2Z.B   <= invdZ2;
+      dspChi2Phi.A  <= phi2;
+      dspChi2Z.A    <= z2;
+      dspChi2Phi.B1 <= dspChi2Phi.B0;
+      dspChi2Z.B1   <= dspChi2Z.B0;
 
       -- clk 4: Calculate the chi2 separately
-      dspChi2Phi.res <= dspChi2Phi.A * dspChi2Phi.B;
-      dspChi2Z.res   <= dspChi2Z.A   * dspChi2Z.B;
+      dspChi2Phi.res <= ( '0' & dspChi2Phi.A ) * ( '0' & dspChi2Phi.B1 );
+      dspChi2Z.res   <= ( '0' & dspChi2Z.A ) * ( '0' & dspChi2Z.B1 );
       -- Technically should be divided by 2 because of the number of degrees of freedom but doesn't matter atm
 
       -- clk 5: Save phi and z chi2
-      chi2s( k ) <= resize( dspChi2Phi.res + dspChi2Z.res, widthDRchi2 );
+      chi2s( k ) <= resize( unsigned( dspChi2Phi.res + dspChi2Z.res ), widthDRchi2 );
 
     end if; -- clk
     end process;
@@ -253,20 +253,17 @@ entity track_conversion is
   begin
   if rising_edge( clk ) then
 
-    -- clk 3: Sum the number of consistent stubs
+    -- clk 2: Sum the number of consistent stubs
     nConsistentStubs( 0 ) <= stdu( count( consistentStubs, '1' ), widthDRConsistentStubs );
 
-    -- -- clk 6: Sum phi and z
-    -- chi2Sum <= std_logic_vector( chi2Sum_tmp );
-
-    -- clk 7: Sum the temporary chi2 values
+    -- clk 6: Sum the temporary chi2 values
     chi2Sum_tmp := ( others => '0' );
     for k in 0 to numLayers - 1 loop
       chi2Sum_tmp := chi2Sum_tmp + chi2s( k );
     end loop;
     chi2Sum <= chi2Sum_tmp;
 
-    -- clk 8: Set values to track
+    -- clk 7: Set values to track
     trk.reset            <= trks( latency - 1 ).reset;
     trk.valid            <= trks( latency - 1 ).valid;
     trk.cm               <= '0';

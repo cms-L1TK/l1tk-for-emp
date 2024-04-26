@@ -86,6 +86,8 @@ function resize( s: std_logic_vector; n: natural ) return std_logic_vector;
 function "*" ( l, r: std_logic_vector ) return std_logic_vector;
 function "+" ( l, r: std_logic_vector ) return std_logic_vector;
 function "-" ( l, r: std_logic_vector ) return std_logic_vector;
+function ">" ( l, r: std_logic_vector ) return boolean;
+function "<" ( l, r: std_logic_vector ) return boolean;
 
 function rangeLimit( ranges: reals ) return reals;
 
@@ -365,6 +367,10 @@ function "-" ( l, r: std_logic_vector ) return std_logic_vector is
 begin
     return std_logic_vector( resize( signed( l ), len ) - resize( signed( r ), len ) );
 end;
+
+function ">" ( l, r: std_logic_vector ) return boolean is begin return signed( l ) > signed( r ); end function;
+
+function "<" ( l, r: std_logic_vector ) return boolean is begin return signed( l ) < signed( r ); end function;
 
 function rangeLimit( ranges: reals ) return reals is
     variable len: natural := ranges'length;
