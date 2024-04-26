@@ -63,15 +63,13 @@ end function;
 
 function init_ramInv2 return t_ramInv2 is
   variable ram: t_ramInv2 := ( others => ( others => '0' ) );
-  variable inv2: real;
+  variable denom, inv2: real;
+  constant baseInv: real := 1.0 / 2 ** widthDRinvRAM;
 begin
   for i in ram'range loop
-      if i = 0 then
-        ram( i ) := ( others => '1' ); -- Division by 0...
-        next;
-      end if;
-      inv2 := 1.0 / real( i ) ** 2 * real( 2 ** widthDRinvRAM - 1); -- left shift with the number of bits that is representing the inverse
-      ram( i ) := stdu( integer( inv2 ), widthDRinvRAM );
+      denom := real( i ) + 0.5;
+      inv2 := ( 1.0 / denom ** 2 ) / baseInv;
+      ram( i ) := stdu( inv2, widthDRinvRAM );
   end loop;
   return ram;
 end function;
@@ -120,26 +118,25 @@ entity track_conversion is
   signal nConsistentStubs: nStubsArray := ( others => ( others => '0' ) ); -- The number of consistent stubs, i.e. the number of 1s in the above vector
 
   -- Signals for chi2
-  constant widthPhi2      : integer := widthDRphi * 2 - 0;
-  constant widthZ2        : integer := widthDRz   * 2 - 0;
-  constant widthChi2Phi   : integer := widthPhi2 + widthDRinvRAM;
-  constant widthChi2Z     : integer := widthZ2   + widthDRinvRAM;
-  -- constant widthChi2tmp : integer := 39;
+  constant widthPhi2    : integer := widthDRphi * 2 - 0;
+  constant widthZ2      : integer := widthDRz   * 2 - 0;
+  constant widthChi2Phi : integer := widthPhi2 + widthDRinvRAM;
+  constant widthChi2Z   : integer := widthZ2   + widthDRinvRAM;
 
   type t_dspChi2Phi is
     record
         A   : std_logic_vector( widthPhi2     - 1 downto 0 );
         B0  : std_logic_vector( widthDRinvRAM - 1 downto 0 );
-        B1  : std_logic_vector( widthDRinvRAM - 1 downto 0 );
-        res : std_logic_vector( widthChi2Phi  - 1 downto 0 );
+        B1  : std_logic_vector( widthDRinvRAM + 1 downto 0 );
+        res : std_logic_vector( widthChi2Phi  + 1 downto 0 );
     end record;
 
   type t_dspChi2Z is
     record
         A   : std_logic_vector( widthZ2       - 1 downto 0 );
         B0  : std_logic_vector( widthDRinvRAM - 1 downto 0 );
-        B1  : std_logic_vector( widthDRinvRAM - 1 downto 0 );
-        res : std_logic_vector( widthChi2Z    - 1 downto 0 );
+        B1  : std_logic_vector( widthDRinvRAM + 1 downto 0 );
+        res : std_logic_vector( widthChi2Z    + 1 downto 0 );
     end record;
 
   type t_chi2s is array ( 0 to numLayers - 1 ) of unsigned( widthDRchi2 - 1 downto 0 );
@@ -168,28 +165,28 @@ entity track_conversion is
   g_stub: for k in trks( 0 ).stubs'range generate
 
   -- clk 1
-  signal phi     : std_logic_vector( widthDRphi  - 2 downto 0 ); -- Only need absolute value
-  signal z       : std_logic_vector( widthDRz    - 2 downto 0 ); -- Only need absolute value
-  signal invdPhi2: std_logic_vector( widthDRinvRAM - 1 downto 0 );
-  signal invdZ2  : std_logic_vector( widthDRinvRAM - 1 downto 0 );
+  signal phi      : std_logic_vector( widthDRphi    - 0 downto 0 );
+  signal z        : std_logic_vector( widthDRz      - 0 downto 0 );
+  signal invdPhi2 : std_logic_vector( widthDRinvRAM - 1 downto 0 );
+  signal invdZ2   : std_logic_vector( widthDRinvRAM - 1 downto 0 );
 
   -- clk 2
-  signal phi2 : std_logic_vector( widthPhi2     - 1 downto 0 );
-  signal z2   : std_logic_vector( widthZ2       - 1 downto 0 );
+  signal phi2 : std_logic_vector( widthPhi2 + 1 downto 0 );
+  signal z2   : std_logic_vector( widthZ2   + 1 downto 0 );
 
-  attribute use_dsp: string;
+  attribute use_dsp : string;
   attribute use_dsp of phi2: signal is "yes"; -- otherwise 9x9 bits are considered too small for DSP
 
-  -- clk 2-4
-  signal dspChi2Phi: t_dspChi2Phi;
-  signal dspChi2Z  : t_dspChi2Z;
-
+  -- clk 2-5
+  signal dspChi2Phi : t_dspChi2Phi;
+  signal dspChi2Z   : t_dspChi2Z;
   
   begin
     process ( clk ) is
 
     variable s : t_stubDRin := nulll;
- 
+    variable chi2 : std_logic_vector( widthChi2Z downto 0) := ( others => '0' );
+
     begin
     if rising_edge( clk ) then
 
@@ -197,35 +194,36 @@ entity track_conversion is
 
       -- clk 1: Check if consistent stub
       consistentStubs( k ) <= '0';
-      if '0' & abs( s.phi ) & '0' < '0' & s.dPhi and '0' & abs( s.z ) & '0' < '0' & s.dZ then -- Check that the residuals are smaller than half the resolution. TODO should be '1'
+      if '0' & abs( s.phi ) & '1' < '0' & s.dPhi and '0' & abs( s.z ) & '1' < '0' & s.dZ then -- Check that the residuals are smaller than half the resolution.
         consistentStubs( k ) <= '1';
       end if;
 
       -- clk 1: Read values from stub and RAM
-      phi      <= abs( s.phi );
-      z        <= abs( s.z );
+      phi      <= s.phi & '1'; -- add '1' due to biased integers
+      z        <= s.z   & '1'; -- add '1' due to biased integers
       invdPhi2 <= ramInv2( uint( s.dPhi ) );
       invdZ2   <= ramInv2( uint( s.dZ ) );
   
       -- clk 2: Calculate squared phi and z
-      phi2          <= ( '0' & phi ) * ( '0' & phi );
-      z2            <= ( '0' & z ) * ( '0' & z );
+      phi2          <= phi * phi;
+      z2            <= z * z;
       dspChi2Phi.B0 <= invdPhi2;
       dspChi2Z.B0   <= invdZ2;
 
       -- clk 3: Save signals to DSP registers
-      dspChi2Phi.A  <= phi2;
-      dspChi2Z.A    <= z2;
-      dspChi2Phi.B1 <= dspChi2Phi.B0;
-      dspChi2Z.B1   <= dspChi2Z.B0;
+      dspChi2Phi.A  <= phi2( widthPhi2 downto 2 ) & '1'; -- Should have '0' sign padding from previously...
+      dspChi2Z.A    <= z2( widthZ2 downto 2 ) & '1';
+      dspChi2Phi.B1 <= '0' & dspChi2Phi.B0 & '1';
+      dspChi2Z.B1   <= '0' & dspChi2Z.B0 & '1';
 
       -- clk 4: Calculate the chi2 separately
-      dspChi2Phi.res <= ( '0' & dspChi2Phi.A ) * ( '0' & dspChi2Phi.B1 );
-      dspChi2Z.res   <= ( '0' & dspChi2Z.A ) * ( '0' & dspChi2Z.B1 );
+      dspChi2Phi.res <= dspChi2Phi.A * dspChi2Phi.B1;
+      dspChi2Z.res   <= dspChi2Z.A * dspChi2Z.B1;
       -- Technically should be divided by 2 because of the number of degrees of freedom but doesn't matter atm
 
       -- clk 5: Save phi and z chi2
-      chi2s( k ) <= resize( unsigned( dspChi2Phi.res + dspChi2Z.res ), widthDRchi2 );
+      chi2 := dspChi2Phi.res( widthChi2Phi + 1 downto 2 ) + dspChi2Z.res( widthChi2Z + 1 downto 2 );
+      chi2s( k ) <= resize( unsigned( chi2 ), widthDRchi2 );
 
     end if; -- clk
     end process;
