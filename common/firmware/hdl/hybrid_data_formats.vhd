@@ -65,7 +65,7 @@ constant baseTFPz0   : real := baseDTCz     * 2.0 ** baseShiftTFPz0;
 
 constant widthDRsector: natural := width( numSectors );
 constant widthDRphiT  : natural := width( numBinsHTphiT  * numBinsMHTphiT  );
-constant widthDRinv2R : natural := width( numBinsHTinv2R * numBinsMHTinv2R );
+constant widthDRinv2R : natural := width( numBinsHTinv2R );
 constant widthDRzT    : natural := width( numBinsZHTZT  ** numStagesZHT    );
 constant widthDRcot   : natural := width( numBinsZHTCot ** numStagesZHT    );
 constant widthDRr     : natural := widthDTCr;
@@ -75,18 +75,19 @@ constant rangeDRphiT : real := rangeDTCphiT;
 constant rangeDRzT   : real := rangeZHTzT;
 constant rangeDRcot  : real := ( rangeZHTzT + rangeTFPz0 ) / chosenRofZ;
 
-constant baseDRinv2R: real := baseDTCinv2R / real( numBinsMHTinv2R );
-constant baseDRphiT : real := baseDTCphiT  / real( numBinsMHTphiT  );
+constant baseDRinv2R: real := baseDTCinv2R;
+constant baseDRphiT : real := baseDTCphiT;
 
 constant baseShiftDRcot: integer := width( rangeDRcot / 1.0      ) - widthDRcot;
 constant baseShiftDRzT : integer := width( rangeDRzT  / baseDTCz ) - widthDRzT;
 
 constant baseDRcot: real := 1.0      * 2.0 ** baseShiftDRcot;
 constant baseDRzT : real := baseDTCz * 2.0 ** baseShiftDRzT;
+constant baseDRzT_new : real := 2.0 * sinh(maxEta) * chosenRofPhi / 32.0; -- gpNumBinsZT = 32 in emulation
 
 constant rangeDRr   : real := rangeDTCr;
-constant rangeDRphi : real := 4.0 * (baseDRphiT + baseDRinv2R * 2.0 * maxRphi + maxdPhi);
-constant rangeDRz   : real := 2.0 * (baseDRzT   + baseDRcot   * 2.0 * maxRz   + maxdZ  );
+constant rangeDRphi : real := baseDRphiT + baseDRinv2R * maxRphi;
+constant rangeDRz   : real := baseDRzT_new + (baseDRzT_new + rangeTFPz0 ) / chosenRofZ * maxRz;
 constant rangeDRdPhi: real := maxdPhi;
 constant rangeDRdZ  : real := maxdZ;
 
@@ -96,12 +97,12 @@ constant baseDRz   : real := baseDTCz;
 constant baseDRdPhi: real := baseDTCphi;
 constant baseDRdZ  : real := baseDTCz;
 
-constant widthDRphi : natural := width( rangeDRphi  / baseDRphi  );
-constant widthDRz   : natural := width( rangeDRz    / baseDRz    );
-constant widthDRdPhi: natural := width( rangeDRdPhi / baseDRdPhi );
-constant widthDRdZ  : natural := width( rangeDRdZ   / baseDRdZ   );
+constant widthDRphi   : natural := width( rangeDRphi  / baseDRphi  ); -- phi residual
+constant widthDRz     : natural := width( rangeDRz    / baseDRz    ); -- z residual
+constant widthDRdPhi  : natural := width( rangeDRdPhi / baseDRdPhi );
+constant widthDRdZ    : natural := width( rangeDRdZ   / baseDRdZ   );
 
-constant widthDRStubId : natural := 7;
+constant widthDRStubId : natural := 10; -- or 7?
 constant widthDRLayerId: natural := 4;
 
 -- KF

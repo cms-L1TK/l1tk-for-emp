@@ -30,7 +30,7 @@ constant numFrames     : natural := tmp * integer( freqTFP / freqLHC ); -- numbe
 constant widthFrames   : natural := width( numFrames );                 -- number of bits used to represent frame number within one TMP
 
 constant chosenRofPhi: real := 55.0;           -- offest radius used for phi sector definitionmaxRtimesMoverBend21.
-constant chosenRofZ  : real := 50.0;           -- offest radius used for eta sector definition
+constant chosenRofZ  : real := 57.76;          -- offest radius used for eta sector definition
 constant minPt       : real :=  1.34;          -- minimum pt of tracks considered as reconstructable
 constant beamWindowZ : real := 15.0;           -- halve lumi region in z
 constant maxEta      : real :=  2.5;           -- maximum |eta| of tracks considered as reconstructable
@@ -59,7 +59,7 @@ constant widthDSPcu: natural := widthDSPc - 1;     -- usbale width of DSP port C
 constant numRegions      : natural :=  9;                            -- nononants or octants or etc
 constant numOverlap      : natural :=  2;                            -- number of nononans a reconstructable track may cross
 constant numDTCsPerRegion: natural := 24;                            -- max number of DTC per Nonant
-constant numLayers       : natural :=  7;                            -- number of detector layers a reconstructable particle may cross
+constant numLayers       : natural :=  8;                            -- number of detector layers a reconstructable particle may cross
 constant numDTCsPerTFP   : natural := numOverlap * numDTCsPerRegion; -- max number of DTC per Nonant
 
 -- GP
@@ -171,6 +171,10 @@ function init_limitsChannelTB return naturals;
 constant limitsChannelTB: naturals( 0 to numSeedTypes );
 
 constant numLinksTB: natural := 1 + maxNumProjectionLayers;
+
+-- DRin
+
+constant numNodesDRin : natural := numSeedTypes;
 
 -- DR
 
