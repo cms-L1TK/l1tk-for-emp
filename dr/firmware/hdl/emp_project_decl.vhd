@@ -23,7 +23,7 @@ constant CLOCK_RATIO       : integer               :=  9;
 constant PAYLOAD_LATENCY: integer := 32 * 2 + 7; -- Because have 32 CMs?
 
 constant REGION_CONF : region_conf_array_t := (
-  0 to 23 => ( no_mgt, buf, no_fmt, buf,    no_mgt ),
+  0 to 2 => ( no_mgt, buf, no_fmt, buf,    no_mgt ),
   others => kDummyRegion
 );
 
