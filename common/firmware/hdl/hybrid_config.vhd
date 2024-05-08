@@ -172,10 +172,6 @@ constant limitsChannelTB: naturals( 0 to numSeedTypes );
 
 constant numLinksTB: natural := 1 + maxNumProjectionLayers;
 
--- DRin
-
-constant numNodesDRin : natural := numSeedTypes;
-
 -- DR
 
 constant numNodesDR          : natural :=  1;

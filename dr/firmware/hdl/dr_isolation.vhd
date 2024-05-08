@@ -95,6 +95,7 @@ begin
 if rising_edge( clk ) then
 
   -- step 1
+
   din <= node_din;
 
   -- step 2

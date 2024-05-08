@@ -151,7 +151,7 @@ type t_trackKFin is
 record
     reset : std_logic;
     valid : std_logic;
-    maybe : std_logic_vector( numLayers      - 1 downto 0 );
+    maybe : std_logic_vector( numLayers     - 1 downto 0 );
     sector: std_logic_vector( widthDRsector - 1 downto 0 );
     phiT  : std_logic_vector( widthDRphiT   - 1 downto 0 );
     inv2R : std_logic_vector( widthDRinv2R  - 1 downto 0 );
