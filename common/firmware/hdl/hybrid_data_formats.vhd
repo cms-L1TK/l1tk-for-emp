@@ -82,12 +82,11 @@ constant baseShiftDRcot: integer := width( rangeDRcot / 1.0      ) - widthDRcot;
 constant baseShiftDRzT : integer := width( rangeDRzT  / baseDTCz ) - widthDRzT;
 
 constant baseDRcot: real := 1.0      * 2.0 ** baseShiftDRcot;
-constant baseDRzT : real := baseDTCz * 2.0 ** baseShiftDRzT;
-constant baseDRzT_new : real := 2.0 * sinh(maxEta) * chosenRofPhi / 32.0; -- gpNumBinsZT = 32 in emulation
+constant baseDRzT : real := 2.0 * sinh(maxEta) * chosenRofPhi / 32.0; -- gpNumBinsZT = 32 in emulation
 
 constant rangeDRr   : real := rangeDTCr;
 constant rangeDRphi : real := baseDRphiT + baseDRinv2R * maxRphi;
-constant rangeDRz   : real := baseDRzT_new + (baseDRzT_new + rangeTFPz0 ) / chosenRofZ * maxRz;
+constant rangeDRz   : real := baseDRzT + (baseDRzT + rangeTFPz0 ) / chosenRofZ * maxRz;
 constant rangeDRdPhi: real := maxdPhi;
 constant rangeDRdZ  : real := maxdZ;
 
