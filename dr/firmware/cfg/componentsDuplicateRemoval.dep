@@ -1,8 +1,0 @@
-src dr_isolation.vhd
-src dr_top.vhd
-src dr_node_DuplicateRemoval.vhd
-src dr_data_types.vhd
-
-iprepo DuplicateRemoval
-
-src ../cgn/DuplicateRemoval/DuplicateRemoval.xci

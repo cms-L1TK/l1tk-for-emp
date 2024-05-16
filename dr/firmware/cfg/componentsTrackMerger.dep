@@ -1,8 +1,0 @@
-src dr_isolation.vhd
-src dr_top.vhd
-src dr_node_TrackMerger.vhd
-src dr_data_types.vhd
-
-iprepo TrackMerger
-
-src ../cgn/TrackMerger/TrackMerger.xci

@@ -30,7 +30,7 @@ begin
       layer( k ) := '1';
     end if;
   end loop;
-  return track.valid = '1' and track.cm = '0' and cm.valid = '1' and count( layer, '1' ) >= minSharedStubs;
+  return track.valid = '1' and track.cm = '0' and cm.valid = '1' and count( layer, '1' ) >= drMinSharedStubs;
 end function;
 
 begin

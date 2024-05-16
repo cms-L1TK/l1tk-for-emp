@@ -2,39 +2,43 @@ library ieee;
 use ieee.std_logic_1164.all;
 use work.hybrid_config.all;
 use work.hybrid_data_types.all;
-use work.hybrid_data_formats.all;
+use work.dr_data_types.all;
 
 entity dr_top is
 port (
   clk: in std_logic;
-  dr_din: in t_tracksDRin( numNodesDR - 1 downto 0 );
-  dr_dout: out t_tracksDR( numNodesDR - 1 downto 0 )
+  dr_din: in t_channelTM;
+  dr_dout: out t_channelDR
 );
 end;
 
 architecture rtl of dr_top is
 
-component dr_node
+signal tracks: t_tracks( drNumComparisonModules downto 0 ) := ( others => nulll );
+component dr_cm
 port (
   clk: in std_logic;
-  node_din: in t_trackDRin;
-  node_dout: out t_trackDR
+  cm_din: in t_track;
+  cm_dout: out t_track
 );
 end component;
 
 begin
 
-g: for k in 0 to numNodesDR - 1 generate
+tracks( 0 ) <= conv( dr_din );
+dr_dout <= conv( tracks( drNumComparisonModules ) );
 
-signal node_din: t_trackDRin := nulll;
-signal node_dout: t_trackDR := nulll;
+g: for k in 0 to drNumComparisonModules - 1 generate
+
+signal cm_din: t_track := nulll;
+signal cm_dout: t_track := nulll;
 
 begin
 
-node_din <= dr_din( k );
-dr_dout( k ) <= node_dout;
+cm_din <= tracks( k );
+tracks( k + 1 ) <= cm_dout;
 
-c: dr_node port map ( clk, node_din, node_dout );
+c: dr_cm port map ( clk, cm_din, cm_dout );
 
 end generate;
 

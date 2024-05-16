@@ -1,5 +1,6 @@
 src emp_payload.vhd
 
+src dr_isolation.vhd
 include components.dep
 include -c l1tk-for-emp:common components.dep
 
