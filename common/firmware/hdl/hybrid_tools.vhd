@@ -24,6 +24,8 @@ function digi( val, base: real ) return integer;
 function ilog2( r: real ) return integer;
 function ilog2( i: integer ) return integer;
 
+function bool( s: std_logic ) return boolean;
+
 function width( i: integer ) return natural;
 function width( r: real    ) return natural;
 
@@ -54,12 +56,17 @@ function min( v: reals    ) return real;
 function max( v: naturals ) return natural;
 function sum( v: naturals ) return natural;
 function sum( v: naturals; low, high: natural ) return natural;
+function sum( lhs, rhs: naturals ) return naturals;
 function nota( w, v: natural ) return naturals;
 
 function isElement( x: natural; v: naturals ) return boolean;
 
 function "abs" ( x: std_logic_vector ) return std_logic_vector;
 function  sba  ( x: std_logic_vector ) return std_logic_vector;
+
+function overflowed ( x: unsigned; w:integer ) return boolean;
+function overflowed ( x: signed;   w:integer ) return boolean;
+function overflowed ( std: std_logic_vector ) return boolean;
 
 function decode( s: std_logic_vector; w: integer ) return std_logic_vector;
 function encode( s: std_logic_vector ) return std_logic_vector;
@@ -140,6 +147,8 @@ begin
   return stdu( integer( floor( x ) ), w );
 end function;
 
+function bool( s: std_logic ) return boolean is begin if s = '1' then return true; end if; return false; end function;
+
 function ureal( s: std_logic_vector ) return real is begin return ureal( s, s'high, s'low ); end function;
 function sreal( s: std_logic_vector ) return real is begin return sreal( s, s'high, s'low ); end function;
 
@@ -213,6 +222,15 @@ begin
   return s;
 end function;
 
+function sum( lhs, rhs: naturals ) return naturals is
+  variable res: naturals( lhs'range ) := ( others => 0 );
+begin
+  for k in res'range loop
+    res( k ) := lhs( k ) + rhs( k );
+  end loop;
+  return res;
+end function;
+
 function nota( w, v: natural ) return naturals is
   variable n: naturals( 0 to w - 1 );
 begin
@@ -242,6 +260,30 @@ begin
 end function;
 
 function sba( x: std_logic_vector ) return std_logic_vector is begin return not x( x'high ) & x( x'high - 1 downto x'low ); end function;
+
+function overflowed( x: unsigned; w: integer ) return boolean is
+begin
+    if x'length < w then
+        return false;
+    end if;
+    return unsigned( x( x'high downto x'low + w ) ) > 0;
+end function;
+
+function overflowed( x: signed; w: integer ) return boolean is
+begin
+    if x'length < w - 1 then
+        return false;
+    end if;
+    return signed( x( x'high downto x'low + w - 1 ) ) /= 0 and signed( x( x'high downto x'low + w - 1 ) ) /= -1;
+end function;
+
+function overflowed ( std: std_logic_vector ) return boolean is
+begin
+  if unsigned( std ) = 0 or signed( std ) = -1 then
+    return false;
+  end if;
+  return true;
+end function;
 
 function decode( s: std_logic_vector; w: integer ) return std_logic_vector is begin return std_logic_vector( to_unsigned( 2 ** to_integer( unsigned( s ) ), w ) ); end function;
 

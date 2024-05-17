@@ -166,7 +166,8 @@ constant tbNumLinks: natural := 1 + tbMaxNumProjectionLayers;
 
 -- TN
 
-constant tmNumNodes: natural :=  1;
+constant tmNumNodes: natural := 1;
+constant tmNumLinks: natural := 1 + numLayers;
 
 -- DR
 

@@ -271,7 +271,6 @@ stubs_din <= out_din.stubs;
 out_dout( 4 * N_REGION - 1 downto drNumLinks ) <= ( others => nulll );
 out_dout( drNumLinks - 1 downto 0 ) <= stubs_dout & track_dout;
 
-
 cTrack: dr_isolation_out_track port map ( clk, track_packet, track_din, track_dout );
 
 cStubs: dr_isolation_out_stubs port map ( clk, stubs_packet, stubs_din, stubs_dout );

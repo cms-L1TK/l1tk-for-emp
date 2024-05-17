@@ -3,10 +3,9 @@ use ieee.std_logic_1164.all;
 use work.hybrid_config.all;
 use work.hybrid_data_types.all;
 use work.hybrid_data_formats.all;
-use work.kfin_config.all;
-use work.kfin_data_types.all;
+use work.tm_data_types.all;
 
-entity kfin_unify is
+entity tm_unify is
 generic (
   seedType: natural
 );
@@ -17,10 +16,10 @@ port (
 );
 end;
 
-architecture rtl of kfin_unify is
+architecture rtl of tm_unify is
 
-constant numProjectionLayers: natural := numsProjectionLayers( seedType );
-signal stubs: t_stubsU( maxNumLayers - 1 downto 0 ) := ( others => nulll );
+constant tbNumProjectionLayers: natural := tbNumsProjectionLayers( seedType );
+signal stubs: t_stubsU( tbNumLayers - 1 downto 0 ) := ( others => nulll );
 
 signal track_din: t_trackTB := nulll;
 signal track_dout: t_trackU := nulll;
@@ -33,7 +32,7 @@ port (
 end component;
 
 signal seeds_din: t_trackTB := nulll;
-signal seeds_dout: t_stubsU( maxNumSeedingLayer - 1 downto 0 ) := ( others => nulll );
+signal seeds_dout: t_stubsU( tbMaxNumSeedingLayer - 1 downto 0 ) := ( others => nulll );
 component unify_seeds
 generic (
   seedType: natural
@@ -41,12 +40,12 @@ generic (
 port (
   clk: in std_logic;
   seeds_din: in t_trackTB;
-  seeds_dout: out t_stubsU( maxNumSeedingLayer - 1 downto 0 )
+  seeds_dout: out t_stubsU( tbMaxNumSeedingLayer - 1 downto 0 )
 );
 end component;
 
 signal projections_din: t_channelTB := nulll;
-signal projections_dout: t_stubsU( maxNumProjectionLayers - 1 downto 0 ) := ( others => nulll );
+signal projections_dout: t_stubsU( tbMaxNumProjectionLayers - 1 downto 0 ) := ( others => nulll );
 component unify_projections
 generic (
   seedType: natural
@@ -54,7 +53,7 @@ generic (
 port (
   clk: in std_logic;
   projections_din: in t_channelTB;
-  projections_dout: out t_stubsU( maxNumProjectionLayers - 1 downto 0 )
+  projections_dout: out t_stubsU( tbMaxNumProjectionLayers - 1 downto 0 )
 );
 end component;
 
@@ -64,7 +63,7 @@ track_din <= unify_din.track;
 seeds_din <= unify_din.track;
 projections_din <= unify_din;
 
-stubs( maxNumSeedingLayer + numProjectionLayers - 1 downto 0 ) <= seeds_dout & projections_dout( numProjectionLayers - 1 downto 0 );
+stubs( tbMaxNumSeedingLayer + tbNumProjectionLayers - 1 downto 0 ) <= seeds_dout & projections_dout( tbNumProjectionLayers - 1 downto 0 );
 
 unify_dout <= ( track_dout, stubs );
 
@@ -84,8 +83,8 @@ use work.hybrid_tools.all;
 use work.hybrid_config.all;
 use work.hybrid_data_types.all;
 use work.hybrid_data_formats.all;
-use work.kfin_data_types.all;
-use work.kfin_data_formats.all;
+use work.tm_data_types.all;
+use work.tm_data_formats.all;
 
 entity unify_track is
 port (
@@ -123,13 +122,13 @@ signal dout: t_trackU := nulll;
 begin
 
 -- step 1
-valid <= track_din.valid when uint( abs( track_din.z0 ) ) < int( beamWindowZ, baseUzT ) else '0';
-phi0 <= resize( track_din.phi0 - stdu( 2 ** powPhi0Shift, widthTBphi0 ), widthTBphi0 );
+valid <= track_din.valid when uint( abs( track_din.z0 ) ) < digi( beamWindowZ, baseUzT ) else '0';
+phi0 <= resize( track_din.phi0 - stdu( 2 ** tbPowPhi0Shift, widthTBphi0 ), widthTBphi0 );
 t <= ( track_din.reset, valid, not track_din.inv2R, track_din.cot );
 -- step 3
 validOver <= '0' when overflowed( dspUphiT.P( r_overUphiT ) ) or overflowed( dspUzT.P( r_overUzT ) ) else '1';
-validRange <= '1' when uint( abs( dspUphiT.P( r_UphiT ) ) ) < int( maxUphiT, baseUphiT )
-                  and  uint( abs( dspUzT.P  ( r_UzT   ) ) ) < int( maxUzT,   baseUzT   ) else '0';
+validRange <= '1' when uint( abs( dspUphiT.P( r_UphiT ) ) ) < digi( maxUphiT, baseUphiT )
+                  and  uint( abs( dspUzT.P  ( r_UzT   ) ) ) < digi( maxUzT,   baseUzT   ) else '0';
 w <= sr( 3 );
 track_dout <= dout;
 
@@ -176,7 +175,7 @@ use ieee.std_logic_1164.all;
 use work.hybrid_config.all;
 use work.hybrid_data_types.all;
 use work.hybrid_data_formats.all;
-use work.kfin_data_types.all;
+use work.tm_data_types.all;
 
 entity unify_seeds is
 generic (
@@ -185,7 +184,7 @@ generic (
 port (
   clk: in std_logic;
   seeds_din: in t_trackTB;
-  seeds_dout: out t_stubsU( maxNumSeedingLayer - 1 downto 0 )
+  seeds_dout: out t_stubsU( tbMaxNumSeedingLayer - 1 downto 0 )
 );
 end;
 
@@ -215,7 +214,7 @@ end component;
 
 begin
 
-g: for k in 0 to maxNumSeedingLayer - 1 generate
+g: for k in 0 to tbMaxNumSeedingLayer - 1 generate
 
 constant layer: natural := seedTypesSeedLayers( seedType )( k );
 function init_index return natural is begin if layer > 6 then return layer - 11; end if; return layer - 1; end function;
@@ -253,8 +252,8 @@ use work.hybrid_tools.all;
 use work.hybrid_config.all;
 use work.hybrid_data_types.all;
 use work.hybrid_data_formats.all;
-use work.kfin_data_types.all;
-use work.kfin_data_formats.all;
+use work.tm_data_types.all;
+use work.tm_data_formats.all;
 
 entity unify_barrel_seed is
 generic (
@@ -278,8 +277,8 @@ signal dsp: t_dspSB := ( others => ( others => '0' ) );
 function init_limit return std_logic_vector is
   variable res: std_logic_vector( widthUz - 1 downto 0 ) := ( others => '0' );
 begin
-  if index < numBarrelLayersPS then
-    res := stdu( int( tiltedLayerLimitsZ( index ), baseUz ), widthUz );
+  if index < tbNumBarrelLayersPS then
+    res := stdu( digi( tbTiltedLayerLimitsZ( index ), baseUz ), widthUz );
   end if;
   return res;
 end function;
@@ -304,7 +303,7 @@ if rising_edge( clk ) then
 
   sr <= sr( sr'high - 1 downto sr'low) & din;
   dsp.a <= seed_din.cot & '1';
-  dsp.b <= '0' & stdu( barrelLayersRadii( index ) / baseUr, widthUr ) & '1';
+  dsp.b <= '0' & stdu( digi( tbBarrelLayersRadii( index ), baseUr ), widthUr ) & '1';
   dsp.c <= seed_din.z0 & "10" & ( -baseShiftUcot - 1 downto 0 => '0' );
 
   -- step 2
@@ -318,8 +317,8 @@ if rising_edge( clk ) then
     dout.reset <= '1';
   elsif sr( 3 ).valid = '1' then
     dout.valid <= '1';
-    dout.r <= stds( ( barrelLayersRadii( index ) - chosenRofPhi ) / baseUr, widthUr );
-    if index < numBarrelLayersPS and unsigned( z ) < unsigned( limit ) then
+    dout.r <= stds( digi( tbBarrelLayersRadii( index ) - chosenRofPhi, baseUr ), widthUr );
+    if index < tbNumBarrelLayersPS and unsigned( z ) < unsigned( limit ) then
      dout.pst <= '1';
     end if;
   end if;
@@ -336,8 +335,8 @@ use work.hybrid_tools.all;
 use work.hybrid_config.all;
 use work.hybrid_data_types.all;
 use work.hybrid_data_formats.all;
-use work.kfin_data_types.all;
-use work.kfin_data_formats.all;
+use work.tm_data_types.all;
+use work.tm_data_formats.all;
 
 entity unify_disk_seed is
 generic (
@@ -391,7 +390,7 @@ if rising_edge( clk ) then
   invCot <= ram( uint( cot( r_Scot ) ) );
   dsp.a <= seed_din.z0 & '1';
   dsp.c <= stds( chosenRofPhi / baseUr, widthUr ) & "10" & ( baseShiftUr - baseShiftUz - baseShiftSinvCot - 1 downto 0 => '0' );
-  dsp.d <= stds( diskZs( index ) / baseUzT, widthUzT ) & '1';
+  dsp.d <= stds( digi( tbDiskZs( index ), baseUzT ), widthUzT ) & '1';
 
   -- step 2
 
@@ -421,7 +420,7 @@ use ieee.std_logic_1164.all;
 use work.hybrid_config.all;
 use work.hybrid_data_types.all;
 use work.hybrid_data_formats.all;
-use work.kfin_data_types.all;
+use work.tm_data_types.all;
 
 entity unify_projections is
 generic (
@@ -430,13 +429,13 @@ generic (
 port (
   clk: in std_logic;
   projections_din: in t_channelTB;
-  projections_dout: out t_stubsU( maxNumProjectionLayers - 1 downto 0 )
+  projections_dout: out t_stubsU( tbMaxNumProjectionLayers - 1 downto 0 )
 );
 end;
 
 architecture rtl of unify_projections is
 
-signal dout: t_stubsU( maxNumProjectionLayers - 1 downto 0 ) := ( others => nulll );
+signal dout: t_stubsU( tbMaxNumProjectionLayers - 1 downto 0 ) := ( others => nulll );
 
 component unify_barrel_projection
 generic (
@@ -466,7 +465,7 @@ begin
 
 projections_dout <= dout;
 
-g: for k in 0 to numsProjectionLayers( seedType ) - 1 generate
+g: for k in 0 to tbNumsProjectionLayers( seedType ) - 1 generate
 
 constant layer: natural := seedTypesProjectionLayers( seedType )( k );
 function init_index return natural is begin if layer > 6 then return layer - 11; end if; return layer - 1; end function;
@@ -502,9 +501,8 @@ use work.hybrid_tools.all;
 use work.hybrid_config.all;
 use work.hybrid_data_types.all;
 use work.hybrid_data_formats.all;
-use work.kfin_config.all;
-use work.kfin_data_types.all;
-use work.kfin_data_formats.all;
+use work.tm_data_types.all;
+use work.tm_data_formats.all;
 
 entity unify_barrel_projection is
 generic (
@@ -524,7 +522,7 @@ function f_stubType( s: t_stubTB ) return natural is
   variable stubtype: natural;
 begin
   case index is
-    when 0 to numBarrelLayersPS - 1 => stubType := 0;
+    when 0 to tbNumBarrelLayersPS - 1 => stubType := 0;
     when others => stubType := 1;
   end case;
   return stubType;
@@ -551,11 +549,11 @@ begin
     res.valid := '1';
     case stubType is
       when 0 =>
-        res.r := resize( ( f_prep( s.r, widthsTBr( 0 ), baseShiftsTBr( 0 ) ) ) + stds( ( barrelLayersRadii( index ) - chosenRofPhi ) / baseUr, widthUr ), widthUr );
+        res.r := resize( ( f_prep( s.r, widthsTBr( 0 ), baseShiftsTBr( 0 ) ) ) + stds( ( tbBarrelLayersRadii( index ) - chosenRofPhi ) / baseUr, widthUr ), widthUr );
         res.phi := resize( f_prep( s.phi, widthsTBphi( 0 ), baseShiftsTBphi( 0 ) ), widthUphi );
         res.z := resize( f_prep( s.z, widthsTBz( 0 ), baseShiftsTBz( 0 ) ), widthUz );
       when 1 =>
-        res.r := resize( ( f_prep( s.r, widthsTBr( 1 ), baseShiftsTBr( 1 ) ) ) + stds( ( barrelLayersRadii( index ) - chosenRofPhi ) / baseUr, widthUr ), widthUr );
+        res.r := resize( ( f_prep( s.r, widthsTBr( 1 ), baseShiftsTBr( 1 ) ) ) + stds( ( tbBarrelLayersRadii( index ) - chosenRofPhi ) / baseUr, widthUr ), widthUr );
         res.phi := resize( f_prep( s.phi, widthsTBphi( 1 ), baseShiftsTBphi( 1 ) ), widthUphi );
         res.z := resize( f_prep( s.z, widthsTBz( 1 ), baseShiftsTBz( 1 ) ), widthUz );
       when others => null;
@@ -574,8 +572,8 @@ signal dsp: t_dspPB := ( others => ( others => '0' ) );
 function init_limit return std_logic_vector is
   variable res: std_logic_vector( widthUz - 1 downto 0 ) := ( others => '0' );
 begin
-  if index < numBarrelLayersPS then
-    res := stdu( int( tiltedLayerLimitsZ( index ), baseUz ), widthUz );
+  if index < tbNumBarrelLayersPS then
+    res := stdu( digi( tbTiltedLayerLimitsZ( index ), baseUz ), widthUz );
   end if;
   return res;
 end function;
@@ -587,7 +585,7 @@ begin
 
 -- step 1
 din <= conv( projection_din );
-z0dz <= incr(projection_track.z0 + din.z);
+z0dz <= ( projection_track.z0 + din.z ) + 1;
 
 -- step 3
 z <= abs( dsp.p( r_PBz ) );
@@ -619,7 +617,7 @@ if rising_edge( clk ) then
     dout.r <= sr( 3 ).r;
     dout.phi <= sr( 3 ).phi;
     dout.z <= sr( 3 ).z;
-    if index < numBarrelLayersPS and unsigned( z ) < unsigned( limit ) then
+    if index < tbNumBarrelLayersPS and unsigned( z ) < unsigned( limit ) then
       dout.pst <= '1';
     end if; 
   end if;
@@ -637,9 +635,8 @@ use work.hybrid_tools.all;
 use work.hybrid_config.all;
 use work.hybrid_data_types.all;
 use work.hybrid_data_formats.all;
-use work.kfin_config.all;
-use work.kfin_data_types.all;
-use work.kfin_data_formats.all;
+use work.tm_data_types.all;
+use work.tm_data_formats.all;
 
 entity unify_disk_projection is
 generic (
@@ -688,7 +685,7 @@ end function;
 
 type t_ringRadii is array( natural range <> ) of std_logic_vector( widthUr - 1 downto 0 );
 function init_ringRadii return t_ringRadii is
-  constant rs: reals( 0 to numEndcap2SRings - 1 ) := endcap2SRingRaddi( index );
+  constant rs: reals( 0 to tbNumEndcap2SRings - 1 ) := tbEndcap2SRingRaddi( index );
   variable res: t_ringRadii( rs'range );
 begin
   for k in res'range loop
@@ -696,7 +693,7 @@ begin
   end loop;
   return res;
 end function;
-constant ringRaddi: t_ringRadii( 0 to numEndcap2SRings - 1 ) := init_ringRadii;
+constant ringRaddi: t_ringRadii( 0 to tbNumEndcap2SRings - 1 ) := init_ringRadii;
 
 function conv( msb: std_logic; s: t_stubTB ) return t_stubU is
   variable res: t_stubU := nulll;
@@ -709,17 +706,17 @@ begin
       res.pst := '1';
       res.r := resize( ( '0' & f_prep( s.r, widthsTBr( 2 ), baseShiftsTBr( 2 ) ) ) - stds( chosenRofPhi / baseUr, widthUr ), widthUr );
       res.phi := resize( f_prep( s.phi, widthsTBphi( 2 ), baseShiftsTBphi( 2 ) ), widthUphi );
-      res.z := resize( f_prep( s.z, widthsTBz( 2 ), baseShiftsTBz( 2 ) ) + stds( diskZs( index ) / baseUz, widthUz ), widthUz );
+      res.z := resize( f_prep( s.z, widthsTBz( 2 ), baseShiftsTBz( 2 ) ) + stds( tbDiskZs( index ) / baseUz, widthUz ), widthUz );
       if msb= '1' then
-        res.z := resize( f_prep( s.z, widthsTBz( 2 ), baseShiftsTBz( 2 ) ) - stds( diskZs( index ) / baseUz, widthUz ), widthUz );
+        res.z := resize( f_prep( s.z, widthsTBz( 2 ), baseShiftsTBz( 2 ) ) - stds( tbDiskZs( index ) / baseUz, widthUz ), widthUz );
       end if;
       res.pst := '1';
     when 3 =>
       res.r := ringRaddi( uint( s.r( widthsTBr( 3 ) - 1 downto 0 ) ) );
       res.phi := resize( f_prep( s.phi, widthsTBphi( 3 ), baseShiftsTBphi( 3 ) ), widthUphi );
-      res.z := resize( f_prep( s.z, widthsTBz( 3 ), baseShiftsTBz( 3 ) ) + stds( diskZs( index ) / baseUz, widthUz ), widthUz );
+      res.z := resize( f_prep( s.z, widthsTBz( 3 ), baseShiftsTBz( 3 ) ) + stds( tbDiskZs( index ) / baseUz, widthUz ), widthUz );
       if msb= '1' then
-        res.z := resize( f_prep( s.z, widthsTBz( 3 ), baseShiftsTBz( 3 ) ) - stds( diskZs( index ) / baseUz, widthUz ), widthUz );
+        res.z := resize( f_prep( s.z, widthsTBz( 3 ), baseShiftsTBz( 3 ) ) - stds( tbDiskZs( index ) / baseUz, widthUz ), widthUz );
       end if;
     when others => null;
   end case;
@@ -740,7 +737,7 @@ begin
 
 -- step 1
 cot <= projection_track.cot;
-stubU <= conv( msb( cot ), projection_din );
+stubU <= conv( cot( cot'high ), projection_din );
 d <= ( stubU.reset, stubU.valid, stubU.pst, stubU.r, stubU.phi );
 -- step 3
 projection_dout <= dout;

@@ -1,9 +1,9 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use work.hybrid_config.all;
-use work.kfin_data_types.all;
+use work.tm_data_types.all;
 
-entity kfin_high is
+entity tm_high is
 port (
   clk: in std_logic;
   high_din: in t_channelU;
@@ -11,7 +11,7 @@ port (
 );
 end;
 
-architecture rtl of kfin_high is
+architecture rtl of tm_high is
 
 signal track_din: t_trackU := nulll;
 signal track_dout: t_trackH := nulll;
@@ -23,13 +23,13 @@ port (
 );
 end component;
 
-signal stubs_din: t_stubsU( maxNumLayers - 1 downto 0 ) := ( others => nulll );
-signal stubs_dout: t_stubsH( maxNumLayers - 1 downto 0 ) := ( others => nulll );
+signal stubs_din: t_stubsU( tbNumLayers - 1 downto 0 ) := ( others => nulll );
+signal stubs_dout: t_stubsH( tbNumLayers - 1 downto 0 ) := ( others => nulll );
 component high_stubs
 port (
   clk: in std_logic;
-  stubs_din: in t_stubsU( maxNumLayers - 1 downto 0 );
-  stubs_dout: out t_stubsH( maxNumLayers - 1 downto 0 )
+  stubs_din: in t_stubsU( tbNumLayers - 1 downto 0 );
+  stubs_dout: out t_stubsH( tbNumLayers - 1 downto 0 )
 );
 end component;
 
@@ -50,13 +50,13 @@ end;
 library ieee;
 use ieee.std_logic_1164.all;
 use work.hybrid_config.all;
-use work.kfin_data_types.all;
+use work.tm_data_types.all;
 
 entity high_stubs is
 port (
   clk: in std_logic;
-  stubs_din: in t_stubsU( maxNumLayers - 1 downto 0 );
-  stubs_dout: out t_stubsH( maxNumLayers - 1 downto 0 )
+  stubs_din: in t_stubsU( tbNumLayers - 1 downto 0 );
+  stubs_dout: out t_stubsH( tbNumLayers - 1 downto 0 )
 );
 end;
 
@@ -72,7 +72,7 @@ end component;
 
 begin
 
-g: for k in 0 to maxNumLayers - 1 generate
+g: for k in 0 to tbNumLayers - 1 generate
 
 signal stub_din: t_stubU := nulll;
 signal stub_dout: t_stubH := nulll;
@@ -93,8 +93,8 @@ library ieee;
 use ieee.std_logic_1164.all;
 use work.hybrid_config.all;
 use work.hybrid_tools.all;
-use work.kfin_data_types.all;
-use work.kfin_data_formats.all;
+use work.tm_data_types.all;
+use work.tm_data_formats.all;
 
 entity high_stub is
 port (
@@ -174,8 +174,8 @@ library ieee;
 use ieee.std_logic_1164.all;
 use work.hybrid_config.all;
 use work.hybrid_tools.all;
-use work.kfin_data_types.all;
-use work.kfin_data_formats.all;
+use work.tm_data_types.all;
+use work.tm_data_formats.all;
 
 entity high_track is
 port (

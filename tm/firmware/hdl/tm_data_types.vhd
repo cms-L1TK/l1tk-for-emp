@@ -4,10 +4,10 @@ use ieee.math_real.all;
 use work.hybrid_tools.all;
 use work.hybrid_config.all;
 use work.hybrid_data_formats.all;
-use work.kfin_data_formats.all;
+use work.tm_data_formats.all;
 
 
-package kfin_data_types is
+package tm_data_types is
 
 
 type t_ctrl is
@@ -44,7 +44,7 @@ function nulll return t_trackU;
 type t_channelU is
 record
   track: t_trackU;
-  stubs: t_stubsU( maxNumLayers - 1 downto 0 );
+  stubs: t_stubsU( tbNumLayers - 1 downto 0 );
 end record;
 type t_channelsU is array ( natural range <> ) of t_channelU;
 function nulll return t_channelU;
@@ -76,44 +76,10 @@ function nulll return t_trackH;
 type t_channelH is
 record
   track: t_trackH;
-  stubs: t_stubsH( maxNumLayers - 1 downto 0 );
+  stubs: t_stubsH( tbNumLayers - 1 downto 0 );
 end record;
 type t_channelsH is array ( natural range <> ) of t_channelH;
 function nulll return t_channelH;
-
-type t_stubS is
-record
-  reset: std_logic;
-  valid: std_logic;
-  pst  : std_logic;
-  r    : std_logic_vector( widthSr   - 1 downto 0 );
-  phi  : std_logic_vector( widthSphi - 1 downto 0 );
-  z    : std_logic_vector( widthSz   - 1 downto 0 );
-end record;
-type t_stubsS is array ( natural range <> ) of t_stubS;
-function nulll return t_stubS;
-
-type t_trackS is
-record
-  reset    : std_logic;
-  valid    : std_logic;
-  sectorPhi: std_logic_vector( widthSsectorPhi - 1 downto 0 );
-  sectorEta: std_logic_vector( widthSsectorEta - 1 downto 0 );
-  inv2R    : std_logic_vector( widthSinv2R     - 1 downto 0 );
-  phiT     : std_logic_vector( widthSphiT      - 1 downto 0 );
-  cot      : std_logic_vector( widthScot       - 1 downto 0 );
-  zT       : std_logic_vector( widthSzT        - 1 downto 0 );
-end record;
-type t_tracksS is array ( natural range <> ) of t_trackS;
-function nulll return t_trackS;
-
-type t_channelS is
-record
-  track: t_trackS;
-  stubs: t_stubsS( maxNumLayers - 1 downto 0 );
-end record;
-type t_channeslS is array ( natural range <> ) of t_channelS;
-function nulll return t_channelS;
 
 type t_stubL is
 record
@@ -131,11 +97,8 @@ type t_trackL is
 record
   reset    : std_logic;
   valid    : std_logic;
-  sectorPhi: std_logic_vector( widthLsectorPhi - 1 downto 0 );
-  sectorEta: std_logic_vector( widthLsectorEta - 1 downto 0 );
   inv2R    : std_logic_vector( widthLinv2R     - 1 downto 0 );
   phiT     : std_logic_vector( widthLphiT      - 1 downto 0 );
-  cot      : std_logic_vector( widthLcot       - 1 downto 0 );
   zT       : std_logic_vector( widthLzT        - 1 downto 0 );
 end record;
 type t_tracksL is array ( natural range <> ) of t_trackL;
@@ -144,7 +107,7 @@ function nulll return t_trackL;
 type t_channelL is
 record
   track: t_trackL;
-  stubs: t_stubsL( maxNumLayers - 1 downto 0 );
+  stubs: t_stubsL( tbNumLayers - 1 downto 0 );
 end record;
 type t_channelsL is array ( natural range <> ) of t_channelL;
 function nulll return t_channelL;
@@ -153,10 +116,8 @@ type t_trackR is
 record
   reset : std_logic;
   valid : std_logic;
-  sector: std_logic_vector( widthRsector - 1 downto 0 );
   inv2R : std_logic_vector( widthRinv2R  - 1 downto 0 );
   phiT  : std_logic_vector( widthRphiT   - 1 downto 0 );
-  cot   : std_logic_vector( widthRcot    - 1 downto 0 );
   zT    : std_logic_vector( widthRzT     - 1 downto 0 );
 end record;
 type t_tracksR is array ( natural range <> ) of t_trackR;
@@ -166,7 +127,6 @@ type t_stubR is
 record
   reset : std_logic;
   valid : std_logic;
-  maybe : std_logic;
   barrel: std_logic;
   ps    : std_logic;
   tilt  : std_logic;
@@ -181,7 +141,7 @@ function nulll return t_stubR;
 type t_channelRL is
 record
   track: t_trackR;
-  stubs: t_stubsR( maxNumLayers - 1 downto 0 );
+  stubs: t_stubsR( tbNumLayers - 1 downto 0 );
 end record;
 function nulll return t_channelRL;
 
@@ -195,6 +155,10 @@ function nulll return t_channelR;
 type t_lutSeed is array ( 0 to 2 ** widthAddrBRAM18 - 1 ) of std_logic_vector( widthDSPbu - 1 downto 0 );
 function init_lutSeed return t_lutSeed;
 subtype r_Scot is natural range widthTBcot - unusedMSBScot - 1 - 1 downto baseShiftScot;
+
+type t_cots is array ( 0 to 2 ** widthTMzT - 1 ) of std_logic_vector( widthHCot - 1 downto 0 );
+function init_cots return t_cots;
+constant cots: t_cots;
 
 constant widthDspSa: natural := widthTBz0 + 1;
 constant widthDspSb: natural := 1 + widthDSPbu + 1;
@@ -357,23 +321,21 @@ record
 end record;
 subtype r_Hz is natural range widthDspHzp - 1 - 1 downto baseShiftTransformHz + 2;
 
-subtype r_overLinv2R is natural range widthSinv2R - 1 downto widthZHTinv2R - baseShiftHinv2R - 1;
-subtype r_overLphiT  is natural range widthSphiT  - 1 downto widthZHTphiT  - baseShiftHphiT  - 1;
-subtype r_overLcot   is natural range widthScot   - 1 downto widthZHTcot   - baseShiftHcot   - 1;
-subtype r_overLzT    is natural range widthSzT    - 1 downto widthZHTzT    - baseShiftHzT    - 1;
-subtype r_overLr     is natural range widthSr     - 1 downto widthZHTr     - baseShiftHr     - 1;
+subtype r_overLinv2R is natural range widthHinv2R - 1 downto widthTMinv2R - baseShiftHinv2R - 1;
+subtype r_overLphiT  is natural range widthHphiT  - 1 downto widthTMphiT  - baseShiftHphiT  - 1;
+subtype r_overLzT    is natural range widthHzT    - 1 downto widthTMzT    - baseShiftHzT    - 1;
+subtype r_overLr     is natural range widthHr     - 1 downto widthTMr     - baseShiftHr     - 1;
 
-subtype r_Linv2R is natural range widthZHTinv2R - baseShiftHinv2R - 1 downto -baseShiftHinv2R;
-subtype r_LphiT  is natural range widthZHTphiT  - baseShiftHphiT  - 1 downto -baseShiftHphiT;
-subtype r_Lcot   is natural range widthZHTcot   - baseShiftHcot   - 1 downto -baseShiftHcot;
-subtype r_LzT    is natural range widthZHTzT    - baseShiftHzT    - 1 downto -baseShiftHzT;
-subtype r_Lr     is natural range widthZHTr     - baseShiftHr     - 1 downto -baseShiftHr;
+subtype r_Linv2R is natural range widthTMinv2R - baseShiftHinv2R - 1 downto -baseShiftHinv2R;
+subtype r_LphiT  is natural range widthTMphiT  - baseShiftHphiT  - 1 downto -baseShiftHphiT;
+subtype r_LzT    is natural range widthTMzT    - baseShiftHzT    - 1 downto -baseShiftHzT;
+subtype r_Lr     is natural range widthTMr     - baseShiftHr     - 1 downto -baseShiftHr;
 
 constant baseShiftLphiT: integer := baseShiftTBinv2R - baseShiftTBphi0;
 constant baseShiftLdphi: integer := baseShiftHinv2R;
-constant widthDspLphia: natural := max( widthLinv2R - baseShiftHinv2R, widthSinv2R ) + 1 + 1;
+constant widthDspLphia: natural := max( widthLinv2R - baseShiftHinv2R, widthHinv2R ) + 1 + 1;
 constant widthDspLphib: natural := widthHr + 1;
-constant widthDspLphic: natural := max( widthLphiT - baseShiftHphiT, widthSphiT ) + 1 + 2 - baseShiftLphiT;
+constant widthDspLphic: natural := max( widthLphiT - baseShiftHphiT, widthHphiT ) + 1 + 2 - baseShiftLphiT;
 constant widthDspLphip: natural := max( widthDspLphia + widthDspLphib, widthDspLphic ) + 1;
 type t_dspLphi is
 record
@@ -385,13 +347,13 @@ end record;
 subtype r_overLphi is natural range widthDspLphip - 1 downto widthLphi - baseShiftLphiT + 1 - 1;
 subtype r_Lphi is natural range widthLphi - baseShiftHphi + 1 - 1 downto -baseShiftHphi + 1;
 subtype r_Ldphi is natural range widthDspLphip - 1 downto -baseShiftLdphi + 2;
-constant widthLdphi: natural := max( widthDspLphip + baseShiftLdphi - 1, widthSphi ) + 1 - 2;
+constant widthLdphi: natural := max( widthDspLphip + baseShiftLdphi - 1, widthHphi ) + 1 - 2;
 
 constant baseShiftLzT: integer := baseShiftTBcot - baseShiftTBz0;
 constant baseShiftLdz: integer := baseShiftHcot - 4;
 constant widthDspLza: natural := widthHr + 1;
-constant widthDspLzb: natural := max( widthLcot - baseShiftHcot, widthScot ) + 1 + 1;
-constant widthDspLzc: natural := max( widthLzT - baseShiftHzT, widthSzT ) + 1 + 2 - baseShiftLzT;
+constant widthDspLzb: natural := widthHcot + 1 + 1;
+constant widthDspLzc: natural := max( widthLzT - baseShiftHzT, widthHzT ) + 1 + 2 - baseShiftLzT;
 constant widthDspLzd: natural := widthHr + 1;
 constant widthDspLzp: natural := max( widthDspLza + widthDspLzb + 1, widthDspLzc ) + 1;
 type t_dspLz is
@@ -405,40 +367,22 @@ end record;
 subtype r_overLz is natural range widthDspLzp - 1 downto widthLz - baseShiftLzT + 1 - 1;
 subtype r_Lz is natural range widthLz - baseShiftHz + 1 - 1 downto -baseShiftHz + 1;
 subtype r_Ldz is natural range widthDspLzp - 1 downto -baseShiftLdz + 2;
-constant widthLdz: natural := max( widthDspLzp + baseShiftLdz - 1, widthSz ) + 1 - 2;
+constant widthLdz: natural := max( widthDspLzp + baseShiftLdz - 1, widthHz ) + 1 - 2;
 
-constant widthDspFdza: natural := widthLcot + 1;
-constant widthDspFdzb: natural := widthLr + 1;
-constant widthDspFdzc: natural := max( widthLzT  + 1 + baseShiftFz, widthLz + 1 ) + 1 + 1 + baseShiftFcot;
-constant widthDspFdzp: natural := max( widthDspFdza + widthDspFdzb, widthDspFdzc ) + 1;
-type t_dspFdZ is
-record
-  A: std_logic_vector( widthDspFdZa - 1 downto 0 );
-  B: std_logic_vector( widthDspFdZb - 1 downto 0 );
-  C: std_logic_vector( widthDspFdZc - 1 downto 0 );
-  P: std_logic_vector( widthDspFdZp - 1 downto 0 );
-end record;
-subtype r_FdZ is natural range widthDspFdzp - 1 downto 2;
+constant widthFr  : natural := widthAddrBRAM18 - 1;
+constant widthFcot: natural := widthAddrBRAM18 - 3;
+constant baseShiftFlutCot: integer := widthFCot - ilog2( maxCot / baseHCot );
 
-type t_ramFinvR is array ( 0 to 2 ** widthAddrBRAM18 - 1 ) of std_logic_vector( widthDspbu - 1 downto 0 );
-function init_ramFinvR return t_ramFinvR;
-subtype r_FinvRr is natural range widthLr - 1 downto unusedLSBFinvRr;
+constant baseF: real := baseInv2R * baseR;
+constant baseShiftF: integer := ilog2( baseF / basePhi );
 
-constant widthDspFcota: natural := widthDspFdzp - 2 + 1;
-constant widthDspFcotb: natural := 1 + widthDspbu + 1;
-constant widthDspFcotc: natural := max( widthHcot  + 2, widthLcot + 1 + baseShiftLcot ) + 1 + baseShiftFinvR;
-constant widthDspFcotp: natural := max( widthDspFcota + widthDspFcotb, widthDspFcotc ) + 1;
-type t_dspFcot is
-record
-  A: std_logic_vector( widthDspFcota - 1 downto 0 );
-  B: std_logic_vector( widthDspFcotb - 1 downto 0 );
-  C: std_logic_vector( widthDspFcotc - 1 downto 0 );
-  P: std_logic_vector( widthDspFcotp - 1 downto 0 );
-end record;
-subtype r_Fcot is natural range 1 + usedMSBFcot + 2 + baseShiftFinvR + baseShiftLcot - baseShiftFlutCot - 1 downto 2 + baseShiftFinvR + baseShiftLcot - baseShiftFlutCot;
+constant maxPitchOverR: real := pitchRowPS / tbInnerRadius;
+constant widthPitchOverR: natural := ilog2( maxPitchOverR / baseF ) + 1;
+constant widthLengthZ: natural := ilog2( rangeTMdZ / baseZ );
+constant widthLengthR: natural := ilog2( pitchCol2S / baseR );
 
 constant widthDspFdPhia: natural := 1 + widthLengthR + 1;
-constant widthDspFdPhib: natural := widthZHTinv2R + 1;
+constant widthDspFdPhib: natural := widthTMinv2R + 1;
 constant widthDspFdPhic: natural := 1 + widthPitchOverR + 2;
 constant widthDspFdPhid: natural := widthLengthR + 1;
 constant widthDspFdPhip: natural := max( max( widthDspFdPhia, widthDspFdPhid ) + 1 + widthDspFdPhib, widthDspFdPhic ) + 1;
@@ -452,8 +396,7 @@ record
   P : std_logic_vector( widthDspFdPhip - 1 downto 0 );
 end record;
 
-subtype r_Fr is natural range widthZHTr - 1 downto unusedLSBFr;
-subtype r_FdPhi is natural range widthZHTdPhi + 2 - baseShiftF - 1 downto 2 - baseShiftF;
+subtype r_FdPhi is natural range widthTMdPhi + 2 - baseShiftF - 1 downto 2 - baseShiftF;
 
 type t_ramLengths is array ( 0 to 2 ** widthAddrBRAM18 - 1 ) of std_logic_vector( widthLengthZ + widthLengthR - 1 downto 0 );
 function init_ramLengths return t_ramLengths;
@@ -463,30 +406,23 @@ type t_ramPitchOverRs is array ( 0 to 2 ** widthAddrBRAM18 - 1 ) of std_logic_ve
 function init_ramPitchOverRs return t_ramPitchOverRs;
 constant ramPitchOverRs: t_ramPitchOverRs;
 
-type t_sectorCots is array ( 0 to numSectorsEta - 1 ) of std_logic_vector( widthHcot - 1 downto 0 );
-function init_sectorCots return t_sectorCots;
-constant sectorCots: t_sectorCots;
-
 end;
 
 
 
-package body kfin_data_types is
+package body tm_data_types is
 
 
 function nulll return t_stubU is begin return ( '0', '0', '0', others => ( others => '0' ) ); end function;
 function nulll return t_stubH is begin return ( '0', '0', '0', others => ( others => '0' ) ); end function;
-function nulll return t_stubS is begin return ( '0', '0', '0', others => ( others => '0' ) ); end function;
 function nulll return t_stubL is begin return ( '0', '0', '0', others => ( others => '0' ) ); end function;
-function nulll return t_stubR is begin return ( '0', '0', '0', '0', '0', '0', others => ( others => '0' ) ); end function;
+function nulll return t_stubR is begin return ( '0', '0', '0', '0', '0', others => ( others => '0' ) ); end function;
 function nulll return t_trackU is begin return ( '0', '0', others => ( others => '0' ) ); end function;
 function nulll return t_trackH is begin return ( '0', '0', others => ( others => '0' ) ); end function;
-function nulll return t_trackS is begin return ( '0', '0', others => ( others => '0' ) ); end function;
 function nulll return t_trackL is begin return ( '0', '0', others => ( others => '0' ) ); end function;
 function nulll return t_trackR is begin return ( '0', '0', others => ( others => '0' ) ); end function;
 function nulll return t_channelU is begin return ( nulll, others => ( others => nulll ) ); end function;
 function nulll return t_channelH is begin return ( nulll, others => ( others => nulll ) ); end function;
-function nulll return t_channelS is begin return ( nulll, others => ( others => nulll ) ); end function;
 function nulll return t_channelL is begin return ( nulll, others => ( others => nulll ) ); end function;
 function nulll return t_channelR is begin return ( nulll, others => ( others => nulll ) ); end function;
 function nulll return t_channelRL is begin return ( nulll, others => ( others => nulll ) ); end function;
@@ -502,6 +438,20 @@ begin
   return lut;
 end function;
 
+function init_cots return t_cots is
+  variable cots: t_cots := ( others => ( others => '0' ) );
+  variable std: std_logic_vector( widthTMzT - 1 downto 0 ) := ( others => '0' );
+  variable zT: real;
+begin
+  for k in cots'range loop
+    std := stdu( k, widthTMzT );
+    zT := ( sreal( std ) + 0.5 ) * baseZT;
+    cots( k ) := stds( digi( zT / chosenRofZ, baseHcot ), widthHcot );
+  end loop;
+  return cots;
+end function;
+constant cots: t_cots := init_cots;
+
 function init_ramLengths return t_ramLengths is
   variable ram: t_ramLengths := ( others => ( others => '0' ) );
   variable index: std_logic_vector( widthAddrBRAM18 - 1 downto 0 );
@@ -513,10 +463,10 @@ begin
     barrel := bool( index( index'high ) );
     ps := bool( index( index'high - 1 ) );
     tilt := bool( index( index'high - 2 ) );
-    cot := ( real( uint( index( index'high - 3 downto 0 ) ) ) + 0.5 ) * baseZHTcot * 2.0 ** (-baseShiftFlutCot);
-    length := length2S;
+    cot := ( real( uint( index( index'high - 3 downto 0 ) ) ) + 0.5 ) * baseHcot * 2.0 ** ( -baseShiftFlutCot );
+    length := pitchCol2S;
     if ps then
-      length := lengthPS;
+      length := pitchColPS;
     end if;
     lengthZ := length;
     lengthR := 0.0;
@@ -524,36 +474,20 @@ begin
       lengthZ := length * cot;
       lengthR := length;
     elsif tilt then
-      lengthZ := lengthZ * abs( tiltApproxSlope * cot + tiltApproxIntercept );
-      lengthR := tiltUncertaintyR;
+      lengthZ := lengthZ * abs( approxSlope * cot + approxIntercept );
+      lengthR := lengthTilt;
     end if;
-    lengthZ := lengthZ + baseZHTz;
-    if lengthZ < baseZHTz * 2.0 ** widthLengthZ then
-      ram( k )( widthLengthZ + widthLengthR - 1 downto widthLengthR ) := stdu( lengthZ / baseZHTz, widthLengthZ );
+    lengthZ := lengthZ + baseZ;
+    if lengthZ < baseZ * 2.0 ** widthLengthZ then
+      ram( k )( widthLengthZ + widthLengthR - 1 downto widthLengthR ) := stdu( digi( lengthZ, baseZ ), widthLengthZ );
     end if;
-    if lengthR < baseZHTr * 2.0 ** widthLengthR then
-      ram( k )( widthLengthR - 1 downto 0 ) := stdu( lengthR / baseZHTr, widthLengthR );
+    if lengthR < baseR * 2.0 ** widthLengthR then
+      ram( k )( widthLengthR - 1 downto 0 ) := stdu( digi( lengthR, baseR ), widthLengthR );
     end if;
   end loop;
   return ram;
 end function;
 constant ramLengths: t_ramLengths := init_ramLengths;
-
-function init_ramFinvR return t_ramFinvR is
-  variable ram: t_ramFinvR := ( others => ( others => '0' ) );
-  variable index: std_logic_vector( widthAddrBRAM18 - 1 downto 0 );
-  variable r, invR: real;
-begin
-  for k in ram'range loop
-    index := stdu( k, widthAddrBRAM18 );
-    r := ( real( sint( index ) ) + 0.5 ) * baseZHTr * 2.0 ** unusedLSBFinvRr + chosenRofPhi;
-    invR := 1.0 / r;
-    if r > 0.0 and invR < baseFinvR * 2.0 ** widthDspbu then
-      ram( k ) := stdu( invR / baseFinvR, widthDspbu );
-    end if;
-  end loop;
-  return ram;
-end function;
  
 function init_ramPitchOverRs return t_ramPitchOverRs is
   variable ram: t_ramPitchOverRs := ( others => ( others => '0' ) );
@@ -565,28 +499,18 @@ begin
   for k in ram'range loop
     index := stdu( k, widthAddrBRAM18 );
     ps := bool( index( index'high ) );
-    r := ( real( sint( index( index'high - 1 downto 0 ) ) ) + 0.5 ) * baseZHTr * 2.0 ** unusedLSBFr + chosenRofPhi;
-    pitch := pitch2S;
+    r := ( sreal( index( index'high - 1 downto 0 ) ) + 0.5 ) * baseR * 2.0 ** ( widthTMr - widthFr ) + chosenRofPhi;
+    pitch := pitchRow2S;
     if ps then
-      pitch := pitchPS;
+      pitch := pitchRowPS;
     end if;
-    if r > 0.0 and pitch / r < baseZHTphi * 2.0 ** ( baseShiftF + widthPitchOverR ) then
-      ram( k ) := stdu( pitch / r / baseZHTphi / 2.0 ** baseShiftF, widthPitchOverR );
+    if r > 0.0 and pitch / r < basePhi * 2.0 ** ( baseShiftF + widthPitchOverR ) then
+      ram( k ) := stdu( pitch / r / basePhi / 2.0 ** baseShiftF, widthPitchOverR );
     end if;
   end loop;
   return ram;
 end function;
 constant ramPitchOverRs: t_ramPitchOverRs := init_ramPitchOverRs;
-
-function init_sectorCots return t_sectorCots is
-  variable res: t_sectorCots;
-begin
-  for k in res'range loop
-    res( k ) := stds( work.hybrid_config.sectorCots( k ) / baseHcot, widthHcot );
-  end loop;
-  return res;
-end function;
-constant sectorCots: t_sectorCots := init_sectorCots;
 
 
 end;

@@ -2,9 +2,9 @@ library ieee;
 use ieee.std_logic_1164.all;
 use work.hybrid_config.all;
 use work.hybrid_data_types.all;
-use work.kfin_data_types.all;
+use work.tm_data_types.all;
 
-entity kfin_router is
+entity tm_router is
 generic (
   seedType: natural
 );
@@ -15,7 +15,7 @@ port (
 );
 end;
 
-architecture rtl of kfin_router is
+architecture rtl of tm_router is
 
 signal lookup_din: t_channelL := nulll;
 signal lookup_dout: t_channelRL := nulll;
@@ -30,7 +30,7 @@ port (
 );
 end component;
 
-constant numInputLayers: natural := maxNumSeedingLayer + numsProjectionLayers( seedType );
+constant numInputLayers: natural := tbMaxNumSeedingLayer + tbNumsProjectionLayers( seedType );
 signal route_din: t_channelRL := nulll;
 signal route_dout: t_channelR := nulll;
 component router_route
@@ -62,8 +62,8 @@ end;
 library ieee;
 use ieee.std_logic_1164.all;
 use work.hybrid_config.all;
-use work.kfin_data_types.all;
-use work.kfin_data_formats.all;
+use work.tm_data_types.all;
+use work.tm_data_formats.all;
 
 entity router_lookUp is
 generic (
@@ -88,7 +88,7 @@ port (
 );
 end component;
 
-signal stubs: t_stubsR( maxNumLayers - 1 downto 0 ) := ( others => nulll );
+signal stubs: t_stubsR( tbNumLayers - 1 downto 0 ) := ( others => nulll );
 component lookup_stub
 generic (
   layer: natural
@@ -109,15 +109,15 @@ lookup_dout.stubs <= stubs;
 
 c: lookup_track port map ( clk, track_din, track_dout );
 
-g: for k in 0 to maxNumSeedingLayer + numsProjectionLayers( seedType ) - 1 generate
+g: for k in 0 to tbMaxNumSeedingLayer + tbNumsProjectionLayers( seedType ) - 1 generate
 
 function init_layer return natural is
   variable layer: natural;
 begin
-  if k < numsProjectionLayers( seedType ) then
+  if k < tbNumsProjectionLayers( seedType ) then
     layer := seedTypesProjectionLayers( seedType )( k );
   else
-    layer := seedTypesSeedLayers( seedType )( k - numsProjectionLayers( seedType ) );
+    layer := seedTypesSeedLayers( seedType )( k - tbNumsProjectionLayers( seedType ) );
   end if;
   if layer < 10 then
     return layer - 1;
@@ -144,7 +144,7 @@ end;
 library ieee;
 use ieee.std_logic_1164.all;
 use work.hybrid_tools.all;
-use work.kfin_data_types.all;
+use work.tm_data_types.all;
 
 entity lookup_track is
 port (
@@ -173,10 +173,8 @@ if rising_edge( clk ) then
     dout.reset <= '1';
   elsif din.valid = '1' then
     dout.valid <= '1';
-    dout.sector <= din.sectorPhi & din.sectorEta;
     dout.inv2R <= din.inv2R;
     dout.phiT <= din.phiT;
-    dout.cot <= din.cot;
     dout .zT <= din.zT;
   end if;
 
@@ -190,9 +188,9 @@ library ieee;
 use ieee.std_logic_1164.all;
 use work.hybrid_tools.all;
 use work.hybrid_config.all;
-use work.kfin_data_types.all;
-use work.kfin_data_formats.all;
-use work.kfin_layerEncoding.all;
+use work.tm_data_types.all;
+use work.tm_data_formats.all;
+use work.tm_layerEncoding.all;
 
 entity lookup_stub is
 generic (
@@ -210,16 +208,14 @@ architecture rtl of lookup_stub is
 
 attribute ram_style: string;
 signal lut: t_layerEncoding := layerEncodings( layer );
-signal index: std_logic_vector( widthLsectorEta + widthLzT + widthLcot - 1 downto 0 ) := ( others => '0' );
-signal encoded: std_logic_vector( 1 + widthRlayer + 1 - 1 downto 0 ) := ( others => '0' );
+signal encoded: std_logic_vector( 1 + widthRlayer - 1 downto 0 ) := ( others => '0' );
 signal dout: t_stubR := nulll;
 attribute ram_style of lut: signal is "register";
 
 begin
 
 stub_dout <= dout;
-index <= stub_track.sectorEta & stub_track.zT & stub_track.cot;
-encoded <= lut( uint( index ) );
+encoded <= lut( uint( stub_track.zT ) );
 
 process ( clk ) is
 begin
@@ -228,22 +224,21 @@ if rising_edge( clk ) then
   dout <= nulll;
   if stub_din.reset = '1' then
     dout.reset <= '1';
-  elsif stub_din.valid = '1' and encoded( 1 + widthRlayer + 1 - 1 ) = '1' then
+  elsif stub_din.valid = '1' and encoded( 1 + widthRlayer - 1 ) = '1' then
     dout.valid <= '1';
     dout.barrel <= '0';
     dout.ps <= stub_din.pst;
     dout.tilt <= '1';
-    if layer < numBarrelLayers then
+    if layer < tbNumBarrelLayers then
       dout.barrel <= '1';
       dout.ps <= '0';
       dout.tilt <= '0';
-      if layer < numBarrelLayersPS then
+      if layer < tbNumBarrelLayersPS then
         dout.ps <= '1';
         dout.tilt <= not stub_din.pst;
       end if;
     end if;
-    dout.maybe <= encoded( 0 );
-    dout.layer <= encoded( widthRlayer + 1 - 1 downto 1 );
+    dout.layer <= encoded( widthRlayer - 1 downto 0 );
     dout.r <= stub_din.r;
     dout.phi <= stub_din.phi;
     dout.z <= stub_din.z;
@@ -258,9 +253,11 @@ end;
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
+use work.hybrid_tools.all;
 use work.hybrid_config.all;
+use work.hybrid_data_formats.all;
 use work.hybrid_data_types.all;
-use work.kfin_data_types.all;
+use work.tm_data_types.all;
 
 entity router_route is
 generic (
@@ -275,18 +272,16 @@ end;
 
 architecture rtl of router_route is
 
-function f_valid( stubs: t_stubsR ) return boolean is
-  variable n: natural := 0;
+function f_hitPattern( stubs: t_stubsR ) return std_logic_vector is
+  variable hitPattern: std_logic_vector( widthLayer - 1 downto 0 ) := ( others => '0' );
 begin
+  
   for k in 0 to numLayers - 1 loop
     if stubs( k ).valid = '1' then
-      n := n + 1;
+      hitPattern( k ) := '1';
     end if;
   end loop;
-  if n < minLayersKF then
-    return false;
-  end if;
-  return true;
+  return hitPattern;
 end function;
 
 -- step 1
@@ -296,6 +291,7 @@ signal track: t_trackR := nulll;
 signal stubs: t_stubsR( numLayers - 1 downto 0 ) := ( others => nulll );
 
 -- step 2
+signal hitPattern:  std_logic_vector( widthLayer - 1 downto 0 ) := ( others => '0' );
 signal dout: t_channelR := nulll;
 
 begin
@@ -304,6 +300,7 @@ begin
 din <= route_din;
 
 -- step 2
+hitPattern <= f_hitPattern( stubs );
 route_dout <= dout;
 
 process ( clk ) is
@@ -330,7 +327,7 @@ if rising_edge( clk ) then
     for k in dout.stubs'range loop
       dout.stubs( k ).reset <= '1';
     end loop;
-  elsif track.valid = '1' and f_valid( stubs ) then
+  elsif track.valid = '1' and count( hitPattern, '1' ) >= kfMinStubs and count( hitPattern, 0, kfMaxSeedLayer - 1, '1' ) >= kfNumSeedLayer then
     dout <= ( track, stubs );
   end if;
 

@@ -5,40 +5,40 @@ use work.emp_data_types.all;
 use work.hybrid_config.all;
 use work.hybrid_data_types.all;
 
-entity kfin_isolation_in is
+entity tm_isolation_in is
 port (
   clk: in std_logic;
   in_din: in ldata( 4 * N_REGION - 1 downto 0 );
-  in_dout: out t_channlesTB( numSeedTypes - 1 downto 0 )
+  in_dout: out t_channelsTB( tbNumSeedTypes - 1 downto 0 )
 );
 end;
 
-architecture rtl of kfin_isolation_in is
+architecture rtl of tm_isolation_in is
 
-component kfin_isolation_in_node
+component tm_isolation_in_node
 generic (
   seedType: natural
 );
 port (
   clk: in std_logic;
-  node_din: in ldata( numLinksTB - 1 downto 0 );
+  node_din: in ldata( tbNumLinks - 1 downto 0 );
   node_dout: out t_channelTB
 );
 end component;
 
 begin
 
-g: for k in 0 to numSeedTypes - 1 generate
+g: for k in 0 to tbNumSeedTypes - 1 generate
 
-signal node_din: ldata( numLinksTB - 1 downto 0 ) := ( others => ( ( others => '0' ), '0', '0', '1' ) );
+signal node_din: ldata( tbNumLinks - 1 downto 0 ) := ( others => nulll );
 signal node_dout: t_channelTB := nulll;
 
 begin
 
-node_din( numsProjectionLayers( k ) + 1 - 1 downto 0 ) <= in_din( limitsChannelTB( k + 1 ) - 1 downto limitsChannelTB( k ) );
+node_din( tbNumsProjectionLayers( k ) + 1 - 1 downto 0 ) <= in_din( tbLimitsChannel( k + 1 ) - 1 downto tbLimitsChannel( k ) );
 in_dout( k ) <= node_dout;
 
-c: kfin_isolation_in_node generic map ( k ) port map ( clk, node_din, node_dout );
+c: tm_isolation_in_node generic map ( k ) port map ( clk, node_din, node_dout );
 
 end generate;
 
@@ -52,22 +52,22 @@ use work.emp_data_types.all;
 use work.hybrid_config.all;
 use work.hybrid_data_types.all;
 
-entity kfin_isolation_in_node is
+entity tm_isolation_in_node is
 generic (
   seedType: natural
 );
 port (
   clk: in std_logic;
-  node_din: in ldata( numLinksTB - 1 downto 0 );
+  node_din: in ldata( tbNumLinks - 1 downto 0 );
   node_dout: out t_channelTB
 );
 end;
 
-architecture rtl of kfin_isolation_in_node is
+architecture rtl of tm_isolation_in_node is
 
-signal track_din: lword := ( ( others => '0' ), '0', '0', '1' );
+signal track_din: lword := nulll;
 signal track_dout: t_trackTB := nulll;
-component kfin_isolation_in_track
+component tm_isolation_in_track
 port (
   clk: in std_logic;
   track_din: in lword;
@@ -75,38 +75,29 @@ port (
 );
 end component;
 
-signal stubs: t_stubsTB( node_dout.stubs'range ) := ( others => nulll );
-component kfin_isolation_in_stub
+signal stubs_din: ldata( tbMaxNumProjectionLayers - 1 downto 0 ) := ( others => nulll );
+signal stubs_dout: t_stubsTB( tbMaxNumProjectionLayers - 1 downto 0 ) := ( others => nulll );
+component tm_isolation_in_stubs
 generic (
-  layer: natural
+  seedType: natural
 );
 port (
   clk: in std_logic;
-  stub_din: in lword;
-  stub_dout: out t_stubTB
+  stubs_din: in ldata( tbMaxNumProjectionLayers - 1 downto 0 );
+  stubs_dout: out t_stubsTB( tbMaxNumProjectionLayers - 1 downto 0 )
 );
 end component;
 
 begin
 
 track_din <= node_din( 0 );
-node_dout <= ( track_dout, stubs );
+stubs_din <= node_din( tbMaxNumProjectionLayers + 1 - 1 downto 1 );
 
-c: kfin_isolation_in_track port map ( clk, track_din, track_dout );
+node_dout <= ( track_dout, stubs_dout );
 
-g: for k in 0 to numsProjectionLayers( seedType ) - 1 generate
+cTrack: tm_isolation_in_track port map ( clk, track_din, track_dout );
 
-signal stub_din: lword := ( ( others => '0' ), '0', '0', '1' );
-signal stub_dout: t_stubTB := nulll;
-
-begin
-
-stub_din <= node_din( k + 1 );
-stubs( k ) <= stub_dout;
-
-c: kfin_isolation_in_stub generic map ( seedTypesProjectionLayers( seedType )( k ) ) port map ( clk, stub_din, stub_dout );
-
-end generate;
+cStubs: tm_isolation_in_stubs generic map ( seedType ) port map ( clk, stubs_din, stubs_dout );
 
 end;
 
@@ -117,7 +108,7 @@ use work.emp_data_types.all;
 use work.hybrid_data_types.all;
 use work.hybrid_data_formats.all;
 
-entity kfin_isolation_in_track is
+entity tm_isolation_in_track is
 port (
   clk: in std_logic;
   track_din: in lword;
@@ -125,10 +116,10 @@ port (
 );
 end;
 
-architecture rtl of kfin_isolation_in_track is
+architecture rtl of tm_isolation_in_track is
 
 -- step 1
-signal din: lword := ( ( others => '0' ), '0', '0', '1' );
+signal din: lword := nulll;
 
 -- step 2
 signal dout: t_trackTB := nulll;
@@ -175,12 +166,62 @@ end;
 
 library ieee;
 use ieee.std_logic_1164.all;
+use work.emp_device_decl.all;
+use work.emp_data_types.all;
+use work.hybrid_config.all;
+use work.hybrid_data_types.all;
+
+entity tm_isolation_in_stubs is
+generic (
+  seedType: natural
+);
+port (
+  clk: in std_logic;
+  stubs_din: in ldata( tbMaxNumProjectionLayers - 1 downto 0 );
+  stubs_dout: out t_stubsTB( tbMaxNumProjectionLayers - 1 downto 0 )
+);
+end;
+
+architecture rtl of tm_isolation_in_stubs is
+
+component tm_isolation_in_stub
+generic (
+  layer: natural
+);
+port (
+  clk: in std_logic;
+  stub_din: in lword;
+  stub_dout: out t_stubTB
+);
+end component;
+
+begin
+
+g: for k in 0 to tbNumsProjectionLayers( seedType ) - 1 generate
+
+signal stub_din: lword := nulll;
+signal stub_dout: t_stubTB := nulll;
+
+begin
+
+stub_din <= stubs_din( k );
+stubs_dout( k ) <= stub_dout;
+
+c: tm_isolation_in_stub generic map ( seedTypesProjectionLayers( seedType )( k ) ) port map ( clk, stub_din, stub_dout );
+
+end generate;
+
+end;
+
+
+library ieee;
+use ieee.std_logic_1164.all;
 use work.emp_data_types.all;
 use work.hybrid_tools.all;
 use work.hybrid_data_types.all;
 use work.hybrid_data_formats.all;
 
-entity kfin_isolation_in_stub is
+entity tm_isolation_in_stub is
 generic (
   layer: natural
 );
@@ -191,10 +232,10 @@ port (
 );
 end;
 
-architecture rtl of kfin_isolation_in_stub is
+architecture rtl of tm_isolation_in_stub is
 
 -- step 1
-signal din: lword := ( ( others => '0' ), '0', '0', '1' );
+signal din: lword := nulll;
 signal stubType: std_logic_vector( widthTBstubType - 1 downto 0 ) := ( others => '0' );
 
 -- step 2
@@ -282,112 +323,55 @@ use work.emp_data_types.all;
 use work.hybrid_config.all;
 use work.hybrid_data_types.all;
 
-entity kfin_isolation_out is
+entity tm_isolation_out is
 port (
   clk: in std_logic;
-  out_packet: in std_logic;
-  out_din: in t_channelsZHT( numSeedTypes - 1 downto 0 );
+  out_packet: in t_packets( 4 * N_REGION - 1 downto 0 );
+  out_din: in t_channelTM;
   out_dout: out ldata( 4 * N_REGION - 1 downto 0 )
 );
 end;
 
-architecture rtl of kfin_isolation_out is
+architecture rtl of tm_isolation_out is
 
-signal dout: ldata( 4 * N_REGION - 1 downto 0 ) := ( others => ( ( others => '0' ), '0', '0', '1' ) );
-component kfin_isolation_out_node
+signal track_packet: t_packet := ( others => '0' );
+signal track_din: t_trackTM := nulll;
+signal track_dout: lword := nulll;
+component tm_isolation_out_track
 port (
   clk: in std_logic;
-  node_packet: in std_logic_vector( numLayers + 1 - 1 downto 0 );
-  node_din: in t_channelZHT;
-  node_dout: out ldata( numLayers + 1 - 1 downto 0 )
-);
-end component;
-
-begin
-
-out_dout <= dout;
-
-node: for k in 0 to numSeedTypes - 1 generate
-
-signal node_packet: std_logic_vector( numLayers + 1 - 1 downto 0 ) := ( others => '0' );
-signal node_din: t_channelZHT := nulll;
-signal node_dout: ldata( numLayers + 1 - 1 downto 0 ) := ( others => ( ( others => '0' ), '0', '0', '1' ) );
-
-begin
-
-node_packet <= ( others => out_packet );
-node_din <= out_din( k );
-dout( ( k + 1 ) * ( numLayers + 1 ) - 1 downto k * ( numLayers + 1 ) ) <= node_dout;
-
-c: kfin_isolation_out_node port map ( clk, node_packet, node_din, node_dout );
-
-end generate;
-
-end;
-
-
-library ieee;
-use ieee.std_logic_1164.all;
-use work.emp_data_types.all;
-use work.emp_project_decl.all;
-use work.hybrid_config.all;
-use work.hybrid_data_types.all;
-
-entity kfin_isolation_out_node is
-port (
-  clk: in std_logic;
-  node_packet: in std_logic_vector( numLayers + 1 - 1 downto 0 );
-  node_din: in t_channelZHT;
-  node_dout: out ldata( numLayers + 1 - 1 downto 0 )
-);
-end;
-
-architecture rtl of kfin_isolation_out_node is
-
-signal track_packet: std_logic := '0';
-signal track_din: t_trackZHT := nulll;
-signal track_dout: lword := ( ( others => '0' ), '0', '0', '1' );
-component kfin_isolation_out_track
-port (
-  clk: in std_logic;
-  track_packet: in std_logic;
-  track_din: in t_trackZHT;
+  track_packet: in t_packet;
+  track_din: in t_trackTM;
   track_dout: out lword
 );
 end component;
 
-component kfin_isolation_out_stub
+signal stubs_packet: t_packets( numLayers - 1 downto 0 ) := ( others => ( others => '0' ) );
+signal stubs_din: t_stubsTM( numLayers - 1 downto 0 ) := ( others => nulll );
+signal stubs_dout: ldata( numLayers - 1 downto 0 ) := ( others => nulll );
+component tm_isolation_out_stubs
 port (
   clk: in std_logic;
-  stub_packet: in std_logic;
-  stub_din: in t_stubZHT;
-  stub_dout: out lword
+  stubs_packet: in t_packets( numLayers - 1 downto 0 );
+  stubs_din: in t_stubsTM( numLayers - 1 downto 0 );
+  stubs_dout: out ldata( numLayers - 1 downto 0 )
 );
 end component;
 
 begin
 
-track_packet <= node_packet( 0 );
-track_din <= node_din.track;
-node_dout( 0 ) <= track_dout;
+track_packet <= out_packet( 0 );
+track_din <= out_din.track;
 
-c: kfin_isolation_out_track port map ( clk, track_packet, track_din, track_dout );
+stubs_packet <= out_packet( numLayers + 1 - 1 downto 1 );
+stubs_din <= out_din.stubs;
 
-g: for k in 0 to numLayers - 1 generate
+out_dout( 4 * N_REGION - 1 downto drNumLinks ) <= ( others => nulll );
+out_dout( drNumLinks - 1 downto 0 ) <= stubs_dout & track_dout;
 
-signal stub_packet: std_logic := '0';
-signal stub_din: t_stubZHT := nulll;
-signal stub_dout: lword := ( ( others => '0' ), '0', '0', '1' );
+cTrack: tm_isolation_out_track port map ( clk, track_packet, track_din, track_dout );
 
-begin
-
-stub_packet <= node_packet( k + 1 );
-stub_din <= node_din.stubs( k );
-node_dout( k + 1 ) <= stub_dout;
-
-c: kfin_isolation_out_stub port map ( clk, stub_packet, stub_din, stub_dout );
-
-end generate;
+cStubs: tm_isolation_out_stubs port map ( clk, stubs_packet, stubs_din, stubs_dout );
 
 end;
 
@@ -396,35 +380,33 @@ library ieee;
 use ieee.std_logic_1164.all;
 use work.emp_data_types.all;
 use work.emp_project_decl.all;
-use work.hybrid_tools.all;
 use work.hybrid_config.all;
 use work.hybrid_data_types.all;
 use work.hybrid_data_formats.all;
 
-entity kfin_isolation_out_track is
+entity tm_isolation_out_track is
 port (
-    clk: in std_logic;
-    track_packet: in std_logic;
-    track_din: in t_trackZHT;
-    track_dout: out lword
+  clk: in std_logic;
+  track_packet: in t_packet;
+  track_din: in t_trackTM;
+  track_dout: out lword
 );
 end;
 
-architecture rtl of kfin_isolation_out_track is
+architecture rtl of tm_isolation_out_track is
 
-constant widthTrack: natural := 1 + widthZHTmaybe + widthZHTsector + widthZHTphiT + widthZHTinv2R + widthZHTzT + widthZHTcot;
---constant widthTrack: natural := 1 + widthZHTsector + widthZHTphiT + widthZHTinv2R + widthZHTzT + widthZHTcot;
+constant widthTrack: natural := 1 + widthTMinv2R + widthTMphiT + widthTMzT;
+
 -- sr
-signal sr: std_logic_vector( PAYLOAD_LATENCY - 1 downto 0 ) := ( others => '0' );
+signal sr: t_packets( PAYLOAD_LATENCY - 1 downto 0 ) := ( others => ( others => '0' ) );
 
 -- step 1
-signal din:  t_trackZHT := nulll;
-signal dout: lword := ( ( others => '0' ), '0', '0', '1' );
+signal din:  t_trackTM := nulll;
+signal dout: lword := nulll;
 
-function conv( s: t_trackZHT ) return std_logic_vector is
+function conv( t: t_trackTM ) return std_logic_vector is
 begin
-    return s.valid & s.maybe & s.sector & s.phiT & s.inv2R & s.zT & s.cot;
-    --return s.valid & s.sector & s.phiT & s.inv2R & s.zT & s.cot;
+  return t.valid & t.inv2R & t.phiT & t.zT;
 end function;
 
 begin
@@ -443,9 +425,10 @@ if rising_edge( clk ) then
 
   -- step 1
 
+  dout.start_of_orbit <= sr( sr'high ).start_of_orbit;
   dout.valid <= '0';
   dout.data <= ( others => '0' );
-  if msb( sr ) = '1' then
+  if sr( sr'high ).valid = '1' then
     dout.valid <= '1';
     dout.data( widthTrack - 1 downto 0  ) <= conv( din );
   end if;
@@ -459,35 +442,81 @@ end;
 library ieee;
 use ieee.std_logic_1164.all;
 use work.emp_data_types.all;
+use work.hybrid_config.all;
+use work.hybrid_data_types.all;
+
+entity tm_isolation_out_stubs is
+port (
+  clk: in std_logic;
+  stubs_packet: in t_packets( numLayers - 1 downto 0 );
+  stubs_din: in t_stubsTM( numLayers - 1 downto 0 );
+  stubs_dout: out ldata( numLayers - 1 downto 0 )
+);
+end;
+
+architecture rtl of tm_isolation_out_stubs is
+
+component tm_isolation_out_stub
+port (
+  clk: in std_logic;
+  stub_packet: in t_packet;
+  stub_din: in t_stubTM;
+  stub_dout: out lword
+);
+end component;
+
+begin
+
+g: for k in 0 to numLayers - 1 generate
+
+signal stub_packet: t_packet := ( others => '0' );
+signal stub_din: t_stubTM := nulll;
+signal stub_dout: lword := nulll;
+
+begin
+
+stub_packet <= stubs_packet( k );
+stub_din <= stubs_din( k );
+stubs_dout( k ) <= stub_dout;
+
+c: tm_isolation_out_stub port map ( clk, stub_packet, stub_din, stub_dout );
+
+end generate;
+
+end;
+
+
+library ieee;
+use ieee.std_logic_1164.all;
+use work.emp_data_types.all;
 use work.emp_project_decl.all;
-use work.hybrid_tools.all;
 use work.hybrid_config.all;
 use work.hybrid_data_types.all;
 use work.hybrid_data_formats.all;
 
-entity kfin_isolation_out_stub is
+entity tm_isolation_out_stub is
 port (
     clk: in std_logic;
-    stub_packet: in std_logic;
-    stub_din: in t_stubZHT;
+    stub_packet: in t_packet;
+    stub_din: in t_stubTM;
     stub_dout: out lword
 );
 end;
 
-architecture rtl of kfin_isolation_out_stub is
+architecture rtl of tm_isolation_out_stub is
 
-constant widthStub: natural := 1 + widthZHTr + widthZHTphi + widthZHTz + widthZHTdPhi + widthZHTdZ;
+constant widthStub: natural := 1 + widthTMstubId + widthTMr + widthTMphi + widthTMz + widthTMdPhi + widthTMdZ;
 
 -- sr
-signal sr: std_logic_vector( PAYLOAD_LATENCY - 1 downto 0 ) := ( others => '0' );
+signal sr: t_packets( PAYLOAD_LATENCY - 1 downto 0 ) := ( others => ( others => '0' ) );
 
 -- step 1
-signal din:  t_stubZHT := nulll;
-signal dout: lword := ( ( others => '0' ), '0', '0', '1' );
+signal din:  t_stubTM := nulll;
+signal dout: lword := nulll;
 
-function conv( s: t_stubZHT ) return std_logic_vector is
+function conv( s: t_stubTM ) return std_logic_vector is
 begin
-    return s.valid & s.r & s.phi & s.z & s.dPhi & s.dZ;
+  return s.valid & s.stubId & s.r & s.phi & s.z & s.dPhi & s.dZ;
 end function;
 
 begin
@@ -506,9 +535,10 @@ if rising_edge( clk ) then
 
   -- step 1
 
+  dout.start_of_orbit <= sr( sr'high ).start_of_orbit;
   dout.valid <= '0';
   dout.data <= ( others => '0' );
-  if msb( sr ) = '1' then
+  if sr( sr'high ).valid = '1' then
     dout.valid <= '1';
     dout.data( widthStub - 1 downto 0  ) <= conv( din );
   end if;
