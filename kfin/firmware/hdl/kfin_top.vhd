@@ -6,8 +6,8 @@ use work.hybrid_data_types.all;
 entity kfin_top is
 port (
   clk: in std_logic;
-  kfin_din: in t_channlesTB( numSeedTypes - 1 downto 0 );
-  kfin_dout: out t_channelsZHT( numSeedTypes - 1 downto 0 )
+  kfin_din: in t_channlesTB( numNodesKF - 1 downto 0 );
+  kfin_dout: out t_channelsZHT( numNodesKF - 1 downto 0 )
 );
 end;
 
@@ -26,7 +26,7 @@ end component;
 
 begin
 
-g: for k in 0 to numSeedTypes - 1 generate
+g: for k in 0 to numNodesKF - 1 generate
 
 signal node_din: t_channelTB := nulll;
 signal node_dout: t_channelZHT := nulll;

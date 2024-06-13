@@ -173,7 +173,8 @@ constant numLinksTB: natural := 1 + maxNumProjectionLayers;
 constant rangeFactor: real    := 2.0; -- search window of each track parameter in initial uncertainties
 constant minLayersKF: natural := 4;   -- required number of stub layers to form a track
 constant maxLayersKF: natural := 7;   -- maximum number of  layers added to a track
-constant numNodesKF : natural := numSeedTypes;   -- number of KF workes
+--constant numNodesKF : natural := numSeedTypes;   -- number of KF workes
+constant numNodesKF : natural := 2;   -- number of KF workes
 
 -- TFP
 
