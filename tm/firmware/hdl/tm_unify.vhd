@@ -31,7 +31,8 @@ port (
 );
 end component;
 
-signal seeds_din: t_trackTB := nulll;
+signal seeds_tin: t_trackTB := nulll;
+signal seeds_sin: t_seedsTB( tbMaxNumSeedingLayer - 1 downto 0 ) := ( others => nulll );
 signal seeds_dout: t_stubsU( tbMaxNumSeedingLayer - 1 downto 0 ) := ( others => nulll );
 component unify_seeds
 generic (
@@ -39,7 +40,8 @@ generic (
 );
 port (
   clk: in std_logic;
-  seeds_din: in t_trackTB;
+  seeds_tin: in t_trackTB;
+  seeds_sin: in t_seedsTB( tbMaxNumSeedingLayer - 1 downto 0 );
   seeds_dout: out t_stubsU( tbMaxNumSeedingLayer - 1 downto 0 )
 );
 end component;
@@ -60,7 +62,8 @@ end component;
 begin
 
 track_din <= unify_din.track;
-seeds_din <= unify_din.track;
+seeds_tin <= unify_din.track;
+seeds_sin <= unify_din.seeds;
 projections_din <= unify_din;
 
 stubs( tbMaxNumSeedingLayer + tbNumProjectionLayers - 1 downto 0 ) <= seeds_dout & projections_dout( tbNumProjectionLayers - 1 downto 0 );
@@ -69,7 +72,7 @@ unify_dout <= ( track_dout, stubs );
 
 cTrack: unify_track port map ( clk, track_din, track_dout );
 
-cSeed: unify_seeds Generic map ( seedType ) port map ( clk, seeds_din, seeds_dout );
+cSeed: unify_seeds Generic map ( seedType ) port map ( clk, seeds_tin, seeds_sin, seeds_dout );
 
 cProjections: unify_projections generic map ( seedType ) port map ( clk, projections_din, projections_dout );
 
@@ -183,7 +186,8 @@ generic (
 );
 port (
   clk: in std_logic;
-  seeds_din: in t_trackTB;
+  seeds_tin: in t_trackTB;
+  seeds_sin: in t_seedsTB( tbMaxNumSeedingLayer - 1 downto 0 );
   seeds_dout: out t_stubsU( tbMaxNumSeedingLayer - 1 downto 0 )
 );
 end;
@@ -196,7 +200,8 @@ generic (
 );
 port (
   clk: in std_logic;
-  seed_din: in t_trackTB;
+  seed_tin: in t_trackTB;
+  seed_sin: in t_seedTB;
   seed_dout: out t_stubU
 );
 end component;
@@ -207,7 +212,8 @@ generic (
 );
 port (
   clk: in std_logic;
-  seed_din: in t_trackTB;
+  seed_tin: in t_trackTB;
+  seed_sin: in t_seedTB;
   seed_dout: out t_stubU
 );
 end component;
@@ -217,25 +223,33 @@ begin
 g: for k in 0 to tbMaxNumSeedingLayer - 1 generate
 
 constant layer: natural := seedTypesSeedLayers( seedType )( k );
-function init_index return natural is begin if layer > 6 then return layer - 11; end if; return layer - 1; end function;
-constant index: natural := init_index;
-signal seed_din: t_trackTB := nulll;
+signal seed_tin: t_trackTB := nulll;
+signal seed_sin: t_seedTB := nulll;
 signal seed_dout: t_stubU := nulll;
 
 begin
 
-seed_din <= seeds_din;
+seed_tin <= seeds_tin;
+seed_sin <= seeds_sin( k );
 seeds_dout( k ) <= seed_dout;
 
 gBarrel: if layer < 7 generate
 
-c: unify_barrel_seed generic map ( index ) port map ( clk, seed_din, seed_dout );
+constant index: natural := layer - 1;
+
+begin
+
+c: unify_barrel_seed generic map ( index ) port map ( clk, seed_tin, seed_sin, seed_dout );
 
 end generate;
 
 gDisk: if layer > 6 generate
 
-c: unify_disk_seed generic map ( index ) port map ( clk, seed_din, seed_dout );
+constant index: natural := layer - 11;
+
+begin
+
+c: unify_disk_seed generic map ( index ) port map ( clk, seed_tin, seed_sin, seed_dout );
 
 end generate;
 
@@ -261,19 +275,14 @@ generic (
 );
 port (
   clk: in std_logic;
-  seed_din: in t_trackTB;
+  seed_tin: in t_trackTB;
+  seed_sin: in t_seedTB;
   seed_dout: out t_stubU
 );
 end;
 
 architecture rtl of unify_barrel_seed is
 
--- step 1
-signal din: t_ctrl := ( others => '0' );
-signal sr: t_ctrls( 3 downto 2 ) := ( others => ( others => '0' ) );
-signal dsp: t_dspSB := ( others => ( others => '0' ) );
-
--- step 3
 function init_limit return std_logic_vector is
   variable res: std_logic_vector( widthUz - 1 downto 0 ) := ( others => '0' );
 begin
@@ -283,13 +292,16 @@ begin
   return res;
 end function;
 constant limit: std_logic_vector( widthUz - 1 downto 0 ) := init_limit;
+
+-- step 1
+signal sr: t_seedsTB( 3 downto 2 ) := ( others => nulll );
+signal dsp: t_dspSB := ( others => ( others => '0' ) );
+
+-- step 3
 signal z: std_logic_vector( widthSBz - 1 - 1 downto 0 ) := ( others => '0' );
 signal dout: t_stubU := nulll;
 
 begin
-
--- step 1
-din <= ( seed_din.reset, seed_din.valid );
 
 -- step 3
 z <= abs( dsp.p( r_SBz ) );
@@ -301,10 +313,10 @@ if rising_edge( clk ) then
 
   -- step 1
 
-  sr <= sr( sr'high - 1 downto sr'low) & din;
-  dsp.a <= seed_din.cot & '1';
+  sr <= sr( sr'high - 1 downto sr'low) & seed_sin;
+  dsp.a <= seed_tin.cot & '1';
   dsp.b <= '0' & stdu( digi( tbBarrelLayersRadii( index ), baseUr ), widthUr ) & '1';
-  dsp.c <= seed_din.z0 & "10" & ( -baseShiftUcot - 1 downto 0 => '0' );
+  dsp.c <= seed_tin.z0 & "10" & ( -baseShiftUcot - 1 downto 0 => '0' );
 
   -- step 2
 
@@ -317,6 +329,7 @@ if rising_edge( clk ) then
     dout.reset <= '1';
   elsif sr( 3 ).valid = '1' then
     dout.valid <= '1';
+    dout.stubId <= sr( 3 ).stubId;
     dout.r <= stds( digi( tbBarrelLayersRadii( index ) - chosenRofPhi, baseUr ), widthUr );
     if index < tbNumBarrelLayersPS and unsigned( z ) < unsigned( limit ) then
      dout.pst <= '1';
@@ -344,7 +357,8 @@ generic (
 );
 port (
   clk: in std_logic;
-  seed_din: in t_trackTB;
+  seed_tin: in t_trackTB;
+  seed_sin: in t_seedTB;
   seed_dout: out t_stubU
 );
 end;
@@ -354,8 +368,7 @@ architecture rtl of unify_disk_seed is
 attribute ram_style: string;
 
 -- step 1
-signal din: t_ctrl := ( others => '0' );
-signal sr: t_ctrls( 3 downto 2 ) := ( others => ( others => '0' ) );
+signal sr: t_seedsTB( 3 downto 2 ) := ( others => nulll );
 signal cot: std_logic_vector( widthUcot - unusedMSBScot - 1 - 1 downto 0 ) := ( others => '0' );
 signal invCot: std_logic_vector( widthDSPbu - 1 downto 0 ) := ( others => '0' );
 signal dsp: t_dspSeed := ( others => ( others => '0' ) );
@@ -371,8 +384,7 @@ signal dout: t_stubU := nulll;
 begin
 
 -- step 1
-din <= ( seed_din.reset, seed_din.valid );
-cot <= abs( resize( seed_din.cot, widthUcot - unusedMSBScot ) );
+cot <= abs( resize( seed_tin.cot, widthUcot - unusedMSBScot ) );
 
 -- step 2
 dsp.b <= '0' & invCot & '1';
@@ -386,9 +398,9 @@ if rising_edge( clk ) then
 
   -- step 1
 
-  sr <= sr( sr'high - 1 downto sr'low ) & din;
+  sr <= sr( sr'high - 1 downto sr'low ) & seed_sin;
   invCot <= ram( uint( cot( r_Scot ) ) );
-  dsp.a <= seed_din.z0 & '1';
+  dsp.a <= seed_tin.z0 & '1';
   dsp.c <= stds( chosenRofPhi / baseUr, widthUr ) & "10" & ( baseShiftUr - baseShiftUz - baseShiftSinvCot - 1 downto 0 => '0' );
   dsp.d <= stds( digi( tbDiskZs( index ), baseUzT ), widthUzT ) & '1';
 
@@ -403,10 +415,9 @@ if rising_edge( clk ) then
     dout.reset <= '1';
   elsif sr( 3 ).valid = '1' then
     dout.valid <= '1';
+    dout.pst <= '1';
+    dout.stubId <= sr( 3 ).stubId;
     dout.r <= dsp.p( r_Sr );
-    --if sint( dsp.p( r_Sr ) ) < int( ( psDiskLimitR( index ) - chosenRofPhi ), baseUr ) then
-      dout.pst <= '1';
-    --end if;
   end if;
 
 end if;
@@ -547,6 +558,7 @@ begin
     res.reset := '1';
   elsif s.valid = '1' then
     res.valid := '1';
+    res.stubId := s.stubId;
     case stubType is
       when 0 =>
         res.r := resize( ( f_prep( s.r, widthsTBr( 0 ), baseShiftsTBr( 0 ) ) ) + stds( ( tbBarrelLayersRadii( index ) - chosenRofPhi ) / baseUr, widthUr ), widthUr );
@@ -614,6 +626,7 @@ if rising_edge( clk ) then
     dout. reset <= '1';
   elsif sr( 3 ).valid = '1' then
     dout.valid <= '1';
+    dout.stubId <= sr( 3 ).stubId;
     dout.r <= sr( 3 ).r;
     dout.phi <= sr( 3 ).phi;
     dout.z <= sr( 3 ).z;
@@ -657,6 +670,7 @@ record
   reset: std_logic;
   valid: std_logic;
   pst: std_logic;
+  stubId: std_logic_vector( widthTBstubId - 1 downto 0 );
   r: std_logic_vector( widthUr - 1 downto 0 );
   phi: std_logic_vector( widthUphi - 1 downto 0 );
 end record;
@@ -689,7 +703,7 @@ function init_ringRadii return t_ringRadii is
   variable res: t_ringRadii( rs'range );
 begin
   for k in res'range loop
-    res( k ) := stds( ( rs( k ) - chosenRofPhi ) / baseUr, widthUr );
+    res( k ) := stds( digi( rs( k ) - chosenRofPhi, baseUr ), widthUr );
   end loop;
   return res;
 end function;
@@ -701,22 +715,23 @@ function conv( msb: std_logic; s: t_stubTB ) return t_stubU is
 begin
   res.reset := s.reset;
   res.valid := s.valid;
+  res.stubId := s.stubId;
   case stubType is
     when 2 =>
       res.pst := '1';
-      res.r := resize( ( '0' & f_prep( s.r, widthsTBr( 2 ), baseShiftsTBr( 2 ) ) ) - stds( chosenRofPhi / baseUr, widthUr ), widthUr );
+      res.r := resize( ( '0' & f_prep( s.r, widthsTBr( 2 ), baseShiftsTBr( 2 ) ) ) - stds( chosenRofPhi, baseUr, widthUr ), widthUr );
       res.phi := resize( f_prep( s.phi, widthsTBphi( 2 ), baseShiftsTBphi( 2 ) ), widthUphi );
-      res.z := resize( f_prep( s.z, widthsTBz( 2 ), baseShiftsTBz( 2 ) ) + stds( tbDiskZs( index ) / baseUz, widthUz ), widthUz );
+      res.z := resize( f_prep( s.z, widthsTBz( 2 ), baseShiftsTBz( 2 ) ) + stds( tbDiskZs( index ), baseUz, widthUz ), widthUz );
       if msb= '1' then
-        res.z := resize( f_prep( s.z, widthsTBz( 2 ), baseShiftsTBz( 2 ) ) - stds( tbDiskZs( index ) / baseUz, widthUz ), widthUz );
+        res.z := resize( f_prep( s.z, widthsTBz( 2 ), baseShiftsTBz( 2 ) ) - stds( tbDiskZs( index ), baseUz, widthUz ), widthUz );
       end if;
       res.pst := '1';
     when 3 =>
       res.r := ringRaddi( uint( s.r( widthsTBr( 3 ) - 1 downto 0 ) ) );
       res.phi := resize( f_prep( s.phi, widthsTBphi( 3 ), baseShiftsTBphi( 3 ) ), widthUphi );
-      res.z := resize( f_prep( s.z, widthsTBz( 3 ), baseShiftsTBz( 3 ) ) + stds( tbDiskZs( index ) / baseUz, widthUz ), widthUz );
+      res.z := resize( f_prep( s.z, widthsTBz( 3 ), baseShiftsTBz( 3 ) ) + stds( tbDiskZs( index ), baseUz, widthUz ), widthUz );
       if msb= '1' then
-        res.z := resize( f_prep( s.z, widthsTBz( 3 ), baseShiftsTBz( 3 ) ) - stds( tbDiskZs( index ) / baseUz, widthUz ), widthUz );
+        res.z := resize( f_prep( s.z, widthsTBz( 3 ), baseShiftsTBz( 3 ) ) - stds( tbDiskZs( index ), baseUz, widthUz ), widthUz );
       end if;
     when others => null;
   end case;
@@ -738,7 +753,7 @@ begin
 -- step 1
 cot <= projection_track.cot;
 stubU <= conv( cot( cot'high ), projection_din );
-d <= ( stubU.reset, stubU.valid, stubU.pst, stubU.r, stubU.phi );
+d <= ( stubU.reset, stubU.valid, stubU.pst, stubU.stubId, stubU.r, stubU.phi );
 -- step 3
 projection_dout <= dout;
 
@@ -763,6 +778,7 @@ if rising_edge( clk ) then
     dout.reset <= '1';
   elsif sr( 3 ).valid = '1' then
     dout.valid <= '1';
+    dout.stubId <= sr( 3 ).stubId;
     dout.pst <= sr( 3 ).pst;
     dout.r <= sr( 3 ).r;
     dout.phi <= sr( 3 ).phi;

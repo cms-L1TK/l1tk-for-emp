@@ -190,11 +190,11 @@ constant cots: t_cots := cots;
 -- step 1
 
 signal sr: t_stubsH( 3 downto 2 ) := ( others => nulll );
-signal inv2R: std_logic_vector( widthLinv2R - baseShiftHinv2R - 1 downto 0 ) := ( others => '0' );
-signal phiT: std_logic_vector( widthLphiT - baseShiftHphiT - 1 downto 0 ) := ( others => '0' );
-signal cot: std_logic_vector( widthHcot - 1 downto 0 ) := ( others => '0' );
+signal inv2R: std_logic_vector( widthLinv2R + 1 + baseShiftHinv2R - 1 downto 0 ) := ( others => '0' );
+signal phiT: std_logic_vector( widthLphiT + 1 + baseShiftHphiT - 1 downto 0 ) := ( others => '0' );
+signal cot: std_logic_vector( widthHcot + 1 - 1 downto 0 ) := ( others => '0' );
 signal index: std_logic_vector( widthLzT - 1 downto 0 ) := ( others => '0' );
-signal zT: std_logic_vector( widthLzT - baseShiftHzT - 1 downto 0 ) := ( others => '0' );
+signal zT: std_logic_vector( widthLzT + 1 + baseShiftHzT - 1 downto 0 ) := ( others => '0' );
 signal dspLphi: t_dspLphi := ( others => ( others => '0' ) );
 signal dspLz: t_dspLz := ( others => ( others => '0' ) );
 
@@ -208,14 +208,17 @@ signal phi: std_logic_vector( widthLdphi + 2 - 1 downto 0 ) := ( others => '0' )
 signal z: std_logic_vector( widthLdz + 2 - 1 downto 0 ) := ( others => '0' );
 signal dout: t_stubL := nulll;
 
+signal test, bd: integer;
 begin
+test <= sint( stub_track.zT & '1' ) - sint(zT);
+bd <= baseShiftLzT + 1;
 
 -- step 1
-inv2R <= stub_track.inv2R( r_Linv2R ) & '1' & ( -baseShiftHinv2R - 2 downto 0 => '0' );
-phiT <= stub_track.phiT( r_LphiT ) & '1' & ( -baseShiftHphiT - 2 downto 0 => '0' );
-zT <= stub_track.zT( r_LzT ) & '1' & ( -baseShiftHzT - 2 downto 0 => '0' );
+inv2R <= stub_track.inv2R( r_Linv2R ) & '1' & ( baseShiftHinv2R - 1 downto 0 => '0' );
+phiT <= stub_track.phiT( r_LphiT ) & '1' & ( baseShiftHphiT - 1 downto 0 => '0' );
+zT <= stub_track.zT( r_LzT ) & '1' & ( baseShiftHzT - 1 downto 0 => '0' );
 index <= stub_track.zT( r_LzT );
-cot <= cots( uint( index ) );
+cot <= cots( uint( index ) ) & '1';
 
 -- step 3
 phi <= ( sr( 3 ).phi & '1' ) + ( dspLphi.p( r_Ldphi ) & '1' );
@@ -229,12 +232,12 @@ if rising_edge( clk ) then
   -- step 1
 
   sr <= sr( sr'high - 1 downto sr'low ) & stub_din;
-  dspLphi.a <= ( stub_track.inv2R - inv2R ) & '1';
+  dspLphi.a <= ( stub_track.inv2R & '1' ) - inv2R;
   dspLphi.b <= stub_din.r & '1';
-  dspLphi.c <= ( stub_track.phiT - phiT ) & '1' & ( 1 - baseShiftLphiT - 1 downto 0 => '0' );
-  dspLz.b <= ( stub_track.cot - cot ) & '1';
+  dspLphi.c <= ( ( stub_track.phiT & '1' ) - phiT ) & ( baseShiftLphiT + 1 - 1 downto 0 => '0' );
+  dspLz.b <= ( stub_track.cot & '1' ) - cot;
   dspLz.a <= stub_din.r & '1';
-  dspLz.c <= ( stub_track.zT - zT ) & '1' & ( 1 - baseShiftLzT - 1 downto 0 => '0' );
+  dspLz.c <= ( ( stub_track.zT & '1' ) - zT ) & ( baseShiftLzT + 1 - 1 downto 0 => '0' );
   dspLz.d <= stds( ( chosenRofPhi - chosenRofZ ) / baseHr, widthHr ) & '1';
 
   -- step 2
@@ -251,9 +254,10 @@ if rising_edge( clk ) then
   dout <= nulll;
   if sr( 3 ).reset = '1' then
     dout.reset <= '1';
-  elsif sr( 3 ).valid = '1' and not overflowed( dspLphi.p( r_overLphi ) ) and not overflowed( dspLz.p( r_overLz ) ) and vr = '1' then
+  elsif sr( 3 ).valid = '1' and not overflowed( phi( r_overLphi ) ) and not overflowed( z( r_overLz ) ) and vr = '1' then
     dout.valid <= '1';
     dout.pst <= sr( 3 ).pst;
+    dout.stubId <= sr( 3 ).stubId;
     dout.r <= sr( 3 ).r( r_Lr );
     dout.phi <= phi( r_Lphi );
     dout.z <= z( r_Lz );

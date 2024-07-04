@@ -19,12 +19,13 @@ type t_ctrls is array ( natural range <> ) of t_ctrl;
 
 type t_stubU is
 record
-  reset: std_logic;
-  valid: std_logic;
-  pst  : std_logic;
-  r    : std_logic_vector( widthUr   - 1 downto 0 );
-  phi  : std_logic_vector( widthUphi - 1 downto 0 );
-  z    : std_logic_vector( widthUz   - 1 downto 0 );
+  reset : std_logic;
+  valid : std_logic;
+  pst   : std_logic;
+  stubId: std_logic_vector( widthUstubId - 1 downto 0 );
+  r     : std_logic_vector( widthUr      - 1 downto 0 );
+  phi   : std_logic_vector( widthUphi    - 1 downto 0 );
+  z     : std_logic_vector( widthUz      - 1 downto 0 );
 end record;
 type t_stubsU is array ( natural range <> ) of t_stubU;
 function nulll return t_stubU;
@@ -51,12 +52,13 @@ function nulll return t_channelU;
 
 type t_stubH is
 record
-  reset: std_logic;
-  valid: std_logic;
-  pst  : std_logic;
-  r    : std_logic_vector( widthHr   - 1 downto 0 );
-  phi  : std_logic_vector( widthHphi - 1 downto 0 );
-  z    : std_logic_vector( widthHz   - 1 downto 0 );
+  reset : std_logic;
+  valid : std_logic;
+  pst   : std_logic;
+  stubId: std_logic_vector( widthHstubId - 1 downto 0 );
+  r     : std_logic_vector( widthHr      - 1 downto 0 );
+  phi   : std_logic_vector( widthHphi    - 1 downto 0 );
+  z    :  std_logic_vector( widthHz      - 1 downto 0 );
 end record;
 type t_stubsH is array ( natural range <> ) of t_stubH;
 function nulll return t_stubH;
@@ -83,12 +85,13 @@ function nulll return t_channelH;
 
 type t_stubL is
 record
-  reset: std_logic;
-  valid: std_logic;
-  pst  : std_logic;
-  r    : std_logic_vector( widthLr   - 1 downto 0 );
-  phi  : std_logic_vector( widthLphi - 1 downto 0 );
-  z    : std_logic_vector( widthLz   - 1 downto 0 );
+  reset : std_logic;
+  valid : std_logic;
+  pst   : std_logic;
+  stubId: std_logic_vector( widthLstubId - 1 downto 0 );
+  r     : std_logic_vector( widthLr      - 1 downto 0 );
+  phi   : std_logic_vector( widthLphi    - 1 downto 0 );
+  z     : std_logic_vector( widthLz      - 1 downto 0 );
 end record;
 type t_stubsL is array ( natural range <> ) of t_stubL;
 function nulll return t_stubL;
@@ -130,10 +133,11 @@ record
   barrel: std_logic;
   ps    : std_logic;
   tilt  : std_logic;
-  layer : std_logic_vector( widthRlayer - 1 downto 0 );
-  r     : std_logic_vector( widthRr     - 1 downto 0 );
-  phi   : std_logic_vector( widthRphi   - 1 downto 0 );
-  z     : std_logic_vector( widthRz     - 1 downto 0 );
+  stubId: std_logic_vector( widthRstubId - 1 downto 0 );
+  layer : std_logic_vector( widthRlayer  - 1 downto 0 );
+  r     : std_logic_vector( widthRr      - 1 downto 0 );
+  phi   : std_logic_vector( widthRphi    - 1 downto 0 );
+  z     : std_logic_vector( widthRz      - 1 downto 0 );
 end record;
 type t_stubsR is array ( natural range <> ) of t_stubR;
 function nulll return t_stubR;
@@ -321,21 +325,21 @@ record
 end record;
 subtype r_Hz is natural range widthDspHzp - 1 - 1 downto baseShiftTransformHz + 2;
 
-subtype r_overLinv2R is natural range widthHinv2R - 1 downto widthTMinv2R - baseShiftHinv2R - 1;
-subtype r_overLphiT  is natural range widthHphiT  - 1 downto widthTMphiT  - baseShiftHphiT  - 1;
-subtype r_overLzT    is natural range widthHzT    - 1 downto widthTMzT    - baseShiftHzT    - 1;
-subtype r_overLr     is natural range widthHr     - 1 downto widthTMr     - baseShiftHr     - 1;
+subtype r_overLinv2R is natural range widthHinv2R - 1 downto widthTMinv2R + baseShiftHinv2R - 1;
+subtype r_overLphiT  is natural range widthHphiT  - 1 downto widthTMphiT  + baseShiftHphiT  - 1;
+subtype r_overLzT    is natural range widthHzT    - 1 downto widthTMzT    + baseShiftHzT    - 1;
+subtype r_overLr     is natural range widthHr     - 1 downto widthTMr     + baseShiftHr     - 1;
 
-subtype r_Linv2R is natural range widthTMinv2R - baseShiftHinv2R - 1 downto -baseShiftHinv2R;
-subtype r_LphiT  is natural range widthTMphiT  - baseShiftHphiT  - 1 downto -baseShiftHphiT;
-subtype r_LzT    is natural range widthTMzT    - baseShiftHzT    - 1 downto -baseShiftHzT;
-subtype r_Lr     is natural range widthTMr     - baseShiftHr     - 1 downto -baseShiftHr;
+subtype r_Linv2R is natural range widthTMinv2R + baseShiftHinv2R - 1 downto baseShiftHinv2R;
+subtype r_LphiT  is natural range widthTMphiT  + baseShiftHphiT  - 1 downto baseShiftHphiT;
+subtype r_LzT    is natural range widthTMzT    + baseShiftHzT    - 1 downto baseShiftHzT;
+subtype r_Lr     is natural range widthTMr     + baseShiftHr     - 1 downto baseShiftHr;
 
-constant baseShiftLphiT: integer := baseShiftTBinv2R - baseShiftTBphi0;
-constant baseShiftLdphi: integer := baseShiftHinv2R;
-constant widthDspLphia: natural := max( widthLinv2R - baseShiftHinv2R, widthHinv2R ) + 1 + 1;
+constant baseShiftLphiT: integer := ilog2( baseHphiT / ( baseHinv2R * baseHr ) );
+constant baseShiftLdphi: integer := ilog2( baseHphi / ( baseHinv2R * baseHr ) );
+constant widthDspLphia: natural := max( widthLinv2R + baseShiftHinv2R, widthHinv2R ) + 1 + 1;
 constant widthDspLphib: natural := widthHr + 1;
-constant widthDspLphic: natural := max( widthLphiT - baseShiftHphiT, widthHphiT ) + 1 + 2 - baseShiftLphiT;
+constant widthDspLphic: natural := widthHphiT + 1 + 2 + baseShiftLphiT;
 constant widthDspLphip: natural := max( widthDspLphia + widthDspLphib, widthDspLphic ) + 1;
 type t_dspLphi is
 record
@@ -344,16 +348,16 @@ record
   C: std_logic_vector( widthDspLphic - 1 downto 0 );
   P: std_logic_vector( widthDspLphip - 1 downto 0 );
 end record;
-subtype r_overLphi is natural range widthDspLphip - 1 downto widthLphi - baseShiftLphiT + 1 - 1;
-subtype r_Lphi is natural range widthLphi - baseShiftHphi + 1 - 1 downto -baseShiftHphi + 1;
-subtype r_Ldphi is natural range widthDspLphip - 1 downto -baseShiftLdphi + 2;
-constant widthLdphi: natural := max( widthDspLphip + baseShiftLdphi - 1, widthHphi ) + 1 - 2;
+constant widthLdphi: natural := widthDspLphip - baseShiftLdphi - 2;
+subtype r_Ldphi is natural range widthDspLphip - 1 downto baseShiftLdphi + 2;
+subtype r_Lphi is natural range widthLphi + baseShiftHphi + 1 - 1 downto baseShiftHphi + 1;
+subtype r_overLphi is natural range widthLdphi + 2 - 1 downto widthLphi + baseShiftHphi + 1 - 1;
 
-constant baseShiftLzT: integer := baseShiftTBcot - baseShiftTBz0;
-constant baseShiftLdz: integer := baseShiftHcot - 4;
+constant baseShiftLzT: integer := ilog2( baseHzT / ( baseHcot * baseHr ) );
+constant baseShiftLdz: integer := ilog2( baseHz / ( baseHcot * baseHr ) );
 constant widthDspLza: natural := widthHr + 1;
 constant widthDspLzb: natural := widthHcot + 1 + 1;
-constant widthDspLzc: natural := max( widthLzT - baseShiftHzT, widthHzT ) + 1 + 2 - baseShiftLzT;
+constant widthDspLzc: natural := widthHzT + 1 + 2 + baseShiftLzT;
 constant widthDspLzd: natural := widthHr + 1;
 constant widthDspLzp: natural := max( widthDspLza + widthDspLzb + 1, widthDspLzc ) + 1;
 type t_dspLz is
@@ -364,15 +368,12 @@ record
   D: std_logic_vector( widthDspLzd - 1 downto 0 );
   P: std_logic_vector( widthDspLzp - 1 downto 0 );
 end record;
-subtype r_overLz is natural range widthDspLzp - 1 downto widthLz - baseShiftLzT + 1 - 1;
-subtype r_Lz is natural range widthLz - baseShiftHz + 1 - 1 downto -baseShiftHz + 1;
-subtype r_Ldz is natural range widthDspLzp - 1 downto -baseShiftLdz + 2;
-constant widthLdz: natural := max( widthDspLzp + baseShiftLdz - 1, widthHz ) + 1 - 2;
+constant widthLdz: natural := widthDspLzp - baseShiftLdz - 2;
+subtype r_Ldz is natural range widthDspLzp - 1 downto baseShiftLdz + 2;
+subtype r_Lz is natural range widthLz + baseShiftHz + 1 - 1 downto baseShiftHz + 1;
+subtype r_overLz is natural range widthLdz + 2 - 1 downto widthLz + baseShiftHz + 1 - 1;
 
 constant widthFr  : natural := widthAddrBRAM18 - 1;
-constant widthFcot: natural := widthAddrBRAM18 - 3;
-constant baseShiftFlutCot: integer := widthFCot - ilog2( maxCot / baseHCot );
-
 constant baseF: real := baseInv2R * baseR;
 constant baseShiftF: integer := ilog2( baseF / basePhi );
 
@@ -395,10 +396,10 @@ record
   D : std_logic_vector( widthDspFdPhid - 1 downto 0 );
   P : std_logic_vector( widthDspFdPhip - 1 downto 0 );
 end record;
-
 subtype r_FdPhi is natural range widthTMdPhi + 2 - baseShiftF - 1 downto 2 - baseShiftF;
 
-type t_ramLengths is array ( 0 to 2 ** widthAddrBRAM18 - 1 ) of std_logic_vector( widthLengthZ + widthLengthR - 1 downto 0 );
+constant widthAddrLengths: natural := 3 + widthZT - 1;
+type t_ramLengths is array ( 0 to 2 ** widthAddrLengths - 1 ) of std_logic_vector( widthLengthZ + widthLengthR - 1 downto 0 );
 function init_ramLengths return t_ramLengths;
 constant ramLengths: t_ramLengths;
 
@@ -454,16 +455,16 @@ constant cots: t_cots := init_cots;
 
 function init_ramLengths return t_ramLengths is
   variable ram: t_ramLengths := ( others => ( others => '0' ) );
-  variable index: std_logic_vector( widthAddrBRAM18 - 1 downto 0 );
+  variable index: std_logic_vector( widthAddrLengths - 1 downto 0 );
   variable barrel, ps, tilt: boolean;
   variable cot, length, lengthZ, lengthR: real;
 begin
   for k in ram'range loop
-    index := stdu( k, widthAddrBRAM18 );
+    index := stdu( k, widthAddrLengths );
     barrel := bool( index( index'high ) );
     ps := bool( index( index'high - 1 ) );
     tilt := bool( index( index'high - 2 ) );
-    cot := ( real( uint( index( index'high - 3 downto 0 ) ) ) + 0.5 ) * baseHcot * 2.0 ** ( -baseShiftFlutCot );
+    cot := ( ureal( index( index'high - 3 downto 0 ) ) + 0.5 ) * baseZT / chosenRofZ;
     length := pitchCol2S;
     if ps then
       length := pitchColPS;

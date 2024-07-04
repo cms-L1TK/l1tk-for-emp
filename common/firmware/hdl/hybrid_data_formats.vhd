@@ -44,6 +44,7 @@ constant posDTCbarrel: natural := widthDTClayer - 1;
 constant posDTCpsTilt: natural := widthDTClayer - 2;
 
 constant widthLayer: natural := width( numLayers );
+constant widthZT   : natural := width( gpNumBinsZT );
 
 -- TFP
 
@@ -112,19 +113,23 @@ constant widthTBz      : natural := max( widthsTBz   );
 
 -- TM
 
-constant rangeTMdPhi: real := pitchRowPS / radiusInner + ( pitchCol2S + scattering ) * rangeDTCinv2R / 2.0 + basePhi;
-constant rangeTMdZ  : real := pitchCol2S * sinh( maxEta ) + baseZ;
 constant rangeTMphi : real := basePhiT + maxRPhi * baseInv2R;
 constant rangeTMz   : real := baseZT + maxRZ * baseCot;
 
 constant widthTMr    : natural := widthDTCr;
-constant widthTMdPhi : natural := width( rangeTMdPhi / basePhi );
-constant widthTMdZ   : natural := width( rangeTMdZ   / baseZ   );
 constant widthTMphi  : natural := width( rangeTMphi / basePhi );
 constant widthTMz    : natural := width( rangeTMz   / baseZ   );
-constant widthTMinv2R: natural := widthDTCinv2R;
 constant widthTMphiT : natural := width( htNumBinsPhiT * gpNumBinsPhiT );
 constant widthTMzT   : natural := width( gpNumBinsZT    );
+
+constant rangeTMinv2R: real := 2.0 * invPtToDphi / minPtcand;
+constant widthTMinv2R: natural := width( rangeTMinv2R / baseInv2R );
+
+constant rangeTMdPhi: real := pitchRowPS / radiusInner + ( pitchCol2S + scattering ) * rangeTMinv2R / 2.0 + basePhi;
+constant rangeTMdZ  : real := pitchCol2S * sinh( maxEta ) + baseZ;
+
+constant widthTMdPhi : natural := width( rangeTMdPhi / basePhi );
+constant widthTMdZ   : natural := width( rangeTMdZ   / baseZ   );
 
 constant widthTMstubId: natural := widthTBstubId;
 

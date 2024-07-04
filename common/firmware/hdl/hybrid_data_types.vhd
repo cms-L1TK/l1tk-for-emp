@@ -59,6 +59,15 @@ record
 end record;
 function nulll return t_stubsDTC;
 
+type t_seedTB is
+record
+  reset : std_logic;
+  valid : std_logic;
+  stubId: std_logic_vector( widthTBstubId  - 1 downto 0 );
+end record;
+type t_seedsTB is array ( natural range <> ) of t_seedTB;
+function nulll return t_seedTB;
+
 type t_stubTB is
 record
   reset  : std_logic;
@@ -88,6 +97,7 @@ function nulll return t_trackTB;
 type t_channelTB is
 record
   track: t_trackTB;
+  seeds: t_seedsTB( tbMaxNumSeedingLayer     - 1 downto 0 );
   stubs: t_stubsTB( tbMaxNumProjectionLayers - 1 downto 0 );
 end record;
 type t_channelsTB is array ( natural range <> ) of t_channelTB;
@@ -207,9 +217,10 @@ function nulll return t_reset is begin return ( '0', '0', others => ( others => 
 function nulll return t_stubDTCPS is begin return ( '0', '0', others => ( others => '0' ) ); end function;
 function nulll return t_stubDTC2S is begin return ( '0', '0', others => ( others => '0' ) ); end function;
 function nulll return t_stubsDTC is begin return ( ( others => nulll ), ( others => nulll ) ); end function;
+function nulll return t_seedTB is begin return ( '0', '0', ( others => '0' ) ); end function;
 function nulll return t_stubTB is begin return ( '0', '0', others => ( others => '0' ) ); end function;
 function nulll return t_trackTB is begin return ( '0', '0', others => ( others => '0' ) ); end function;
-function nulll return t_channelTB is begin return ( nulll, ( others => nulll ) ); end function;
+function nulll return t_channelTB is begin return ( nulll, ( others => nulll ), ( others => nulll ) ); end function;
 function nulll return t_stubTM is begin return ( '0', '0', others => ( others => '0' ) ); end function;
 function nulll return t_trackTM is begin return ( '0', '0', others => ( others => '0' ) ); end function;
 function nulll return t_channelTM is begin return ( nulll, ( others => nulll ) ); end function;

@@ -133,17 +133,17 @@ end;
 
 architecture rtl of format_stub is
 
-signal cots: t_cots := cots;
 signal ramLengths: t_ramLengths := ramLengths;
 signal ramPitchOverRs: t_ramPitchOverRs := ramPitchOverRs;
 attribute ram_style: string;
 type t_stub is
 record
-  reset: std_logic;
-  valid: std_logic;
-  r: std_logic_vector( widthTMr - 1 downto 0 );
-  phi: std_logic_vector( widthTMphi - 1 downto 0 );
-  z: std_logic_vector( widthTMz - 1 downto 0 );
+  reset : std_logic;
+  valid : std_logic;
+  stubId: std_logic_vector( widthStubId - 1 downto 0 );
+  r     : std_logic_vector( widthTMr    - 1 downto 0 );
+  phi   : std_logic_vector( widthTMphi  - 1 downto 0 );
+  z     : std_logic_vector( widthTMz    - 1 downto 0 );
 end record;
 function nulll return t_stub is begin return ( '0', '0', others => ( others => '0' ) ); end function;
 type t_stubs is array ( natural range <> ) of t_stub;
@@ -154,9 +154,7 @@ type t_srz is array ( natural range <> ) of std_logic_vector( widthTMdZ - 1 down
 signal stub: t_stub := nulll;
 signal sr: t_stubs( 4 downto 1 + 1 ) := ( others => nulll );
 signal dspDphi: t_dspFdPhi := ( others => ( others => '0' ) );
-signal cot: std_logic_vector( widthHcot - 1 downto 0 ) := ( others => '0' );
-signal cotTrunc: std_logic_vector( widthFcot + 1 - 1 downto 0 ) := ( others => '0' );
-signal indexLength: std_logic_vector( widthAddrBRAM18 - 1 downto 0 ) := ( others => '0' );
+signal indexLength: std_logic_vector( widthAddrLengths - 1 downto 0 ) := ( others => '0' );
 signal indexPitchOverR: std_logic_vector( widthAddrBRAM18 - 1 downto 0 ) := ( others => '0' );
 signal pitchOverR: std_logic_vector( widthPitchOverR - 1 downto 0 ) := ( others => '0' );
 signal lengths: std_logic_vector( widthLengthZ + widthLengthR - 1 downto 0 ) := ( others => '0' );
@@ -174,10 +172,8 @@ signal dout: t_stubTM := nulll;
 begin
 
 -- step 1
-stub <= ( stub_din.reset, stub_din.valid, stub_din.r, stub_din.phi, stub_din.z );
-cot <= cots( uint( stub_track.zT ) );
-cotTrunc <= cot( widthHcot - 1 downto widthHcot - widthFcot - 1 );
-indexLength <= stub_din.barrel & stub_din.ps & stub_din.tilt & abs( cotTrunc );
+stub <= ( stub_din.reset, stub_din.valid, stub_din.stubId, stub_din.r, stub_din.phi, stub_din.z );
+indexLength <= stub_din.barrel & stub_din.ps & stub_din.tilt & abs( stub_track.zT );
 indexPitchOverR <= stub_din.ps & stub_din.r( widthLr - 1 downto widthLr - widthFr );
 
 -- step 2
@@ -216,6 +212,7 @@ if rising_edge( clk ) then
   dout.reset <= sr( 4 ).reset;
   if sr( 4 ).valid = '1' then
     dout.valid <= '1';
+    dout.stubId <= sr( 4 ).stubId;
     dout.r <= sr( 4 ).r;
     dout.phi <= sr( 4 ).phi;
     dout.z <= sr( 4 ).z;

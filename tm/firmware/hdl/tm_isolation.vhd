@@ -30,12 +30,16 @@ begin
 
 g: for k in 0 to tbNumSeedTypes - 1 generate
 
+constant numProjectionLayers: natural := tbNumsProjectionLayers( k );
+constant high: natural := tbLimitsChannel( k + 1 ) - 1;
+constant low: natural := tbLimitsChannel( k );
+
 signal node_din: ldata( tbNumLinks - 1 downto 0 ) := ( others => nulll );
 signal node_dout: t_channelTB := nulll;
 
 begin
 
-node_din( tbNumsProjectionLayers( k ) + 1 - 1 downto 0 ) <= in_din( tbLimitsChannel( k + 1 ) - 1 downto tbLimitsChannel( k ) );
+node_din( numProjectionLayers + tbMaxNumSeedingLayer + 1 - 1 downto 0 ) <= in_din( high downto low );
 in_dout( k ) <= node_dout;
 
 c: tm_isolation_in_node generic map ( k ) port map ( clk, node_din, node_dout );
@@ -65,6 +69,21 @@ end;
 
 architecture rtl of tm_isolation_in_node is
 
+constant numProjectionLayers: natural := tbNumsProjectionLayers( seedType );
+
+signal desync_din: ldata( tbNumLinks - 1 downto 0 ) := ( others => nulll );
+signal desync_dout: ldata( tbNumLinks - 1 downto 0 ) := ( others => nulll );
+component tm_isolation_in_desync
+generic (
+  index: natural
+);
+port (
+  clk: in std_logic;
+  desync_din: in ldata( tbNumLinks - 1 downto 0 );
+  desync_dout: out ldata( tbNumLinks - 1 downto 0 )
+);
+end component;
+
 signal track_din: lword := nulll;
 signal track_dout: t_trackTB := nulll;
 component tm_isolation_in_track
@@ -88,16 +107,104 @@ port (
 );
 end component;
 
+signal seeds_din: ldata( tbMaxNumSeedingLayer - 1 downto 0 ) := ( others => nulll );
+signal seeds_dout: t_seedsTB( tbMaxNumSeedingLayer - 1 downto 0 ) := ( others => nulll );
+component tm_isolation_in_seeds
+port (
+  clk: in std_logic;
+  seeds_din: in ldata( tbMaxNumSeedingLayer - 1 downto 0 );
+  seeds_dout: out t_seedsTB( tbMaxNumSeedingLayer - 1 downto 0 )
+);
+end component;
+
 begin
 
-track_din <= node_din( 0 );
-stubs_din <= node_din( tbMaxNumProjectionLayers + 1 - 1 downto 1 );
+desync_din <= node_din;
 
-node_dout <= ( track_dout, stubs_dout );
+track_din <= desync_dout( 0 );
+stubs_din( numProjectionLayers - 1 downto 0 ) <= desync_dout( numProjectionLayers + 1 - 1 downto 1 );
+seeds_din <= desync_dout( tbMaxNumSeedingLayer + numProjectionLayers + 1 - 1 downto numProjectionLayers + 1 );
+
+node_dout <= ( track_dout, seeds_dout, stubs_dout );
+
+cDesync: tm_isolation_in_desync generic map ( seedType ) port map ( clk, desync_din, desync_dout );
 
 cTrack: tm_isolation_in_track port map ( clk, track_din, track_dout );
 
 cStubs: tm_isolation_in_stubs generic map ( seedType ) port map ( clk, stubs_din, stubs_dout );
+
+cSeeds: tm_isolation_in_seeds port map ( clk, seeds_din, seeds_dout );
+
+end;
+
+
+library ieee;
+use ieee.std_logic_1164.all;
+use work.emp_data_types.all;
+use work.hybrid_tools.all;
+use work.hybrid_config.all;
+use work.hybrid_data_types.all;
+
+entity tm_isolation_in_desync is
+generic (
+  index: natural
+);
+port (
+  clk: in std_logic;
+  desync_din: in ldata( tbNumLinks - 1 downto 0 );
+  desync_dout: out ldata( tbNumLinks - 1 downto 0 )
+);
+end;
+
+architecture rtl of tm_isolation_in_desync is
+
+constant widthLdata: natural := 5 + LWORD_WIDTH;
+constant widthRam: natural := tbNumLinks * widthLdata;
+constant widthAddr: natural := width( tbNumLinks + 1 );
+type t_ram is array ( 0 to 2 ** widthAddr - 1 ) of std_logic_vector( widthRam - 1 downto 0 );
+function conv( std: std_logic_vector ) return ldata is
+  variable links: ldata( tbNumLinks - 1 downto 0 ) := ( others => nulll );
+  variable link: std_logic_vector( widthLdata - 1 downto 0 ) := ( others => '0' );
+begin
+  for k in links'range loop
+    link := std( ( k + 1 ) * widthLdata - 1 downto k * widthLdata );
+    links( k ).data  := link( widthLdata - 1 downto 5 );
+    links( k ).valid          := link( 4 );
+    links( k ).start          := link( 3 );
+    links( k ).start_of_orbit := link( 2 );
+    links( k ).strobe         := link( 1 );
+    links( k ).last           := link( 0 );
+  end loop;
+  return links;
+end function;
+function conv( links: ldata ) return std_logic_vector is
+  variable std: std_logic_vector( widthRam - 1 downto 0 ) := ( others => '0' );
+begin
+  for k in links'range loop
+    std( ( k + 1 ) * widthLdata - 1 downto k * widthLdata ) := links( k ).data & links( k ).valid & links( k ).start & links( k ).start_of_orbit & links( k ).strobe & links( k ).last;
+  end loop;
+  return std;
+end function;
+
+signal ram: t_ram := ( others => ( others => '0' ) );
+signal waddr, raddr: std_logic_vector( widthAddr - 1 downto 0 ) := ( others => '0' );
+signal dout: ldata( tbNumLinks - 1 downto 0 ) := ( others => nulll );
+
+begin
+
+desync_dout <= dout;
+waddr <= raddr + index + 1;
+
+process ( clk ) is
+begin
+if rising_edge( clk ) then
+
+  ram( uint( waddr ) ) <= conv( desync_din );
+  dout <= conv( ram( uint( raddr ) ) );
+  raddr <= raddr + 1;
+
+end if;
+end process;
 
 end;
 
@@ -184,6 +291,7 @@ end;
 
 architecture rtl of tm_isolation_in_stubs is
 
+signal dout: t_stubsTB( tbMaxNumProjectionLayers - 1 downto 0 ) := ( others => nulll );
 component tm_isolation_in_stub
 generic (
   layer: natural
@@ -197,6 +305,8 @@ end component;
 
 begin
 
+stubs_dout <= dout;
+
 g: for k in 0 to tbNumsProjectionLayers( seedType ) - 1 generate
 
 signal stub_din: lword := nulll;
@@ -205,11 +315,114 @@ signal stub_dout: t_stubTB := nulll;
 begin
 
 stub_din <= stubs_din( k );
-stubs_dout( k ) <= stub_dout;
+dout( k ) <= stub_dout;
 
 c: tm_isolation_in_stub generic map ( seedTypesProjectionLayers( seedType )( k ) ) port map ( clk, stub_din, stub_dout );
 
 end generate;
+
+end;
+
+
+library ieee;
+use ieee.std_logic_1164.all;
+use work.emp_device_decl.all;
+use work.emp_data_types.all;
+use work.hybrid_config.all;
+use work.hybrid_data_types.all;
+
+entity tm_isolation_in_seeds is
+port (
+  clk: in std_logic;
+  seeds_din: in ldata( tbMaxNumSeedingLayer - 1 downto 0 );
+  seeds_dout: out t_seedsTB( tbMaxNumSeedingLayer - 1 downto 0 )
+);
+end;
+
+architecture rtl of tm_isolation_in_seeds is
+
+component tm_isolation_in_seed
+port (
+  clk: in std_logic;
+  seed_din: in lword;
+  seed_dout: out t_seedTB
+);
+end component;
+
+begin
+
+g: for k in 0 to tbMaxNumSeedingLayer - 1 generate
+
+signal seed_din: lword := nulll;
+signal seed_dout: t_seedTB := nulll;
+
+begin
+
+seed_din <= seeds_din( k );
+seeds_dout( k ) <= seed_dout;
+
+c: tm_isolation_in_seed port map ( clk, seed_din, seed_dout );
+
+end generate;
+
+end;
+
+
+library ieee;
+use ieee.std_logic_1164.all;
+use work.emp_data_types.all;
+use work.hybrid_tools.all;
+use work.hybrid_data_types.all;
+use work.hybrid_data_formats.all;
+
+entity tm_isolation_in_seed is
+port (
+  clk: in std_logic;
+  seed_din: in lword;
+  seed_dout: out t_seedTB
+);
+end;
+
+architecture rtl of tm_isolation_in_seed is
+
+function conv( std: std_logic_vector ) return t_seedTB is
+  variable s: t_seedTB := nulll;
+begin
+  s.valid                                := std( 1 + widthTBstubId - 1 );
+  s.stubId( widthTBstubId - 1 downto 0 ) := std(     widthTBstubId - 1 downto 0 );
+  return s;
+end function;
+
+-- step 1
+signal din: lword := nulll;
+
+-- step 2
+signal dout: t_seedTB := nulll;
+
+begin
+
+-- step 2
+seed_dout <= dout;
+
+process( clk ) is
+begin
+if rising_edge( clk ) then
+
+  -- step 1
+
+  din <= seed_din;
+
+  -- step 2
+
+  dout <= nulll;
+  if din.valid = '1' then
+    dout <= conv( din.data );
+  elsif seed_din.valid = '1' then
+    dout.reset <= '1';
+  end if;
+
+end if;
+end process;
 
 end;
 
@@ -260,28 +473,32 @@ begin
 end function;
 function conv( l: std_logic_vector; t: natural ) return t_stubTB is
   variable s: t_stubTB := nulll;
-  variable v0  : std_logic                                         := l( 1 + widthsTBr( 0 ) + widthsTBphi( 0 ) + widthsTBz( 0 ) - 1 );
-  variable v1  : std_logic                                         := l( 1 + widthsTBr( 1 ) + widthsTBphi( 1 ) + widthsTBz( 1 ) - 1 );
-  variable v2  : std_logic                                         := l( 1 + widthsTBr( 2 ) + widthsTBphi( 2 ) + widthsTBz( 2 ) - 1 );
-  variable v3  : std_logic                                         := l( 1 + widthsTBr( 3 ) + widthsTBphi( 3 ) + widthsTBz( 3 ) - 1 );
-  variable r0  : std_logic_vector( widthsTBr( 0 )   - 1 downto 0 ) := l(     widthsTBr( 0 ) + widthsTBphi( 0 ) + widthsTBz( 0 ) - 1 downto widthsTBphi( 0 ) + widthsTBz( 0 ) );
-  variable r1  : std_logic_vector( widthsTBr( 1 )   - 1 downto 0 ) := l(     widthsTBr( 1 ) + widthsTBphi( 1 ) + widthsTBz( 1 ) - 1 downto widthsTBphi( 1 ) + widthsTBz( 1 ) );
-  variable r2  : std_logic_vector( widthsTBr( 2 )   - 1 downto 0 ) := l(     widthsTBr( 2 ) + widthsTBphi( 2 ) + widthsTBz( 2 ) - 1 downto widthsTBphi( 2 ) + widthsTBz( 2 ) );
-  variable r3  : std_logic_vector( widthsTBr( 3 )   - 1 downto 0 ) := l(     widthsTBr( 3 ) + widthsTBphi( 3 ) + widthsTBz( 3 ) - 1 downto widthsTBphi( 3 ) + widthsTBz( 3 ) );
-  variable phi0: std_logic_vector( widthsTBphi( 0 ) - 1 downto 0 ) := l(                      widthsTBphi( 0 ) + widthsTBz( 0 ) - 1 downto                    widthsTBz( 0 ) );
-  variable phi1: std_logic_vector( widthsTBphi( 1 ) - 1 downto 0 ) := l(                      widthsTBphi( 1 ) + widthsTBz( 1 ) - 1 downto                    widthsTBz( 1 ) );
-  variable phi2: std_logic_vector( widthsTBphi( 2 ) - 1 downto 0 ) := l(                      widthsTBphi( 2 ) + widthsTBz( 2 ) - 1 downto                    widthsTBz( 2 ) );
-  variable phi3: std_logic_vector( widthsTBphi( 3 ) - 1 downto 0 ) := l(                      widthsTBphi( 3 ) + widthsTBz( 3 ) - 1 downto                    widthsTBz( 3 ) );
-  variable z0  : std_logic_vector( widthsTBz( 0 )   - 1 downto 0 ) := l(                                         widthsTBz( 0 ) - 1 downto                                 0 );
-  variable z1  : std_logic_vector( widthsTBz( 1 )   - 1 downto 0 ) := l(                                         widthsTBz( 1 ) - 1 downto                                 0 );
-  variable z2  : std_logic_vector( widthsTBz( 2 )   - 1 downto 0 ) := l(                                         widthsTBz( 2 ) - 1 downto                                 0 );
-  variable z3  : std_logic_vector( widthsTBz( 3 )   - 1 downto 0 ) := l(                                         widthsTBz( 3 ) - 1 downto                                 0 );
+  variable v0  : std_logic                                         := l( 1 + widthTBstubId + widthsTBr( 0 ) + widthsTBphi( 0 ) + widthsTBz( 0 ) - 1 );
+  variable v1  : std_logic                                         := l( 1 + widthTBstubId + widthsTBr( 1 ) + widthsTBphi( 1 ) + widthsTBz( 1 ) - 1 );
+  variable v2  : std_logic                                         := l( 1 + widthTBstubId + widthsTBr( 2 ) + widthsTBphi( 2 ) + widthsTBz( 2 ) - 1 );
+  variable v3  : std_logic                                         := l( 1 + widthTBstubId + widthsTBr( 3 ) + widthsTBphi( 3 ) + widthsTBz( 3 ) - 1 );
+  variable id0 : std_logic_vector( widthTBstubId    - 1 downto 0 ) := l(     widthTBstubId + widthsTBr( 0 ) + widthsTBphi( 0 ) + widthsTBz( 0 ) - 1 downto widthsTBr( 0 ) + widthsTBphi( 0 ) + widthsTBz( 0 ) );
+  variable id1 : std_logic_vector( widthTBstubId    - 1 downto 0 ) := l(     widthTBstubId + widthsTBr( 1 ) + widthsTBphi( 1 ) + widthsTBz( 1 ) - 1 downto widthsTBr( 1 ) + widthsTBphi( 1 ) + widthsTBz( 1 ) );
+  variable id2 : std_logic_vector( widthTBstubId    - 1 downto 0 ) := l(     widthTBstubId + widthsTBr( 2 ) + widthsTBphi( 2 ) + widthsTBz( 2 ) - 1 downto widthsTBr( 2 ) + widthsTBphi( 2 ) + widthsTBz( 2 ) );
+  variable id3 : std_logic_vector( widthTBstubId    - 1 downto 0 ) := l(     widthTBstubId + widthsTBr( 3 ) + widthsTBphi( 3 ) + widthsTBz( 3 ) - 1 downto widthsTBr( 3 ) + widthsTBphi( 3 ) + widthsTBz( 3 ) );
+  variable r0  : std_logic_vector( widthsTBr( 0 )   - 1 downto 0 ) := l(                     widthsTBr( 0 ) + widthsTBphi( 0 ) + widthsTBz( 0 ) - 1 downto                  widthsTBphi( 0 ) + widthsTBz( 0 ) );
+  variable r1  : std_logic_vector( widthsTBr( 1 )   - 1 downto 0 ) := l(                     widthsTBr( 1 ) + widthsTBphi( 1 ) + widthsTBz( 1 ) - 1 downto                  widthsTBphi( 1 ) + widthsTBz( 1 ) );
+  variable r2  : std_logic_vector( widthsTBr( 2 )   - 1 downto 0 ) := l(                     widthsTBr( 2 ) + widthsTBphi( 2 ) + widthsTBz( 2 ) - 1 downto                  widthsTBphi( 2 ) + widthsTBz( 2 ) );
+  variable r3  : std_logic_vector( widthsTBr( 3 )   - 1 downto 0 ) := l(                     widthsTBr( 3 ) + widthsTBphi( 3 ) + widthsTBz( 3 ) - 1 downto                  widthsTBphi( 3 ) + widthsTBz( 3 ) );
+  variable phi0: std_logic_vector( widthsTBphi( 0 ) - 1 downto 0 ) := l(                                      widthsTBphi( 0 ) + widthsTBz( 0 ) - 1 downto                                     widthsTBz( 0 ) );
+  variable phi1: std_logic_vector( widthsTBphi( 1 ) - 1 downto 0 ) := l(                                      widthsTBphi( 1 ) + widthsTBz( 1 ) - 1 downto                                     widthsTBz( 1 ) );
+  variable phi2: std_logic_vector( widthsTBphi( 2 ) - 1 downto 0 ) := l(                                      widthsTBphi( 2 ) + widthsTBz( 2 ) - 1 downto                                     widthsTBz( 2 ) );
+  variable phi3: std_logic_vector( widthsTBphi( 3 ) - 1 downto 0 ) := l(                                      widthsTBphi( 3 ) + widthsTBz( 3 ) - 1 downto                                     widthsTBz( 3 ) );
+  variable z0  : std_logic_vector( widthsTBz( 0 )   - 1 downto 0 ) := l(                                                         widthsTBz( 0 ) - 1 downto                                                  0 );
+  variable z1  : std_logic_vector( widthsTBz( 1 )   - 1 downto 0 ) := l(                                                         widthsTBz( 1 ) - 1 downto                                                  0 );
+  variable z2  : std_logic_vector( widthsTBz( 2 )   - 1 downto 0 ) := l(                                                         widthsTBz( 2 ) - 1 downto                                                  0 );
+  variable z3  : std_logic_vector( widthsTBz( 3 )   - 1 downto 0 ) := l(                                                         widthsTBz( 3 ) - 1 downto                                                  0 );
 begin
   case t is
-    when 0 => s := ( '0', v0, ( others => '0' ), ( others => '0' ), resize( r0, widthTBr ), resize( phi0, widthTBphi ), resize( z0, widthTBz ) );
-    when 1 => s := ( '0', v1, ( others => '0' ), ( others => '0' ), resize( r1, widthTBr ), resize( phi1, widthTBphi ), resize( z1, widthTBz ) );
-    when 2 => s := ( '0', v2, ( others => '0' ), ( others => '0' ), resize( r2, widthTBr ), resize( phi2, widthTBphi ), resize( z2, widthTBz ) );
-    when 3 => s := ( '0', v3, ( others => '0' ), ( others => '0' ), resize( r3, widthTBr ), resize( phi3, widthTBphi ), resize( z3, widthTBz ) );
+    when 0 => s := ( '0', v0, ( others => '0' ), id0, resize( r0, widthTBr ), resize( phi0, widthTBphi ), resize( z0, widthTBz ) );
+    when 1 => s := ( '0', v1, ( others => '0' ), id1, resize( r1, widthTBr ), resize( phi1, widthTBphi ), resize( z1, widthTBz ) );
+    when 2 => s := ( '0', v2, ( others => '0' ), id2, resize( r2, widthTBr ), resize( phi2, widthTBphi ), resize( z2, widthTBz ) );
+    when 3 => s := ( '0', v3, ( others => '0' ), id3, resize( r3, widthTBr ), resize( phi3, widthTBphi ), resize( z3, widthTBz ) );
     when others => null;
   end case;
   return s;

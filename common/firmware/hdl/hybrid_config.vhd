@@ -66,10 +66,10 @@ constant numDTCsPerRegion: natural := 24;                            -- max numb
 constant numLayers       : natural :=  8;                            -- number of detector layers a reconstructable particle may cross
 constant numDTCsPerTFP   : natural := numOverlap * numDTCsPerRegion; -- max number of DTC per Nonant
 
-constant dtcWidthR       : natural := 11;                            -- number of bits used to represent r w.r.t. chosenRofPhi
-constant dtcWidthPhi     : natural := 14;                            -- number of bits used to represent phi w.r.t. phi sector center
-constant dtcWidthZ       : natural := 13;                            -- number of bits used to represent gloabl z
-constant dtcWidthLayer   : natural :=  5;
+constant dtcWidthR       : natural := 12;                            -- number of bits used to represent r w.r.t. chosenRofPhi
+constant dtcWidthPhi     : natural := 15;                            -- number of bits used to represent phi w.r.t. phi sector center
+constant dtcWidthZ       : natural := 14;                            -- number of bits used to represent gloabl z
+constant dtcWidthLayer   : natural :=  3;
 
 -- TFP
 
@@ -162,7 +162,7 @@ constant tbNumsProjectionLayers: naturals( 0 to tbNumSeedTypes - 1 );
 function init_limitsChannelTB return naturals;
 constant tbLimitsChannel: naturals( 0 to tbNumSeedTypes );
 
-constant tbNumLinks: natural := 1 + tbMaxNumProjectionLayers;
+constant tbNumLinks: natural := 1 + tbMaxNumProjectionLayers + tbMaxNumSeedingLayer;
 
 -- TN
 
@@ -219,7 +219,7 @@ function init_limitsChannelTB return naturals is
   variable limits: naturals( 0 to tbNumSeedTypes ) := ( others => 0 );
 begin
   for k in 0 to tbNumSeedTypes - 1 loop
-    limits( k + 1 ) := limits( k ) + tbNumsProjectionLayers( k ) + 1;
+    limits( k + 1 ) := limits( k ) + tbNumsProjectionLayers( k ) + tbMaxNumSeedingLayer + 1;
   end loop;
   return limits;
 end function;

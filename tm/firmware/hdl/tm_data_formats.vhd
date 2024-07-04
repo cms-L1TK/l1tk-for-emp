@@ -39,6 +39,7 @@ constant widthUcot  : natural := widthTBcot;
 constant widthUphiT : natural := width( 2.0 * maxUphiT / baseUphiT );
 constant widthUzT   : natural := width( 2.0 * maxUzT   / baseUzT   );
 
+constant widthUstubId: natural := widthTBstubId;
 constant widthUr  : natural := width( rangeDTCr / baseUr );
 constant widthUphi: natural := max( sum( widthsTBphi, baseShiftsTBphi ) );
 constant widthUz  : natural := max( sum( widthsTBz,   baseShiftsTBz   ) );
@@ -52,15 +53,15 @@ constant baseSinvCot: real := 2.0 ** baseShiftSinvCot;
 
 constant baseCot: real := baseZ / baseR;
 
-constant baseShiftHinv2R: integer := ilog2( baseUinv2R / baseInv2R );
-constant baseShiftHphiT : integer := ilog2( baseUphiT  / basePhiT  );
-constant baseShiftHcot  : integer := ilog2( baseUcot   / baseCot   );
-constant baseShiftHzT   : integer := ilog2( baseUzT    / baseZT    );
+constant baseShiftHinv2R: integer := ilog2( baseInv2R / baseUinv2R );
+constant baseShiftHphiT : integer := ilog2( basePhiT  / baseUphiT  );
+constant baseShiftHcot  : integer := ilog2( baseCot   / baseUcot   );
+constant baseShiftHzT   : integer := ilog2( baseZT    / baseUzT    );
 
-constant baseHinv2R: real := baseInv2R * 2.0 ** baseShiftHinv2R;
-constant baseHphiT : real := basePhiT  * 2.0 ** baseShiftHphiT;
-constant baseHcot  : real := baseCot   * 2.0 ** baseShiftHcot;
-constant baseHzT   : real := baseZT    * 2.0 ** baseShiftHzT;
+constant baseHinv2R: real := baseInv2R / 2.0 ** baseShiftHinv2R;
+constant baseHphiT : real := basePhiT  / 2.0 ** baseShiftHphiT;
+constant baseHcot  : real := baseCot   / 2.0 ** baseShiftHcot;
+constant baseHzT   : real := baseZT    / 2.0 ** baseShiftHzT;
 
 constant baseTransformHinv2R: real := baseUinv2R / baseHinv2R;
 constant baseTransformHphiT : real := baseUphiT  / baseHphiT;
@@ -72,13 +73,13 @@ constant baseShiftTransformHphiT : integer := widthDSPbu - width( baseTransformH
 constant baseShiftTransformHcot  : integer := widthDSPbu - width( baseTransformHcot   );
 constant baseShiftTransformHzT   : integer := widthDSPbu - width( baseTransformHzT    );
 
-constant baseShiftHr  : integer := ilog2( baseUr   / baseR   );
-constant baseShiftHphi: integer := ilog2( baseUphi / basePhi );
-constant baseShiftHz  : integer := ilog2( baseUz   / baseZ   );
+constant baseShiftHr  : integer := ilog2( baseR   / baseUr   );
+constant baseShiftHphi: integer := ilog2( basePhi / baseUphi );
+constant baseShiftHz  : integer := ilog2( baseZ   / baseUz   );
 
-constant baseHr  : real := baseR   * 2.0 ** baseShiftHr;
-constant baseHphi: real := basePhi * 2.0 ** baseShiftHphi;
-constant baseHz  : real := baseZ   * 2.0 ** baseShiftHz;
+constant baseHr  : real := baseR   / 2.0 ** baseShiftHr;
+constant baseHphi: real := basePhi / 2.0 ** baseShiftHphi;
+constant baseHz  : real := baseZ   / 2.0 ** baseShiftHz;
 
 constant baseTransformHr  : real := baseUr   / baseHr;
 constant baseTransformHphi: real := baseUphi / baseHphi;
@@ -93,6 +94,7 @@ constant widthHphiT : natural := widthUphiT  + widthDSPbu - baseShiftTransformHp
 constant widthHcot  : natural := widthUcot   + widthDSPbu - baseShiftTransformHcot;
 constant widthHzT   : natural := widthUzT    + widthDSPbu - baseShiftTransformHzT;
 
+constant widthHstubId: natural := widthTBstubId; 
 constant widthHr  : natural := widthUr   + widthDSPbu - baseShiftTransformHr;
 constant widthHphi: natural := widthUphi + widthDSPbu - baseShiftTransformHphi;
 constant widthHz  : natural := widthUz   + widthDSPbu - baseShiftTransformHz;
@@ -101,6 +103,7 @@ constant widthLinv2R: natural := widthTMinv2R;
 constant widthLphiT : natural := widthTMphiT;
 constant widthLzT   : natural := widthTMzT;
 
+constant widthLstubId: natural := widthTBstubId;
 constant widthLr  : natural := widthTMr;
 constant widthLphi: natural := widthTMphi;
 constant widthLz  : natural := widthTMz;
@@ -115,10 +118,13 @@ constant baseLz    : real := baseZ;
 constant widthRinv2R : natural := widthLinv2R;
 constant widthRphiT  : natural := widthLphiT;
 constant widthRzT    : natural := widthLzT;
-constant widthRlayer: natural := widthDTClayer;
+constant widthRstubId: natural := widthTBstubId;
+constant widthRlayer: natural := widthLayer;
 constant widthRr    : natural := widthLr;
 constant widthRphi  : natural := widthLphi;
 constant widthRz    : natural := widthLz;
+
+constant widthStubId: natural := widthTBstubId;
 
 
 end;

@@ -78,6 +78,8 @@ end;
 
 architecture rtl of router_lookUp is
 
+constant numProjectionLayers: natural := tbNumsProjectionLayers( seedType );
+
 signal track_din: t_trackL := nulll;
 signal track_dout: t_trackR := nulll;
 component lookup_track
@@ -109,15 +111,15 @@ lookup_dout.stubs <= stubs;
 
 c: lookup_track port map ( clk, track_din, track_dout );
 
-g: for k in 0 to tbMaxNumSeedingLayer + tbNumsProjectionLayers( seedType ) - 1 generate
+g: for k in 0 to tbMaxNumSeedingLayer + numProjectionLayers - 1 generate
 
 function init_layer return natural is
-  variable layer: natural;
+  variable layer: natural := 1;
 begin
-  if k < tbNumsProjectionLayers( seedType ) then
+  if k < numProjectionLayers then
     layer := seedTypesProjectionLayers( seedType )( k );
-  else
-    layer := seedTypesSeedLayers( seedType )( k - tbNumsProjectionLayers( seedType ) );
+  elsif k >= numProjectionLayers then
+    layer := seedTypesSeedLayers( seedType )( k - numProjectionLayers );
   end if;
   if layer < 10 then
     return layer - 1;
@@ -238,6 +240,7 @@ if rising_edge( clk ) then
         dout.tilt <= not stub_din.pst;
       end if;
     end if;
+    dout.stubId <= stub_din.stubId;
     dout.layer <= encoded( widthRlayer - 1 downto 0 );
     dout.r <= stub_din.r;
     dout.phi <= stub_din.phi;
@@ -273,7 +276,7 @@ end;
 architecture rtl of router_route is
 
 function f_hitPattern( stubs: t_stubsR ) return std_logic_vector is
-  variable hitPattern: std_logic_vector( widthLayer - 1 downto 0 ) := ( others => '0' );
+  variable hitPattern: std_logic_vector( numLayers - 1 downto 0 ) := ( others => '0' );
 begin
   
   for k in 0 to numLayers - 1 loop
@@ -291,7 +294,7 @@ signal track: t_trackR := nulll;
 signal stubs: t_stubsR( numLayers - 1 downto 0 ) := ( others => nulll );
 
 -- step 2
-signal hitPattern:  std_logic_vector( widthLayer - 1 downto 0 ) := ( others => '0' );
+signal hitPattern:  std_logic_vector( numLayers - 1 downto 0 ) := ( others => '0' );
 signal dout: t_channelR := nulll;
 
 begin
@@ -327,7 +330,7 @@ if rising_edge( clk ) then
     for k in dout.stubs'range loop
       dout.stubs( k ).reset <= '1';
     end loop;
-  elsif track.valid = '1' and count( hitPattern, '1' ) >= kfMinStubs and count( hitPattern, 0, kfMaxSeedLayer - 1, '1' ) >= kfNumSeedLayer then
+  elsif track.valid = '1' and count( hitPattern, '1' ) >= kfMinStubs and count( hitPattern, kfMaxSeedLayer - 1, 0, '1' ) >= kfNumSeedLayer then
     dout <= ( track, stubs );
   end if;
 

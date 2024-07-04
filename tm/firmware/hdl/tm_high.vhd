@@ -108,18 +108,20 @@ architecture rtl of high_stub is
 
 type t_word is
 record
-  reset: std_logic;
-  valid: std_logic;
-  pst  : std_logic;
+  reset : std_logic;
+  valid : std_logic;
+  pst   : std_logic;
+  stubId: std_logic_vector( widthStubId - 1 downto 0 );
 end record;
+function nulll return t_word is begin return ( '0', '0', '0', ( others => '0' ) ); end function;
 type t_sr is array ( natural range <> ) of t_word;
 
 -- step 1
 signal dspHr: t_dspHr := ( others => ( others => '0' ) );
 signal dspHphi: t_dspHphi := ( others => ( others => '0' ) );
 signal dspHz: t_dspHz := ( others => ( others => '0' ) );
-signal sr: t_sr( 3 downto 2 ) := ( others => ( others => '0' ) );
-signal din: t_word := ( others => '0' );
+signal sr: t_sr( 3 downto 2 ) := ( others => nulll );
+signal din: t_word := nulll;
 
 -- step 3
 signal dout: t_stubH := nulll;
@@ -127,7 +129,7 @@ signal dout: t_stubH := nulll;
 begin
 
 -- step 1
-din <= ( stub_din.reset, stub_din.valid, stub_din.pst );
+din <= ( stub_din.reset, stub_din.valid, stub_din.pst, stub_din.stubId );
 
 -- step 2
 stub_dout <= dout;
@@ -159,6 +161,7 @@ if rising_edge( clk ) then
   elsif sr( 3 ).valid = '1' then
     dout.valid <= '1';
     dout.pst <= sr( 3 ).pst;
+    dout.stubId <= sr( 3 ).stubId;
     dout.r <= dspHr.p( r_Hr );
     dout.phi <= dspHphi.p( r_Hphi );
     dout.z <= dspHz.p( r_Hz );

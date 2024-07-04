@@ -39,6 +39,8 @@ function min( a, b: integer  ) return integer;
 
 function stds( x, w: integer ) return std_logic_vector;
 function stdu( x, w: integer ) return std_logic_vector;
+function stds( x, b:real; w: integer ) return std_logic_vector;
+function stdu( x, b:real; w: integer ) return std_logic_vector;
 function stds( x: integer ) return std_logic;
 function stdu( x: integer ) return std_logic;
 
@@ -108,12 +110,12 @@ package body hybrid_tools is
 
 function digi( val, base: real ) return integer is begin return integer( floor( val / base + 1.0e-11 ) ); end function;
 
-function ilog2( r: real ) return integer is begin return integer( ceil( log2( r ) - 1.0e-11 ) ); end function;
+function ilog2( r: real ) return integer is variable a: real := abs( r ); begin return integer( ceil( log2( a ) - 1.0e-11 ) ); end function;
 function ilog2( i: integer ) return integer is begin return ilog2( real( i ) ); end function;
 
 function width( i: integer ) return natural is begin return width( real( i ) ); end function;
 
-function width( r: real ) return natural is begin if r >= -1.0 and r <= 1.0 then return 1; end if; return ilog2( abs( r ) ); end function;
+function width( r: real ) return natural is begin if r >= -1.0 and r <= 1.0 then return 1; end if; return ilog2( r ); end function;
 
 function uint( s: std_logic_vector ) return integer is begin return to_integer( unsigned( s ) ); end function;
 function sint( s: std_logic_vector ) return integer is begin return to_integer( signed( s ) ); end function;
@@ -146,6 +148,9 @@ begin
   end if;
   return stdu( integer( floor( x ) ), w );
 end function;
+
+function stds( x, b:real; w: integer ) return std_logic_vector is begin return stds( digi( x, b ), w ); end function;
+function stdu( x, b:real; w: integer ) return std_logic_vector is begin return stdu( digi( x, b ), w ); end function;
 
 function bool( s: std_logic ) return boolean is begin if s = '1' then return true; end if; return false; end function;
 

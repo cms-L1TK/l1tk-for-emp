@@ -7,6 +7,8 @@ use work.emp_ttc_decl.all;
 use work.emp_slink_types.all;
 use work.hybrid_config.all;
 use work.hybrid_data_types.all;
+use work.hybrid_data_formats.all;
+use work.tm_data_formats.all;
 
 
 entity emp_payload is
@@ -77,6 +79,10 @@ begin
   end loop;
   return s;
 end;
+
+constant baseHcot: real := baseHcot;
+constant chosenRofZ: real := chosenRofZ;
+constant baseZT: real := baseZT;
 
 
 begin
