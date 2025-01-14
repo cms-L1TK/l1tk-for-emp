@@ -1,0 +1,10 @@
+setup ../ucf/settings.tcl
+setup ../ucf/vsim.tcl
+
+include -c emp-fwk:boards/testbench top.dep
+
+include payload.dep
+src tb_decl.vhd
+
+include -c emp-fwk:boards/serenity/dc_vu13p packages_so2.dep
+include -c emp-fwk:boards/serenity/dc_vu13p device.dep

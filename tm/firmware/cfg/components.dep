@@ -1,11 +1,11 @@
 src tm_multiplex.vhd
-src tm_format.vhd
+src tm_desync.vhd
+src tm_cdc.vhd
 src tm_router.vhd
 src tm_low.vhd
 src tm_high.vhd
 src tm_unify.vhd
 src tm_transform.vhd
 src tm_top.vhd
-src tm_layerEncoding.vhd
 src tm_data_types.vhd
 src tm_data_formats.vhd

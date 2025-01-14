@@ -1,48 +1,95 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use work.hybrid_config.all;
+use work.hybrid_data_types.all;
 use work.tm_data_types.all;
 
 entity tm_low is
 port (
   clk: in std_logic;
-  low_din: in t_channelH;
-  low_dout: out t_channelL
+  low_din: in t_trackH;
+  low_dout: out t_trackL
 );
 end;
 
 architecture rtl of tm_low is
 
-signal track_din: t_trackH := nulll;
-signal track_dout: t_trackL := nulll;
-component low_track
+signal meta_din: t_metaTB := nulll;
+signal meta_dout: t_metaTB := nulll;
+component low_meta
 port (
   clk: in std_logic;
-  track_din: in t_trackH;
-  track_dout: out t_trackL
+  meta_din: in t_metaTB;
+  meta_dout: out t_metaTB
 );
 end component;
 
-signal stubs_din: t_channelH := nulll;
-signal stubs_dout: t_stubsL( tbNumLayers - 1 downto 0 ) := ( others => nulll );
+signal track_din: t_parameterTrackH := nulll;
+signal track_valid: std_logic := '0';
+signal track_dout: t_parameterTrackTM := nulll;
+component low_track
+port (
+  clk: in std_logic;
+  track_din: in t_parameterTrackH;
+  track_valid: out std_logic;
+  track_dout: out t_parameterTrackTM
+);
+end component;
+
+signal stubs_din: t_parameterStubsH( 0 to tbNumLayers - 1 ) := ( others => nulll );
+signal stubs_track: t_parameterTrackH := nulll;
+signal stubs_hits: std_logic_vector( 0 to tbNumLayers - 1 ) := ( others => '0' );
+signal stubs_dout: t_parameterStubsTM( 0 to tbNumLayers - 1 ) := ( others => nulll );
 component low_stubs
 port (
   clk: in std_logic;
-  stubs_din: in t_channelH;
-  stubs_dout: out t_stubsL( tbNumLayers - 1 downto 0 )
+  stubs_din: in t_parameterStubsH( 0 to tbNumLayers - 1 );
+  stubs_track: in t_parameterTrackH;
+  stubs_hits: out std_logic_vector( 0 to tbNumLayers - 1 );
+  stubs_dout: out t_parameterStubsTM( 0 to tbNumLayers - 1 )
+);
+end component;
+
+signal valid_din: std_logic := '0';
+signal valid_hits: std_logic_vector( 0 to tbNumLayers - 1 ) := ( others => '0' );
+signal valid_meta: t_metaTB := nulll;
+signal valid_track: t_parameterTrackTM := nulll;
+signal valid_stubs: t_parameterStubsTM( 0 to tbNumLayers - 1 ) := ( others => nulll );
+signal valid_dout: t_trackL := nulll;
+component low_valid
+port (
+  clk: in std_logic;
+  valid_din: in std_logic;
+  valid_hits: in std_logic_vector( 0 to tbNumLayers - 1 );
+  valid_meta: in t_metaTB;
+  valid_track: in t_parameterTrackTM;
+  valid_stubs: in t_parameterStubsTM( 0 to tbNumLayers - 1 );
+  valid_dout: out t_trackL
 );
 end component;
 
 begin
 
+meta_din <= low_din.meta;
 track_din <= low_din.track;
-stubs_din <= low_din;
+stubs_din <= low_din.stubs;
+stubs_track <= low_din.track;
 
-low_dout <= ( track_dout, stubs_dout );
+valid_din <= track_valid;
+valid_hits <= stubs_hits;
+valid_meta <= meta_dout;
+valid_track <= track_dout;
+valid_stubs <= stubs_dout;
 
-cTrack: low_track port map ( clk, track_din, track_dout );
+low_dout <= valid_dout;
 
-cStubs: low_stubs port map ( clk, stubs_din, stubs_dout );
+cMeta: low_meta port map ( clk, meta_din, meta_dout );
+
+cTrack: low_track port map ( clk, track_din, track_valid, track_dout );
+
+cStubs: low_stubs port map ( clk, stubs_din, stubs_track, stubs_hits, stubs_dout );
+
+cValid: low_valid port map ( clk, valid_din, valid_hits, valid_meta, valid_track, valid_stubs, valid_dout );
 
 end;
 
@@ -50,13 +97,15 @@ end;
 library ieee;
 use ieee.std_logic_1164.all;
 use work.hybrid_tools.all;
+use work.hybrid_data_types.all;
 use work.tm_data_types.all;
 
 entity low_track is
 port (
   clk: in std_logic;
-  track_din: in t_trackH;
-  track_dout: out t_trackL
+  track_din: in t_parameterTrackH;
+  track_valid: out std_logic;
+  track_dout: out t_parameterTrackTM
 );
 end;
 
@@ -64,20 +113,19 @@ architecture rtl of low_track is
 
 -- step 1
 
-signal din: t_trackH := nulll;
+signal inv2R, phiT, zT: std_logic := '0';
+signal din: t_parameterTrackTM := nulll;
 
 -- step 2
 
-signal d: t_trackL := nulll;
-signal vin2R, vphiT, vzT: std_logic := '0';
-
--- step 3
-
-signal dout: t_trackL := nulll;
+signal valid: std_logic := '0';
+signal dout: t_parameterTrackTM := nulll;
 
 begin
 
 -- step 2
+
+track_valid <= valid;
 track_dout <= dout;
 
 process ( clk ) is
@@ -86,32 +134,28 @@ if rising_edge( clk ) then
 
   -- step 1
 
-  din <= track_din;
+  din.inv2R <= track_din.inv2R( r_Linv2R );
+  din.phiT <= track_din.phiT( r_LphiT );
+  din.zT <= track_din.zT( r_LzT );
+  inv2R <= '0';
+  if not overflowed( track_din.inv2R( r_overLinv2R ) ) then
+    inv2R <= '1';
+  end if;
+  phiT <= '0';
+  if not overflowed( track_din.phiT( r_overLphiT ) ) then
+    phiT <= '1';
+  end if;
+  zT <= '0';
+  if not overflowed( track_din.zT( r_overLzT ) ) then
+    zT <= '1';
+  end if;
 
   -- step 2
 
-  d.reset <= din.reset;
-  d.valid <= din.valid;
-  d.inv2R <= din.inv2R( r_Linv2R );
-  d.phiT <= din.phiT( r_LphiT );
-  d.zT <= din.zT( r_LzT );
-  vin2R <= '0';
-  vphiT <= '0';
-  vzT <= '0';
-  if not overflowed( din.inv2R( r_overLinv2R ) ) then vin2R <= '1'; end if;
-  if not overflowed( din.phiT( r_overLphiT ) ) then vphiT <= '1'; end if;
-  if not overflowed( din.zT( r_overLzT ) ) then vzT <= '1'; end if;
-
-  -- step 3
-
-  dout <= nulll;
-  if d.reset = '1' then
-    dout.reset <= '1';
-  elsif d.valid = '1' and vin2R = '1' and vphiT = '1' and vzT = '1' then
-    dout.valid <= '1';
-    dout.inv2R <= d.inv2R;
-    dout.phiT <= d.phiT;
-    dout.zT <= d.zT;
+  valid <= '0';
+  dout <= din;
+  if inv2R = '1' and phiT = '1' and zT = '1' then
+    valid <= '1';
   end if;
 
 end if;
@@ -123,43 +167,48 @@ end;
 library ieee;
 use ieee.std_logic_1164.all;
 use work.hybrid_config.all;
+use work.hybrid_data_types.all;
 use work.tm_data_types.all;
 
 entity low_stubs is
 port (
   clk: in std_logic;
-  stubs_din: in t_channelH;
-  stubs_dout: out t_stubsL( tbNumLayers - 1 downto 0 )
+  stubs_din: in t_parameterStubsH( 0 to tbNumLayers - 1 );
+  stubs_track: in t_parameterTrackH;
+  stubs_hits: out std_logic_vector( 0 to tbNumLayers - 1 );
+  stubs_dout: out t_parameterStubsTM( 0 to tbNumLayers - 1 )
 );
 end;
 
 architecture rtl of low_stubs is
 
-signal stub_track: t_trackH := nulll;
 component low_stub
 port (
   clk: in std_logic;
-  stub_track: in t_trackH;
-  stub_din: in t_stubH;
-  stub_dout: out t_stubL
+  stub_din: in t_parameterStubH;
+  stub_track: in t_parameterTrackH;
+  stub_valid: out std_logic;
+  stub_dout: out t_parameterStubTM
 );
 end component;
 
 begin
 
-stub_track <= stubs_din.track;
-
 g: for k in 0 to tbNumLayers - 1 generate
 
-signal stub_din: t_stubH := nulll;
-signal stub_dout: t_stubL := nulll;
+signal stub_din: t_parameterStubH := nulll;
+signal stub_track: t_parameterTrackH := nulll;
+signal stub_valid: std_logic := '0';
+signal stub_dout: t_parameterStubTM := nulll;
 
 begin
 
-stub_din <= stubs_din.stubs( k );
+stub_din <= stubs_din( k );
+stub_track <= stubs_track;
+stubs_hits( k ) <= stub_valid;
 stubs_dout( k ) <= stub_dout;
 
-c: low_stub port map ( clk, stub_track, stub_din, stub_dout );
+c: low_stub port map ( clk, stub_din, stub_track, stub_valid, stub_dout );
 
 end generate;
 
@@ -170,16 +219,17 @@ library ieee;
 use ieee.std_logic_1164.all;
 use work.hybrid_tools.all;
 use work.hybrid_config.all;
-use work.hybrid_data_formats.all;
+use work.hybrid_data_types.all;
 use work.tm_data_types.all;
 use work.tm_data_formats.all;
 
 entity low_stub is
 port (
   clk: in std_logic;
-  stub_track: in t_trackH;
-  stub_din: in t_stubH;
-  stub_dout: out t_stubL
+  stub_din: in t_parameterStubH;
+  stub_track: in t_parameterTrackH;
+  stub_valid: out std_logic;
+  stub_dout: out t_parameterStubTM
 );
 end;
 
@@ -189,7 +239,8 @@ constant cots: t_cots := cots;
 
 -- step 1
 
-signal sr: t_stubsH( 3 downto 2 ) := ( others => nulll );
+signal valid: std_logic := '0';
+signal din: t_parameterStubH := nulll;
 signal inv2R: std_logic_vector( widthLinv2R + 1 + baseShiftHinv2R - 1 downto 0 ) := ( others => '0' );
 signal phiT: std_logic_vector( widthLphiT + 1 + baseShiftHphiT - 1 downto 0 ) := ( others => '0' );
 signal cot: std_logic_vector( widthHcot + 1 - 1 downto 0 ) := ( others => '0' );
@@ -200,30 +251,27 @@ signal dspLz: t_dspLz := ( others => ( others => '0' ) );
 
 -- step 2
 
-signal vr: std_logic := '0';
-
--- step 3
-
+signal dout: t_parameterStubH := nulll;
 signal phi: std_logic_vector( widthLdphi + 2 - 1 downto 0 ) := ( others => '0' );
 signal z: std_logic_vector( widthLdz + 2 - 1 downto 0 ) := ( others => '0' );
-signal dout: t_stubL := nulll;
 
-signal test, bd: integer;
 begin
-test <= sint( stub_track.zT & '1' ) - sint(zT);
-bd <= baseShiftLzT + 1;
 
 -- step 1
+
 inv2R <= stub_track.inv2R( r_Linv2R ) & '1' & ( baseShiftHinv2R - 1 downto 0 => '0' );
 phiT <= stub_track.phiT( r_LphiT ) & '1' & ( baseShiftHphiT - 1 downto 0 => '0' );
 zT <= stub_track.zT( r_LzT ) & '1' & ( baseShiftHzT - 1 downto 0 => '0' );
 index <= stub_track.zT( r_LzT );
 cot <= cots( uint( index ) ) & '1';
 
--- step 3
-phi <= ( sr( 3 ).phi & '1' ) + ( dspLphi.p( r_Ldphi ) & '1' );
-z <= ( sr( 3 ).z & '1' ) + ( dspLz.p( r_Ldz ) & '1' );
-stub_dout <= dout;
+-- step 2
+
+phi <= ( dout.phi & '1' ) + ( dspLphi.p( r_Ldphi ) & '1' );
+z <= ( dout.z & '1' ) + ( dspLz.p( r_Ldz ) & '1' );
+stub_valid <= '1' when valid = '1' and not overflowed( phi( r_overLphi ) ) and not overflowed( z( r_overLz ) ) else '0';
+stub_dout <= ( dout.pst, dout.stubId, dout.r( r_Lr ), phi( r_Lphi ), z( r_Lz ) );
+
 
 process ( clk ) is
 begin
@@ -231,7 +279,11 @@ if rising_edge( clk ) then
 
   -- step 1
 
-  sr <= sr( sr'high - 1 downto sr'low ) & stub_din;
+  valid <= '0';
+  if not overflowed( stub_din.r( r_overLr ) ) then
+    valid <= '1';
+  end if;
+  din <= stub_din;
   dspLphi.a <= ( stub_track.inv2R & '1' ) - inv2R;
   dspLphi.b <= stub_din.r & '1';
   dspLphi.c <= ( ( stub_track.phiT & '1' ) - phiT ) & ( baseShiftLphiT + 1 - 1 downto 0 => '0' );
@@ -242,26 +294,106 @@ if rising_edge( clk ) then
 
   -- step 2
 
+  dout <= din;
   dspLphi.p <= dspLphi.a * dspLphi.b + dspLphi.c;
   dspLz.p <= dspLz.b * ( dspLz.a + dspLz.d ) + dspLz.c;
-  vr <= '0';
-  if not overflowed( sr( 2 ).r( r_overLr ) ) then
-    vr <= '1';
+
+end if;
+end process;
+
+end;
+
+
+library ieee;
+use ieee.std_logic_1164.all;
+use work.hybrid_config.all;
+use work.hybrid_data_types.all;
+use work.tm_data_types.all;
+
+entity low_meta is
+port (
+  clk: in std_logic;
+  meta_din: in t_metaTB;
+  meta_dout: out t_metaTB
+);
+end;
+
+architecture rtl of low_meta is
+
+-- step 1
+
+signal din: t_metaTB := nulll;
+
+-- step 2
+
+signal dout: t_metaTB := nulll;
+
+begin
+
+-- step 2
+
+meta_dout <= dout;
+
+process ( clk ) is
+begin
+if rising_edge( clk ) then
+
+  din <= meta_din;
+
+  dout <= din;
+
+end if;
+end process;
+
+end;
+
+
+library ieee;
+use ieee.std_logic_1164.all;
+use work.hybrid_config.all;
+use work.hybrid_data_types.all;
+use work.tm_data_types.all;
+
+entity low_valid is
+port (
+  clk: in std_logic;
+  valid_din: in std_logic;
+  valid_hits: in std_logic_vector( 0 to tbNumLayers - 1 );
+  valid_meta: in t_metaTB;
+  valid_track: in t_parameterTrackTM;
+  valid_stubs: in t_parameterStubsTM( 0 to tbNumLayers - 1 );
+  valid_dout: out t_trackL
+);
+end;
+
+architecture rtl of low_valid is
+
+-- step 3
+
+signal dout: t_trackL := nulll;
+
+begin
+
+-- step 3
+
+valid_dout <= dout;
+
+process ( clk ) is
+begin
+if rising_edge( clk ) then
+
+  dout <= ( valid_meta, valid_track, valid_stubs );
+
+  if valid_meta.valid = '0' then
+    dout.track <= nulll;
   end if;
 
-  -- step 3
-
-  dout <= nulll;
-  if sr( 3 ).reset = '1' then
-    dout.reset <= '1';
-  elsif sr( 3 ).valid = '1' and not overflowed( phi( r_overLphi ) ) and not overflowed( z( r_overLz ) ) and vr = '1' then
-    dout.valid <= '1';
-    dout.pst <= sr( 3 ).pst;
-    dout.stubId <= sr( 3 ).stubId;
-    dout.r <= sr( 3 ).r( r_Lr );
-    dout.phi <= phi( r_Lphi );
-    dout.z <= z( r_Lz );
-  end if;
+  for k in 0 to tbNumLayers - 1 loop
+    if valid_meta.valid = '0' or valid_meta.hits( k ) = '0' or valid_hits( k ) = '0' then
+      dout.meta.hits( k ) <= '0';
+      dout.stubs( k ) <= nulll;
+    end if;
+  end loop;
 
 end if;
 end process;

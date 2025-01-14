@@ -8,44 +8,6 @@ use work.hybrid_tools.all;
 package hybrid_data_formats is
 
 
--- DTC
-
-constant widthDTCr    : natural := dtcWidthR;
-constant widthDTCphi  : natural := dtcWidthPhi;
-constant widthDTCz    : natural := dtcWidthZ;
-constant widthDTClayer: natural := dtcWidthLayer;
-
-constant widthDTCphiT : natural := width( numOverlap     );
-constant widthDTCzT   : natural := width( gpNumBinsZT    );
-constant widthDTCinv2R: natural := width( htNumBinsInv2R );
-
-constant rangeDTCinv2R: real := 2.0 * invPtToDphi / minPt;
-constant rangeDTCphiT : real := 2.0 * MATH_PI / real( numRegions );
-constant rangeDTCcot  : real := 2.0 * maxCot;
-constant rangeDTCzT   : real := 2.0 * sinh( maxEta ) * chosenRofZ;
-constant rangeDTCr    : real := 2.0 * maxRphi;
-constant rangeDTCphi  : real := rangeDTCphiT + maxRPhi * rangeDTCinv2R;
-constant rangeDTCz    : real := 2.0 * halfLength;
-
-constant baseInv2R: real := rangeDTCinv2R / real( htNumBinsInv2R );
-constant basePhiT : real := rangeDTCphiT  / real( htNumBinsPhiT  ) / real( gpNumBinsPhiT );
-constant baseZT   : real := rangeDTCzT    / real( gpNumBinsZT    );
-constant baseCot  : real := ( baseZT + 2.0 * beamWindowZ ) / chosenRofZ;
-
-constant baseShiftDTCr  : integer := ilog2( rangeDTCr   / basePhiT * baseInv2R ) - widthDTCr;
-constant baseShiftDTCphi: integer := ilog2( rangeDTCphi / basePhiT             ) - widthDTCphi;
-constant baseShiftDTCz  : integer := ilog2( rangeDTCz   / baseZT               ) - widthDTCz;
-
-constant baseR  : real := basePhiT / baseInv2R * 2.0 ** baseShiftDTCr;
-constant basePhi: real := basePhiT             * 2.0 ** baseShiftDTCphi;
-constant baseZ  : real := baseZT               * 2.0 ** baseShiftDTCz;
-
-constant posDTCbarrel: natural := widthDTClayer - 1;
-constant posDTCpsTilt: natural := widthDTClayer - 2;
-
-constant widthLayer: natural := width( numLayers );
-constant widthZT   : natural := width( gpNumBinsZT );
-
 -- TFP
 
 constant widthTFPinv2R: natural := tfpWidthInv2R;
@@ -53,121 +15,82 @@ constant widthTFPphi0 : natural := tfpWidthPhi0;
 constant widthTFPcot  : natural := tfpWidthCot;
 constant widthTFPz0   : natural := tfpWidthZ0;
 
-constant rangeTFPinv2R: real := rangeDTCinv2R + 2.0 * baseInv2R;
-constant rangeTFPphi0 : real := rangeDTCphiT + maxRPhi * rangeTFPinv2R;
-constant rangeTFPcot  : real := rangeDTCcot;
-constant rangeTFPz0   : real := 2.0 * beamWindowZ;
-
-constant baseShiftTFPinv2R: integer := ilog2( rangeTFPinv2R / baseInv2R                     ) - widthTFPinv2R;
-constant baseShiftTFPphi0 : integer := ilog2( rangeTFPphi0  / basePhiT                      ) - widthTFPphi0;
-constant baseShiftTFPcot  : integer := ilog2( rangeTFPcot   / baseZT * basePhiT / baseInv2R ) - widthTFPcot;
-constant baseShiftTFPz0   : integer := ilog2( rangeTFPz0    / baseZT                        ) - widthTFPz0;
-
-constant baseTFPinv2R: real := baseInv2R                     * 2.0 ** baseShiftTFPinv2R;
-constant baseTFPphi0 : real := basePhiT                      * 2.0 ** baseShiftTFPphi0;
-constant baseTFPcot  : real := baseZT / basePhiT * baseInv2R * 2.0 ** baseShiftTFPcot;
-constant baseTFPz0   : real := baseZT                        * 2.0 ** baseShiftTFPz0;
-
--- IR
-
-constant widthIRBX: natural := 3;
-
-constant widthsIRr    : naturals( 0 to irNumStubTypes - 1 ) := (  7,  7, 12,  7 );
-constant widthsIRz    : naturals( 0 to irNumStubTypes - 1 ) := ( 12,  8,  7,  7 );
-constant widthsIRphi  : naturals( 0 to irNumStubTypes - 1 ) := ( 14, 17, 14, 14 );
-constant widthsIRalpha: naturals( 0 to irNumStubTypes - 1 ) := (  0,  0,  0,  4 );
-constant widthsIRbend : naturals( 0 to irNumStubTypes - 1 ) := (  3,  4,  3,  4 );
-
-constant widthIRlayer: natural:= 2;
-
--- TB
-
-constant widthTBseedType: natural :=  3;
-constant widthTBinv2R   : natural := 14;
-constant widthTBphi0    : natural := 18;
-constant widthTBz0      : natural := 10;
-constant widthTBcot     : natural := 14;
-
-constant baseShiftTBinv2R: integer :=  -9;
-constant baseShiftTBphi0 : integer :=   1;
-constant baseShiftTBcot  : integer := -10;
-constant baseShiftTBz0   : integer :=   0;
-
-constant widthTB2Sr: natural := 4; 
-constant widthsTBr  : naturals( 0 to irNumStubTypes - 1 ) := (  7,  7, 12, 12 );
-constant widthsTBphi: naturals( 0 to irNumStubTypes - 1 ) := ( 12, 12, 12, 12 );
-constant widthsTBz  : naturals( 0 to irNumStubTypes - 1 ) := (  9,  9,  7,  7 );
-constant widthTBstubType: natural := width( irNumStubTypes );
-constant widthTBstubDiksType: natural := widthsIRr( 3 ) - widthTB2Sr;
-subtype r_stubDiskType is natural range widthTBstubDiksType + widthTB2Sr + widthsTBphi( 3 ) + widthsTBz( 3 ) - 1 downto widthTB2Sr + widthsTBphi( 3 ) + widthsTBz( 3 ); 
-
-constant baseShiftsTBr  : naturals( 0 to irNumStubTypes - 1 ) := ( 1, 1, 0, 0 );
-constant baseShiftsTBphi: naturals( 0 to irNumStubTypes - 1 ) := ( 0, 0, 3, 3 );
-constant baseShiftsTBz  : naturals( 0 to irNumStubTypes - 1 ) := ( 0, 4, 0, 0 );
-
-constant widthTBtrackId: natural :=  7;
-constant widthTBstubId : natural := 10;
-constant widthTBr      : natural := max( widthsTBr   );
-constant widthTBphi    : natural := max( widthsTBphi );
-constant widthTBz      : natural := max( widthsTBz   );
+constant baseTFPinv2R: real := tfpRangeInv2R * 2.0 ** ( -widthTFPinv2R );
+constant baseTFPPhi0 : real := tfpRangePhi0  * 2.0 ** ( -widthTFPphi0  );
+constant baseTFPCot  : real := tfpRangeCot   * 2.0 ** ( -widthTFPcot   );
+constant baseTFPZ0   : real := tfpRangeZ0    * 2.0 ** ( -widthTFPz0    );
 
 -- TM
 
-constant rangeTMphi : real := basePhiT + maxRPhi * baseInv2R;
-constant rangeTMz   : real := baseZT + maxRZ * baseCot;
+constant rangeTMinv2R: real := 2.0 * invPtToDphi / minPt          * real( htNumBinsInv2R + 2 )                    / real( htNumBinsInv2R );
+constant rangeTMphiT : real := 2.0 * MATH_PI / real( numRegions ) * real( htNumBinsPhiT * ( gpNumBinsPhiT + 2 ) ) / real( htNumBinsPhiT * gpNumBinsPhiT );
+constant rangeTMzT   : real := 2.0 * sinh( maxEta ) * chosenRofZ  * real( gpNumBinsZT + 2 )                       / real( gpNumBinsZT );
 
-constant widthTMr    : natural := widthDTCr;
-constant widthTMphi  : natural := width( rangeTMphi / basePhi );
-constant widthTMz    : natural := width( rangeTMz   / baseZ   );
-constant widthTMphiT : natural := width( htNumBinsPhiT * gpNumBinsPhiT );
-constant widthTMzT   : natural := width( gpNumBinsZT    );
+constant baseTMinv2R: real := rangeTMinv2R / real( htNumBinsInv2R + 2 );
+constant baseTMphiT : real := rangeTMphiT  / real( htNumBinsPhiT * ( gpNumBinsPhiT + 2 ) );
+constant baseTMzT   : real := rangeTMzT    / real( gpNumBinsZT + 2 );
 
-constant rangeTMinv2R: real := 2.0 * invPtToDphi / minPtcand;
-constant widthTMinv2R: natural := width( rangeTMinv2R / baseInv2R );
+constant rangeTMcot: real := ( rangeTMzT + 2.0 * beamWindowZ ) / chosenRofZ;
+constant baseTMcot : real := ( baseTMzT  + 2.0 * beamWindowZ ) / chosenRofZ;
 
-constant rangeTMdPhi: real := pitchRowPS / radiusInner + ( pitchCol2S + scattering ) * rangeTMinv2R / 2.0 + basePhi;
-constant rangeTMdZ  : real := pitchCol2S * sinh( maxEta ) + baseZ;
+constant rangeDTCr  : real := 2.0 * maxRphi;
+constant rangeDTCphi: real := 2.0 * MATH_PI / real( numRegions ) + maxRPhi * rangeTMinv2R;
+constant rangeDTCz  : real := 2.0 * halfLength;
 
-constant widthTMdPhi : natural := width( rangeTMdPhi / basePhi );
-constant widthTMdZ   : natural := width( rangeTMdZ   / baseZ   );
+constant rangeTMr  : real := 2.0 * maxRphi;
+constant rangeTMphi: real := baseTMphiT + maxRPhi * baseTMinv2R;
+constant rangeTMz  : real := baseTMzT   + maxRZ   * baseTMcot;
 
-constant widthTMstubId: natural := widthTBstubId;
+constant baseTMR  : real := baseTMphiT / baseTMinv2R * 2.0 ** ( ilog2( rangeDTCr   / baseTMphiT * baseTMinv2R ) - dtcwidthR   );
+constant baseTMPhi: real := baseTMphiT               * 2.0 ** ( ilog2( rangeDTCphi / baseTMphiT               ) - dtcWidthPhi );
+constant baseTMZ  : real := baseTMzT                 * 2.0 ** ( ilog2( rangeDTCz   / baseTMzT                 ) - dtcWidthz   );
+
+constant rangeTMdPhi: real := 0.5 * pitchRowPS / radiusInner + 0.25 * ( pitchCol2S + scattering ) * rangeTMinv2R;
+constant rangeTMdZ  : real := 0.5 * pitchCol2S * sinh( maxEta );
+
+constant widthTMstubId: natural := widthTBStubId;
+constant widthTMr     : natural := ilog2( rangeTMr     / baseTMr     );
+constant widthTMphi   : natural := ilog2( rangeTMphi   / baseTMPhi   );
+constant widthTMz     : natural := ilog2( rangeTMz     / baseTMZ     );
+constant widthTMdPhi  : natural := ilog2( rangeTMdPhi  / baseTMPhi   );
+constant widthTMdZ    : natural := ilog2( rangeTMdZ    / baseTMZ     );
+constant widthTMInv2R : natural := ilog2( rangeTMinv2R / baseTMinv2R );
+constant widthTMphiT  : natural := ilog2( rangeTMphiT  / baseTMphiT  );
+constant widthTMzT    : natural := ilog2( rangeTMzT    / baseTMzT    );
 
 -- DR
 
-constant widthDRStubId : natural := 10;
-constant widthDRLayerId: natural := 4;
-
-constant widthDRr    : natural := widthTMr;
-constant widthDRdPhi : natural := widthTMdPhi;
-constant widthDRdZ   : natural := widthTMdZ;
-constant widthDRphi  : natural := widthTMphi;
-constant widthDRz    : natural := widthTMz;
-constant widthDRinv2R: natural := widthTMinv2R;
-constant widthDRphiT : natural := widthTMphiT;
-constant widthDRzT   : natural := widthTMzT;
+constant widthDRr     : natural := widthTMr;
+constant widthDRdPhi  : natural := widthTMdPhi;
+constant widthDRdZ    : natural := widthTMdZ;
+constant widthDRphi   : natural := widthTMphi;
+constant widthDRz     : natural := widthTMz;
+constant widthDRinv2R : natural := widthTMinv2R;
+constant widthDRphiT  : natural := widthTMphiT;
+constant widthDRzT    : natural := widthTMzT;
 
 -- KF
 
-constant widthKFdPhi : natural := widthTMdPhi;
-constant widthKFdZ   : natural := widthTMdZ;
-constant widthKFr    : natural := widthTMr;
-constant widthKFz    : natural := widthTMz;
-constant widthKFmatch: natural := kfWidthMatch;
+constant widthKFr   : natural := widthTMr;
+constant widthKFphi : natural := widthTMphi;
+constant widthKFz   : natural := widthTMz;
+constant widthKFdPhi: natural := widthTMdPhi;
+constant widthKFdZ  : natural := widthTMdZ;
 
-constant baseKFinv2R: real := baseTFPinv2R * 2.0 ** kfBaseShift;
-constant baseKFphiT : real := baseTFPphi0  * 2.0 ** kfBaseShift;
-constant baseKFcot  : real := baseTFPcot   * 2.0 ** kfBaseShift;
-constant baseKFzT   : real := baseTFPz0    * 2.0 ** kfBaseShift;
+constant baseShiftKFinv2R: integer := -ilog2( baseTMinv2R        / baseTFPinv2R );
+constant baseShiftKFphiT : integer := -ilog2( baseTMphiT         / baseTFPphi0  );
+constant baseShiftKFcot  : integer := -ilog2( baseTMzT / baseTMR / baseTFPcot   );
+constant baseShiftKFzT   : integer := -ilog2( baseTMzT           / baseTFPz0    );
 
-constant widthKFinv2R: natural := width( rangeTFPinv2R / baseKFinv2R );
-constant widthKFphiT : natural := width( rangeDTCphiT  / baseKFphiT  );
-constant widthKFcot  : natural := width( baseCot       / baseKFcot   );
-constant widthKFzT   : natural := width( rangeDTCzT    / baseKFzT    );
+constant baseKFinv2R: real := baseTMinv2R        * 2.0 ** baseShiftKFinv2R;
+constant baseKFphiT : real := baseTMphiT         * 2.0 ** baseShiftKFphiT;
+constant baseKFcot  : real := baseTMzT / baseTMR * 2.0 ** baseShiftKFcot;
+constant baseKFzT   : real := baseTMzT           * 2.0 ** baseShiftKFzT;
 
-constant rangeKFphi: real := rangeTMphi * kfRangeFactor;
-
-constant widthKFphi: natural := width( rangeKFphi  / basePhi );
+constant widthKFinv2R: natural := width( rangeTMinv2R / baseKFinv2R );
+constant widthKFphiT : natural := width( rangeTMphiT  / baseKFphiT  );
+constant widthKFcot  : natural := width( rangeTMcot   / baseKFcot   );
+constant widthKFzT   : natural := width( rangeTMzT    / baseKFzT    );
 
 
 end;

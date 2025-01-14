@@ -15,6 +15,7 @@ record
   valid: std_logic;
   start_of_orbit: std_logic;
 end record;
+function nulll return t_packet;
 type t_packets is array ( natural range <> ) of t_packet;
 
 type t_reset is
@@ -59,148 +60,155 @@ record
 end record;
 function nulll return t_stubsDTC;
 
-type t_seedTB is
+type t_metaTB is
 record
-  reset : std_logic;
-  valid : std_logic;
+  reset: std_logic;
+  valid: std_logic;
+  hits : std_logic_vector( 0 to tbNumLayers - 1 );
+end record;
+type t_metasTB is array ( natural range <> ) of t_metaTB;
+function nulll return t_metaTB;
+
+type t_seedsTB is array ( 0 to tbMaxNumSeedingLayer - 1 ) of std_logic_vector( widthTBstubId - 1 downto 0 );
+function nulll return t_seedsTB;
+
+type t_parameterStubTB is
+record
   stubId: std_logic_vector( widthTBstubId  - 1 downto 0 );
+  r     : std_logic_vector( widthTBr       - 1 downto 0 );
+  phi   : std_logic_vector( widthTBphi     - 1 downto 0 );
+  z     : std_logic_vector( widthTBz       - 1 downto 0 );
 end record;
-type t_seedsTB is array ( natural range <> ) of t_seedTB;
-function nulll return t_seedTB;
+type t_parameterStubsTB is array ( natural range <> ) of t_parameterStubTB;
+function nulll return t_parameterStubTB;
 
-type t_stubTB is
+type t_parameterTrackTB is
 record
-  reset  : std_logic;
-  valid  : std_logic;
-  trackId: std_logic_vector( widthTBtrackId - 1 downto 0 );
-  stubId : std_logic_vector( widthTBstubId  - 1 downto 0 );
-  r      : std_logic_vector( widthTBr       - 1 downto 0 );
-  phi    : std_logic_vector( widthTBphi     - 1 downto 0 );
-  z      : std_logic_vector( widthTBz       - 1 downto 0 );
-end record;
-type t_stubsTB is array ( natural range <> ) of t_stubTB;
-function nulll return t_stubTB;
-
-type t_trackTB is
-record
-  reset   : std_logic;
-  valid   : std_logic;
   seedType: std_logic_vector( widthTBseedType - 1 downto 0 );
   inv2R   : std_logic_vector( widthTBinv2R    - 1 downto 0 );
   phi0    : std_logic_vector( widthTBphi0     - 1 downto 0 );
   z0      : std_logic_vector( widthTBz0       - 1 downto 0 );
   cot     : std_logic_vector( widthTBcot      - 1 downto 0 );
 end record;
+type t_parameterTracksTB is array ( natural range <> ) of t_parameterTrackTB;
+function nulll return t_parameterTrackTB;
+
+type t_trackTB is
+record
+  meta : t_metaTB;
+  track: t_parameterTrackTB;
+  seeds: t_seedsTB;
+  stubs: t_parameterStubsTB( 0 to tbMaxNumProjectionLayers - 1 );
+end record;
 type t_tracksTB is array ( natural range <> ) of t_trackTB;
 function nulll return t_trackTB;
 
-type t_channelTB is
+type t_metaTM is
 record
-  track: t_trackTB;
-  seeds: t_seedsTB( tbMaxNumSeedingLayer     - 1 downto 0 );
-  stubs: t_stubsTB( tbMaxNumProjectionLayers - 1 downto 0 );
+  reset: std_logic;
+  valid: std_logic;
+  hits : std_logic_vector( 0 to tmNumLayers - 1 );
 end record;
-type t_channelsTB is array ( natural range <> ) of t_channelTB;
-function nulll return t_channelTB;
+type t_metasTM is array ( natural range <> ) of t_metaTM;
+function nulll return t_metaTM;
 
-type t_stubTM is
+type t_parameterStubTM is
 record
-  reset : std_logic;
-  valid : std_logic;
+  pst   : std_logic;
   stubId: std_logic_vector( widthTMstubId - 1 downto 0 );
   r     : std_logic_vector( widthTMr      - 1 downto 0 );
   phi   : std_logic_vector( widthTMphi    - 1 downto 0 );
   z     : std_logic_vector( widthTMz      - 1 downto 0 );
-  dPhi  : std_logic_vector( widthTMdPhi   - 1 downto 0 );
-  dZ    : std_logic_vector( widthTMdZ     - 1 downto 0 );
 end record;
-type t_stubsTM is array ( natural range <> ) of t_stubTM;
-function nulll return t_stubTM;
+type t_parameterStubsTM is array ( natural range <> ) of t_parameterStubTM;
+function nulll return t_parameterStubTM;
 
-type t_trackTM is
+type t_parameterTrackTM is
 record
-  reset: std_logic;
-  valid: std_logic;
   inv2R: std_logic_vector( widthTMinv2R - 1 downto 0 );
   phiT : std_logic_vector( widthTMphiT  - 1 downto 0 );
   zT   : std_logic_vector( widthTMzT    - 1 downto 0 );
 end record;
+type t_parameterTracksTM is array ( natural range <> ) of t_parameterTrackTM;
+function nulll return t_parameterTrackTM;
+
+type t_trackTM is
+record
+  meta : t_metaTM;
+  track: t_parameterTrackTM;
+  stubs: t_parameterStubsTM( 0 to tmNumLayers - 1 );
+end record;
 type t_tracksTM is array ( natural range <> ) of t_trackTM;
 function nulll return t_trackTM;
 
-type t_channelTM is
-record
-  track: t_trackTM;
-  stubs: t_stubsTM( numLayers - 1 downto 0 );
-end record;
-type t_channelsTM is array ( natural range <> ) of t_channelTM;
-function nulll return t_channelTM;
-
-type t_stubDR is
+constant numLinksTrack: natural := 1 + numLayers;
+type t_metaDR is
 record
   reset: std_logic;
   valid: std_logic;
+  hits : std_logic_vector( 0 to numLayers - 1 );
+end record;
+function nulll return t_metaDR;
+
+type t_parameterStubDR is
+record
   r    : std_logic_vector( widthDRr    - 1 downto 0 );
   phi  : std_logic_vector( widthDRphi  - 1 downto 0 );
   z    : std_logic_vector( widthDRz    - 1 downto 0 );
   dPhi : std_logic_vector( widthDRdPhi - 1 downto 0 );
   dZ   : std_logic_vector( widthDRdZ   - 1 downto 0 );
 end record;
-type t_stubsDR is array ( natural range <> ) of t_stubDR;
-function nulll return t_stubDR;
+type t_parameterStubsDR is array ( natural range <> ) of t_parameterStubDR;
+function nulll return t_parameterStubDR;
 
-type t_trackDR is
+type t_parameterTrackDR is
 record
-  reset: std_logic;
-  valid: std_logic;
   inv2R: std_logic_vector( widthDRinv2R - 1 downto 0 );
   phiT : std_logic_vector( widthDRphiT  - 1 downto 0 );
   zT   : std_logic_vector( widthDRzT    - 1 downto 0 );
 end record;
+type t_parameterTracksDR is array ( natural range <> ) of t_parameterTrackDR;
+function nulll return t_parameterTrackDR;
+function conv( tm: t_parameterTrackTM ) return t_parameterTrackDR;
+
+type t_trackDR is
+record
+  meta : t_metaDR;
+  track: t_parameterTrackDR;
+  stubs: t_parameterStubsDR( 0 to numLayers - 1 );
+end record;
 type t_tracksDR is array ( natural range <> ) of t_trackDR;
 function nulll return t_trackDR;
 
-type t_channelDR is
+type t_parameterStubKF is
 record
-  track: t_trackDR;
-  stubs: t_stubsDR( numLayers - 1 downto 0 );
+  r    : std_logic_vector( widthKFr    - 1 downto 0 );
+  phi  : std_logic_vector( widthKFphi  - 1 downto 0 );
+  z    : std_logic_vector( widthKFz    - 1 downto 0 );
+  dPhi : std_logic_vector( widthKFdPhi - 1 downto 0 );
+  dZ   : std_logic_vector( widthKFdZ   - 1 downto 0 );
 end record;
-type t_channelsDR is array ( natural range <> ) of t_channelDR;
-function nulll return t_channelDR;
+type t_parameterStubsKF is array ( natural range <> ) of t_parameterStubKF;
+function nulll return t_parameterStubKF;
 
-type t_stubKF is
+type t_parameterTrackKF is
 record
-    reset: std_logic;
-    valid: std_logic;
-    r    : std_logic_vector( widthKFr    - 1 downto 0 );
-    phi  : std_logic_vector( widthKFphi  - 1 downto 0 );
-    z    : std_logic_vector( widthKFz    - 1 downto 0 );
-    dPhi : std_logic_vector( widthKFdPhi - 1 downto 0 );
-    dZ   : std_logic_vector( widthKFdZ   - 1 downto 0 );
+  inv2R: std_logic_vector( widthKFinv2R - 1 downto 0 );
+  phiT : std_logic_vector( widthKFphiT  - 1 downto 0 );
+  cot  : std_logic_vector( widthKFcot   - 1 downto 0 );
+  zT   : std_logic_vector( widthKFzT    - 1 downto 0 );
 end record;
-type t_stubsKF is array ( natural range <> ) of t_stubKF;
-function nulll return t_stubKF;
+type t_parameterTracksKF is array ( natural range <> ) of t_parameterTrackKF;
+function nulll return t_parameterTrackKF;
 
 type t_trackKF is
 record
-    reset: std_logic;
-    valid: std_logic;
-    match: std_logic;
-    phiT : std_logic_vector( widthKFphiT  - 1 downto 0 );
-    inv2R: std_logic_vector( widthKFinv2R - 1 downto 0 );
-    cot  : std_logic_vector( widthKFcot   - 1 downto 0 );
-    zT   : std_logic_vector( widthKFzT    - 1 downto 0 );
+  meta : t_metaDR;
+  track: t_parameterTrackKF;
+  stubs: t_parameterStubsKF( 0 to numLayers - 1 );
 end record;
 type t_tracksKF is array ( natural range <> ) of t_trackKF;
 function nulll return t_trackKF;
-
-type t_channelKF is
-record
-    track: t_trackKF;
-    stubs: t_stubsKF(numLayers - 1 downto 0);
-end record;
-type t_channelsKF is array ( natural range <> ) of t_channelKF;
-function nulll return t_channelKF;
 
 subtype t_frame is std_logic_vector( LWORD_WIDTH - 1 downto 0 );
 type t_frames is array ( natural range <> ) of t_frame;
@@ -212,24 +220,30 @@ end;
 package body hybrid_data_types is
 
 
-function nulll return lword is begin return ( ( others => '0' ), '0', '0', '0', '1', '0' ); end function;
-function nulll return t_reset is begin return ( '0', '0', others => ( others => '0' ) ); end function;
-function nulll return t_stubDTCPS is begin return ( '0', '0', others => ( others => '0' ) ); end function;
-function nulll return t_stubDTC2S is begin return ( '0', '0', others => ( others => '0' ) ); end function;
-function nulll return t_stubsDTC is begin return ( ( others => nulll ), ( others => nulll ) ); end function;
-function nulll return t_seedTB is begin return ( '0', '0', ( others => '0' ) ); end function;
-function nulll return t_stubTB is begin return ( '0', '0', others => ( others => '0' ) ); end function;
-function nulll return t_trackTB is begin return ( '0', '0', others => ( others => '0' ) ); end function;
-function nulll return t_channelTB is begin return ( nulll, ( others => nulll ), ( others => nulll ) ); end function;
-function nulll return t_stubTM is begin return ( '0', '0', others => ( others => '0' ) ); end function;
-function nulll return t_trackTM is begin return ( '0', '0', others => ( others => '0' ) ); end function;
-function nulll return t_channelTM is begin return ( nulll, ( others => nulll ) ); end function;
-function nulll return t_stubDR is begin return ( '0', '0', others => ( others => '0' ) ); end function;
-function nulll return t_trackDR is begin return ( '0', '0', others => ( others => '0' ) ); end function;
-function nulll return t_channelDR is begin return ( nulll, ( others => nulll ) ); end function;
-function nulll return t_stubKF is begin return ( '0', '0', others => ( others => '0' ) ); end function;
-function nulll return t_trackKF is begin return ( '0', '0', '0', others => ( others => '0' ) ); end function;
-function nulll return t_channelKF is begin return ( nulll, ( others => nulll ) ); end function;
+function nulll return lword              is begin return ( ( others => '0' ), '0', '0', '0', '1', '0' ); end function;
+function nulll return t_packet           is begin return ( '0', '0' );                                   end function;
+function nulll return t_reset            is begin return ( '0', '0', others => ( others => '0' ) );      end function;
+function nulll return t_stubDTCPS        is begin return ( '0', '0', others => ( others => '0' ) );      end function;
+function nulll return t_stubDTC2S        is begin return ( '0', '0', others => ( others => '0' ) );      end function;
+function nulll return t_stubsDTC         is begin return ( ( others => nulll ), ( others => nulll ) );   end function;
+function nulll return t_metaTB           is begin return ( '0', '0', ( others => '0' ) );                end function;
+function nulll return t_seedsTB          is begin return ( others => ( others => '0' ) );                end function;
+function nulll return t_parameterStubTB  is begin return ( others => ( others => '0' ) );                end function;
+function nulll return t_parameterTrackTB is begin return ( others => ( others => '0' ) );                end function;
+function nulll return t_trackTB          is begin return ( nulll, nulll, nulll, ( others => nulll ) );   end function;
+function nulll return t_metaTM           is begin return ( '0', '0', ( others => '0' ) );                end function;
+function nulll return t_parameterStubTM  is begin return ( '0', others => ( others => '0' ) );           end function;
+function nulll return t_parameterTrackTM is begin return ( others => ( others => '0' ) );                end function;
+function nulll return t_trackTM          is begin return ( nulll, nulll, ( others => nulll ) );          end function;
+function nulll return t_metaDR           is begin return ( '0', '0', ( others => '0' ) );                end function;
+function nulll return t_parameterStubDR  is begin return ( others => ( others => '0' ) );                end function;
+function nulll return t_parameterTrackDR is begin return ( others => ( others => '0' ) );                end function;
+function nulll return t_trackDR          is begin return ( nulll, nulll, ( others => nulll ) );          end function;
+function nulll return t_parameterStubKF  is begin return ( others => ( others => '0' ) );                end function;
+function nulll return t_parameterTrackKF is begin return ( others => ( others => '0' ) );                end function;
+function nulll return t_trackKF          is begin return ( nulll, nulll, ( others => nulll ) );          end function;
+
+function conv( tm: t_parameterTrackTM ) return t_parameterTrackDR is begin return ( tm.inv2R, tm.phiT, tm.zT ); end function;
 
 
 end;

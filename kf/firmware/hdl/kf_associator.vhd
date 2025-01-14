@@ -11,8 +11,8 @@ generic (
 port (
   clk: in std_logic;
   associator_state: in t_state;
-  associator_stub: in t_stubProto;
-  associator_dout: out t_state
+  associator_stub: in t_stub;
+  associator_dout: out t_update
 );
 end;
 
@@ -31,9 +31,9 @@ port (
 end component;
 
 signal core_state: t_state := nulll;
-signal core_stub: t_stubProto := nulll;
+signal core_stub: t_stub := nulll;
 signal core_comb: t_state := nulll;
-signal core_update: t_state := nulll;
+signal core_update: t_update := nulll;
 component kf_associator_core
 generic (
   index: natural
@@ -41,9 +41,9 @@ generic (
 port (
   clk: in std_logic;
   core_state: in t_state;
-  core_stub: in t_stubProto;
+  core_stub: in t_stub;
   core_comb: out t_state;
-  core_update: out t_state
+  core_update: out t_update
 );
 end component;
 
@@ -67,6 +67,7 @@ library ieee;
 use ieee.std_logic_1164.all;
 use work.hybrid_tools.all;
 use work.hybrid_config.all;
+use work.hybrid_data_formats.all;
 use work.kf_data_formats.all;
 use work.kf_data_types.all;
 
@@ -81,36 +82,31 @@ end;
 
 architecture rtl of kf_associator_comb is
 
-constant widthRam: natural := 1 + widthTrack + widthLMap + widthLayer + widthStubs + widthMaybe + widthHitsT + widthHits + widthx0 + widthx1 + widthx2 + widthx3 + widthC00 +  widthC01 +  widthC11 + widthC22 + widthC23 + widthC33;
+constant widthRam: natural := widthTrack + widthHits + widthHits + widthx0 + widthx1 + widthx2 + widthx3 + widthC00 +  widthC01 +  widthC11 + widthC22 + widthC23 + widthC33;
 constant widthAddr: natural := widthFrames;
 type t_ram is array ( 0 to 2 ** widthAddr - 1 ) of std_logic_vector( widthRam - 1 downto 0 );
 attribute ram_style: string;
 function conv( s: std_logic_vector ) return t_state is
   variable k: t_state := nulll;
 begin
-  k.skip  := s( widthTrack + widthLMap + widthLayer + widthStubs + widthMaybe + widthHitsT + widthHits + widthx0 + widthx1 + widthx2 + widthx3 + widthC00 +  widthC01 +  widthC11 + widthC22 + widthC23 + widthC33);
-  k.track := s( widthTrack + widthLMap + widthLayer + widthStubs + widthMaybe + widthHitsT + widthHits + widthx0 + widthx1 + widthx2 + widthx3 + widthC00 +  widthC01 +  widthC11 + widthC22 + widthC23 + widthC33 - 1 downto widthLMap + widthLayer + widthStubs + widthMaybe + widthHitsT + widthHits + widthx0 + widthx1 + widthx2 + widthx3 + widthC00 +  widthC01 +  widthC11 + widthC22 + widthC23 + widthC33 );
-  k.lmap  := s(              widthLMap + widthLayer + widthStubs + widthMaybe + widthHitsT + widthHits + widthx0 + widthx1 + widthx2 + widthx3 + widthC00 +  widthC01 +  widthC11 + widthC22 + widthC23 + widthC33 - 1 downto             widthLayer + widthStubs + widthMaybe + widthHitsT + widthHits + widthx0 + widthx1 + widthx2 + widthx3 + widthC00 +  widthC01 +  widthC11 + widthC22 + widthC23 + widthC33 );
-  k.layer := s(                          widthLayer + widthStubs + widthMaybe + widthHitsT + widthHits + widthx0 + widthx1 + widthx2 + widthx3 + widthC00 +  widthC01 +  widthC11 + widthC22 + widthC23 + widthC33 - 1 downto                          widthStubs + widthMaybe + widthHitsT + widthHits + widthx0 + widthx1 + widthx2 + widthx3 + widthC00 +  widthC01 +  widthC11 + widthC22 + widthC23 + widthC33 );
-  k.stub  := s(                                       widthStubs + widthMaybe + widthHitsT + widthHits + widthx0 + widthx1 + widthx2 + widthx3 + widthC00 +  widthC01 +  widthC11 + widthC22 + widthC23 + widthC33 - 1 downto                                       widthMaybe + widthHitsT + widthHits + widthx0 + widthx1 + widthx2 + widthx3 + widthC00 +  widthC01 +  widthC11 + widthC22 + widthC23 + widthC33 );
-  k.maybe := s(                                                    widthMaybe + widthHitsT + widthHits + widthx0 + widthx1 + widthx2 + widthx3 + widthC00 +  widthC01 +  widthC11 + widthC22 + widthC23 + widthC33 - 1 downto                                                    widthHitsT + widthHits + widthx0 + widthx1 + widthx2 + widthx3 + widthC00 +  widthC01 +  widthC11 + widthC22 + widthC23 + widthC33 );
-  k.hitsT := s(                                                                 widthHitsT + widthHits + widthx0 + widthx1 + widthx2 + widthx3 + widthC00 +  widthC01 +  widthC11 + widthC22 + widthC23 + widthC33 - 1 downto                                                                 widthHits + widthx0 + widthx1 + widthx2 + widthx3 + widthC00 +  widthC01 +  widthC11 + widthC22 + widthC23 + widthC33 );
-  k.hits  := s(                                                                              widthHits + widthx0 + widthx1 + widthx2 + widthx3 + widthC00 +  widthC01 +  widthC11 + widthC22 + widthC23 + widthC33 - 1 downto                                                                             widthx0 + widthx1 + widthx2 + widthx3 + widthC00 +  widthC01 +  widthC11 + widthC22 + widthC23 + widthC33 );
-  k.x0    := s(                                                                                          widthx0 + widthx1 + widthx2 + widthx3 + widthC00 +  widthC01 +  widthC11 + widthC22 + widthC23 + widthC33 - 1 downto                                                                                       widthx1 + widthx2 + widthx3 + widthC00 +  widthC01 +  widthC11 + widthC22 + widthC23 + widthC33 );
-  k.x1    := s(                                                                                                    widthx1 + widthx2 + widthx3 + widthC00 +  widthC01 +  widthC11 + widthC22 + widthC23 + widthC33 - 1 downto                                                                                                 widthx2 + widthx3 + widthC00 +  widthC01 +  widthC11 + widthC22 + widthC23 + widthC33 );
-  k.x2    := s(                                                                                                              widthx2 + widthx3 + widthC00 +  widthC01 +  widthC11 + widthC22 + widthC23 + widthC33 - 1 downto                                                                                                           widthx3 + widthC00 +  widthC01 +  widthC11 + widthC22 + widthC23 + widthC33 );
-  k.x3    := s(                                                                                                                        widthx3 + widthC00 +  widthC01 +  widthC11 + widthC22 + widthC23 + widthC33 - 1 downto                                                                                                                     widthC00 +  widthC01 +  widthC11 + widthC22 + widthC23 + widthC33 );
-  k.C00   := s(                                                                                                                                  widthC00 +  widthC01 +  widthC11 + widthC22 + widthC23 + widthC33 - 1 downto                                                                                                                                 widthC01 +  widthC11 + widthC22 + widthC23 + widthC33 );
-  k.C01   := s(                                                                                                                                              widthC01 +  widthC11 + widthC22 + widthC23 + widthC33 - 1 downto                                                                                                                                             widthC11 + widthC22 + widthC23 + widthC33 );
-  k.C11   := s(                                                                                                                                                          widthC11 + widthC22 + widthC23 + widthC33 - 1 downto                                                                                                                                                        widthC22 + widthC23 + widthC33 );
-  k.C22   := s(                                                                                                                                                                     widthC22 + widthC23 + widthC33 - 1 downto                                                                                                                                                                   widthC23 + widthC33 );
-  k.C23   := s(                                                                                                                                                                                widthC23 + widthC33 - 1 downto                                                                                                                                                                              widthC33 );
-  k.C33   := s(                                                                                                                                                                                           widthC33 - 1 downto                                                                                                                                                                                     0 );
+  k.meta.track := s( widthTrack + widthHits + widthHits + widthx0 + widthx1 + widthx2 + widthx3 + widthC00 +  widthC01 +  widthC11 + widthC22 + widthC23 + widthC33 - 1 downto widthHits + widthHits + widthx0 + widthx1 + widthx2 + widthx3 + widthC00 +  widthC01 +  widthC11 + widthC22 + widthC23 + widthC33 );
+  k.meta.hitsT := s(              widthHits + widthHits + widthx0 + widthx1 + widthx2 + widthx3 + widthC00 +  widthC01 +  widthC11 + widthC22 + widthC23 + widthC33 - 1 downto             widthHits + widthx0 + widthx1 + widthx2 + widthx3 + widthC00 +  widthC01 +  widthC11 + widthC22 + widthC23 + widthC33 );
+  k.meta.hitsS := s(                          widthHits + widthx0 + widthx1 + widthx2 + widthx3 + widthC00 +  widthC01 +  widthC11 + widthC22 + widthC23 + widthC33 - 1 downto                         widthx0 + widthx1 + widthx2 + widthx3 + widthC00 +  widthC01 +  widthC11 + widthC22 + widthC23 + widthC33 );
+  k.track.x0  := s(                                      widthx0 + widthx1 + widthx2 + widthx3 + widthC00 +  widthC01 +  widthC11 + widthC22 + widthC23 + widthC33 - 1 downto                                   widthx1 + widthx2 + widthx3 + widthC00 +  widthC01 +  widthC11 + widthC22 + widthC23 + widthC33 );
+  k.track.x1  := s(                                                widthx1 + widthx2 + widthx3 + widthC00 +  widthC01 +  widthC11 + widthC22 + widthC23 + widthC33 - 1 downto                                             widthx2 + widthx3 + widthC00 +  widthC01 +  widthC11 + widthC22 + widthC23 + widthC33 );
+  k.track.x2  := s(                                                          widthx2 + widthx3 + widthC00 +  widthC01 +  widthC11 + widthC22 + widthC23 + widthC33 - 1 downto                                                       widthx3 + widthC00 +  widthC01 +  widthC11 + widthC22 + widthC23 + widthC33 );
+  k.track.x3  := s(                                                                    widthx3 + widthC00 +  widthC01 +  widthC11 + widthC22 + widthC23 + widthC33 - 1 downto                                                               + widthC00 +  widthC01 +  widthC11 + widthC22 + widthC23 + widthC33 );
+  k.cov.C00   := s(                                                                              widthC00 +  widthC01 +  widthC11 + widthC22 + widthC23 + widthC33 - 1 downto                                                                             widthC01 +  widthC11 + widthC22 + widthC23 + widthC33 );
+  k.cov.C01   := s(                                                                                          widthC01 +  widthC11 + widthC22 + widthC23 + widthC33 - 1 downto                                                                                         widthC11 + widthC22 + widthC23 + widthC33 );
+  k.cov.C11   := s(                                                                                                      widthC11 + widthC22 + widthC23 + widthC33 - 1 downto                                                                                                    widthC22 + widthC23 + widthC33 );
+  k.cov.C22   := s(                                                                                                                 widthC22 + widthC23 + widthC33 - 1 downto                                                                                                               widthC23 + widthC33 );
+  k.cov.C23   := s(                                                                                                                            widthC23 + widthC33 - 1 downto                                                                                                                          widthC33 );
+  k.cov.C33   := s(                                                                                                                                       widthC33 - 1 downto                                                                                                                                 0 );
   return k;
 end function;
 function conv( k: t_state ) return std_logic_vector is
 begin
-  return k.skip & k.track & k.lmap & k.layer & k.stub & k.maybe  & k.hitsT  & k.hits & k.x0 & k.x1 & k.x2 & k.x3 & k.C00 & k.C01 & k.C11 & k.C22 & k.C23 & k.C33;
+  return k.meta.track & k.meta.hitsT & k.meta.hitsS & k.track.x0 & k.track.x1 & k.track.x2 & k.track.x3 & k.cov.C00 & k.cov.C01 & k.cov.C11 & k.cov.C22 & k.cov.C23 & k.cov.C33;
 end function;
 
 -- step 1
@@ -142,20 +138,20 @@ if rising_edge( clk ) then
   din <= comb_updater;
   ram( uint( waddr ) ) <= conv( comb_core );
   optional <= conv( ram( uint( raddr ) ) );
-  if comb_core.valid = '1' and dead = '0' then
-    waddr <= incr( waddr );
+  if comb_core.meta.valid = '1' and dead = '0' then
+    waddr <= waddr + 1;
   end if;
-  if comb_updater.valid = '0' and raddr /= waddr then
-    optional.valid <= '1';
-    raddr <= incr( raddr );
+  if comb_updater.meta.valid = '0' and raddr /= waddr then
+    optional.meta.valid <= '1';
+    raddr <= raddr + 1;
   end if;
-  if comb_updater.reset = '1' then
-    optional.valid <= '0';
+  if comb_updater.meta.reset = '1' then
+    optional.meta.valid <= '0';
     waddr <= ( others => '0' );
     raddr <= ( others => '0' );
     dead <= '1';
   end if;
-  if comb_core.reset = '1' then
+  if comb_core.meta.reset = '1' then
     dead <= '0';
   end if;
 
@@ -167,7 +163,7 @@ if rising_edge( clk ) then
   -- step 3
 
   dout <= regDin;
-  if regRam.valid = '1' then
+  if regRam.meta.valid = '1' then
     dout <= regRam;
   end if;
 
@@ -179,23 +175,23 @@ end;
 
 library ieee;
 use ieee.std_logic_1164.all;
-use ieee.numeric_std.all;
 use work.hybrid_tools.all;
 use work.hybrid_config.all;
+use work.hybrid_data_formats.all;
 use work.hybrid_data_types.all;
 use work.kf_data_formats.all;
 use work.kf_data_types.all;
 
 entity kf_associator_core is
 generic (
-  index: natural
+  index: natural := 0
 );
 port (
   clk: in std_logic;
   core_state: in t_state;
-  core_stub: in t_stubProto;
+  core_stub: in t_stub;
   core_comb: out t_state;
-  core_update: out t_state
+  core_update: out t_update
 );
 end;
 
@@ -203,58 +199,34 @@ architecture rtl of kf_associator_core is
 
 attribute ram_style: string;
 constant widthRam: natural := widthH00 + widthm0 + widthm1 + widthd0 + widthd1;
-constant widthAddr: natural := widthTrack + widthStubs;
+constant widthAddr: natural := widthTrack;
 type t_ram is array ( 0 to 2 ** widthAddr - 1 ) of std_logic_vector( widthRam - 1 downto 0 );
-function conv( s: t_stubProto ) return std_logic_vector is
+function conv( stub: t_parameterStub ) return std_logic_vector is begin return stub.H00 & stub.m0 & stub.m1 & stub.d0 & stub.d1; end function;
+function conv( std: std_logic_vector ) return t_parameterStub is
+  variable stub: t_parameterStub := nulll;
 begin
-  return s.r & s.phi & s.z & s.dPhi & s.dZ;
-end function;
-function conv( s: std_logic_vector ) return t_stubProto is
-  variable r: t_stubProto := nulll;
-begin
-  r.r    := s( widthH00 + widthm0 + widthm1 + widthd0 + widthd1 - 1 downto widthm0 + widthm1 + widthd0 + widthd1 );
-  r.phi  := s(            widthm0 + widthm1 + widthd0 + widthd1 - 1 downto           widthm1 + widthd0 + widthd1 );
-  r.z    := s(                      widthm1 + widthd0 + widthd1 - 1 downto                     widthd0 + widthd1 );
-  r.dPhi := s(                                widthd0 + widthd1 - 1 downto                               widthd1 );
-  r.dZ   := s(                                          widthd1 - 1 downto                                     0 );
-  return r;
-end function;
-
-function f_skip( state: t_state ) return boolean is
-  variable available: natural;
-  variable needed: integer := minLayersKF - count( state.hits, '1' );
-begin
-  if index = numLayers - 1 then
-    return false;
-  end if;
-  available := count( state.hitsT, numLayers - 1, index + 1, '1' );
-  return available >= needed;
+  stub.H00 := std( widthH00 + widthm0 + widthm1 + widthd0 + widthd1 - 1 downto widthm0 + widthm1 + widthd0 + widthd1 );
+  stub.m0  := std(            widthm0 + widthm1 + widthd0 + widthd1 - 1 downto           widthm1 + widthd0 + widthd1 );
+  stub.m1  := std(                      widthm1 + widthd0 + widthd1 - 1 downto                     widthd0 + widthd1 );
+  stub.d0  := std(                                widthd0 + widthd1 - 1 downto                               widthd1 );
+  stub.d1  := std(                                          widthd1 - 1 downto                                     0 );
+  return stub;
 end function;
 
 -- step 1
+signal validUpdate, validMin, validNext, validSkip: std_logic := '0';
 signal state: t_state := nulll;
-signal valid: std_logic := '0';
-signal track: std_logic_vector( widthTrack - 1 downto 0 ) := ( others => '0' );
 signal ram: t_ram := ( others => ( others => '0' ) );
-signal waddr, raddr: std_logic_vector( widthAddr - 1 downto 0 ) := ( others => '0' ); 
-signal counter: std_logic_vector( widthStubs - 1 downto 0 ) := ( others => '0' );
-signal counterReg: std_logic_vector( widthStubs - 1 downto 0 ) := ( others => '0' );
-signal optional: t_stubProto := nulll;
+signal optional: t_parameterStub := nulll;
 attribute ram_style of ram: signal is "block";
 
 -- step 2
-signal lmap: t_lmap := ( others => ( others => '0' ) );
-signal update, comb: t_state := nulll;
+signal update: t_update := nulll;
+signal comb: t_state := nulll;
 
 begin
 
--- step 1
-counter <= ( others => '0' ) when core_stub.valid = '0' or valid /= core_stub.valid or track /= core_stub.track else incr( counterReg );
-waddr <= core_stub.track & counter;
-raddr <= core_state.track & core_state.stub;
-
 -- step 2
-lmap <= conv( state.lmap );
 core_comb <= comb;
 core_update <= update;
 
@@ -264,36 +236,52 @@ if rising_edge( clk ) then
 
   -- step 1
 
-  valid <= core_stub.valid;
-  track <= core_stub.track;
+  validUpdate <= '0';
+  validMin <= '0';
+  validNext <= '0';
+  validSkip <= '0';
   state <= core_state;
-  counterReg <= counter;
-  if core_stub.valid = '1' then
-    ram( uint( waddr ) ) <= conv( core_stub );
+  if core_state.meta.valid = '1' and count( core_state.meta.hitsS, index + 1, numLayers - 1 ) = 0 then
+    if core_state.meta.hitsS( index ) = '0' then
+      if core_state.meta.hitsT( index ) = '1' and count( core_state.meta.hitsS, 0, index ) < kfMaxStubs then
+        validMin <= '1';
+      end if;
+    else
+      validUpdate <= '1';
+      if count( core_state.meta.hitsS, 0, index ) < kfMaxStubs and count( core_state.meta.hitsT, index + 1, numLayers - 1 ) > 0 then
+        if count( core_state.meta.hitsT, index + 1, numLayers - 1 ) + count( core_state.meta.hitsS, 0, index - 1 ) >= kfMinStubs then
+          validSkip <= '1';
+        end if;
+        if count( core_state.meta.hitsS, 0, index ) < kfMinStubs then
+          validNext <= '1';
+        end if;
+      end if;
+    end if;
   end if;
-  optional <= conv( ram( uint( raddr ) ) );
+  if core_stub.meta.valid = '1' then
+    ram( uint( core_stub.meta.track ) ) <= conv( core_stub.param );
+  end if;
+  optional <= conv( ram( uint( core_state.meta.track ) ) );
 
   -- step 2
 
-  update <= state;
+  update <= ( state.meta, nulll, state.track, state.cov );
   comb <= state;
-  if state.valid = '1' then
-    update.H00 <= optional.r;
-    update.m0 <= optional.phi;
-    update.m1 <= optional.z;
-    update.d0 <= optional.dPhi;
-    update.d1 <= optional.dZ;
-    comb.valid <= '0';
-    if state.skip = '0' then
-      if unsigned( state.stub ) < unsigned( lmap( index ) ) then
-        comb.valid <= '1';
-        comb.stub <= incr( state.stub );
-      elsif f_skip( state ) then
-        comb.valid <= '1';
-        comb.skip <= '1';
-        comb.stub <= ( others => '0' );
-      end if;
-    end if;
+  comb.meta.valid <= '0';
+  if validUpdate = '1' then
+    update.stub <= optional;
+  end if;
+  if validMin = '1' then
+    comb.meta.valid <= '1';
+    comb.meta.hitsS( index ) <= '1';
+  end if;
+  if validSkip = '1' then
+    comb.meta.valid <= '1';
+    comb.meta.hitsS( index ) <= '0';
+    comb.meta.hitsS( find( state.meta.hitsT, index + 1, numLayers - 1, '1' ) ) <= '1';
+  end if;
+  if validNext = '1' then
+    update.meta.hitsS( find( state.meta.hitsT, index + 1, numLayers - 1, '1' ) ) <= '1';
   end if;
 
 end if;

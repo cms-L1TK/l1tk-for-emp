@@ -16,7 +16,7 @@ constant radiusInner     : real :=  21.8;                                -- smal
 constant radiusOuter     : real := 112.7;                                -- biggest radius
 constant radiusPS        : real :=  60.0;                                -- transition radius from PS tp 2S modules
 constant halfLength      : real := 270.0;                                -- biggest |z|
-constant halfLengthBarrel: real := 125.0;                                -- half lengt of outer tracker barrel
+constant halfLengthBarrel: real := 120.0;                                -- half lengt of outer tracker barrel
 constant pitchRow2S      : real :=   0.009;                              -- strip pitch of outer tracker sensors in cm
 constant pitchRowPS      : real :=   0.01;                               -- pixel pitch of outer tracker sensors in cm
 constant pitchCol2S      : real :=   5.025;                              -- strip length of outer tracker sensors in cm
@@ -44,19 +44,19 @@ constant maxCot      : real := sinh( maxEta ) + beamWindowZ / chosenRofZ; -- max
 constant maxRphi     : real := max( radiusOuter - chosenRofPhi, chosenRofPhi - radiusInner );
 constant maxRz       : real := max( radiusOuter - chosenRofZ,   chosenRofZ   - radiusInner );
 
-constant widthDSPportA  : natural := 27; -- native DSP port A size of used FPGA 
-constant widthDSPportB  : natural := 18; -- native DSP port B size of used FPGA
-constant widthDSPportC  : natural := 48; -- native DSP port C size of used FPGA
-constant widthAddrBRAM36: natural :=  9; -- smallest address width of an BRAM36 configured as broadest simple dual port memory
-constant widthAddrBRAM18: natural := 10; -- smallest address width of an BRAM18 configured as broadest simple dual port memory
+constant dspWidthPortA  : natural := 27; -- native DSP port A size of used FPGA 
+constant dspWidthPortB  : natural := 18; -- native DSP port B size of used FPGA
+constant dspWidthPortC  : natural := 48; -- native DSP port C size of used FPGA
+constant bram36WidthAddr: natural :=  9; -- smallest address width of an BRAM36 configured as broadest simple dual port memory
+constant bram18WidthAddr: natural := 10; -- smallest address width of an BRAM18 configured as broadest simple dual port memory
 constant dramWidthAddr  : natural :=  6; -- 
 
-constant widthDSPa : natural := widthDSPportA - 1; -- usbale width of DSP port A using biased signed integer
-constant widthDSPb : natural := widthDSPportB - 1; -- usbale width of DSP port B using biased signed integer
-constant widthDSPc : natural := widthDSPportC - 1; -- usbale width of DSP port C using biased signed integer
-constant widthDSPau: natural := widthDSPa - 1;     -- usbale width of DSP port A using biased unsigned integer
-constant widthDSPbu: natural := widthDSPb - 1;     -- usbale width of DSP port B using biased unsigned integer
-constant widthDSPcu: natural := widthDSPc - 1;     -- usbale width of DSP port C using biased unsigned integer
+constant dspWidthA : natural := dspWidthPortA - 1; -- usbale width of DSP port A using biased signed integer
+constant dspWidthB : natural := dspWidthPortB - 1; -- usbale width of DSP port B using biased signed integer
+constant dspWidthC : natural := dspWidthPortC - 1; -- usbale width of DSP port C using biased signed integer
+constant dspWidthAu: natural := dspWidthA - 1;     -- usbale width of DSP port A using biased unsigned integer
+constant dspWidthBu: natural := dspWidthB - 1;     -- usbale width of DSP port B using biased unsigned integer
+constant dspWidthCu: natural := dspWidthC - 1;     -- usbale width of DSP port C using biased unsigned integer
 
 -- DTC
 
@@ -69,7 +69,6 @@ constant numDTCsPerTFP   : natural := numOverlap * numDTCsPerRegion; -- max numb
 constant dtcWidthR       : natural := 12;                            -- number of bits used to represent r w.r.t. chosenRofPhi
 constant dtcWidthPhi     : natural := 15;                            -- number of bits used to represent phi w.r.t. phi sector center
 constant dtcWidthZ       : natural := 14;                            -- number of bits used to represent gloabl z
-constant dtcWidthLayer   : natural :=  3;
 
 -- TFP
 
@@ -79,6 +78,11 @@ constant tfpWidthInv2R: natural := 15; -- number of bits used to represent 1/2R
 constant tfpWidthPhi0 : natural := 12; -- number of bits used to represent phi0 w.r.t. region center
 constant tfpWidthCot  : natural := 16; -- number of bits used to represent cot(Theta)
 constant tfpWidthZ0   : natural := 12; -- number of bits used to represent z0
+
+constant tfpRangeInv2R: real := 1.0 * 0.006;
+constant tfpRangePhi0 : real := 2.0 * 0.7853981696;
+constant tfpRangeCot  : real := 2.0 * 8.0;
+constant tfpRangeZ0   : real := 2.0 * 20.46912512;
 
 -- IR
 
@@ -93,6 +97,14 @@ constant irNumTypedStubs: naturals( 0 to irNumStubTypes - 1 ) := (
 );
 constant irNumQuads: natural := natural( ceil( real( sum( irNumTypedStubs ) ) / 4.0 ) );
 
+constant widthIRBX: natural := 3;
+constant widthsIRr    : naturals( 0 to irNumStubTypes - 1 ) := (  7,  7, 12,  7 );
+constant widthsIRz    : naturals( 0 to irNumStubTypes - 1 ) := ( 12,  8,  7,  7 );
+constant widthsIRphi  : naturals( 0 to irNumStubTypes - 1 ) := ( 14, 17, 14, 14 );
+constant widthsIRalpha: naturals( 0 to irNumStubTypes - 1 ) := (  0,  0,  0,  4 );
+constant widthsIRbend : naturals( 0 to irNumStubTypes - 1 ) := (  3,  4,  3,  4 );
+constant widthIRlayer: natural:= 2;
+
 -- GP
 
 constant gpNumBinsPhiT: natural :=  2;   -- number of phi sectors within a region
@@ -105,6 +117,7 @@ constant htNumBinsPhiT : natural := 32; -- number of bins in phiT in track findi
 
 -- TB
 
+constant tbLatency: natural := 22; -- in 360 MHz clock ticks
 constant tbMaxDiskR   : real := 120.0; --cm
 constant tbLengthZ    : real := 120.0; --cm
 constant tbInnerRadius: real :=  19.6; --cm
@@ -116,14 +129,13 @@ constant tbBarrelLayersRadii: reals( 0 to tbNumBarrelLayers - 1 ) := (  24.9316,
 constant tbNumEndcapDisks: natural := 5;
 constant tbDiskZs: reals( 0 to tbNumEndcapDisks - 1 ) := ( 131.1914, 154.9805, 185.3320, 221.6016, 265.0195 ); -- mean z of outer tracker endcap disks
 constant tbNumEndcap2SRings: natural := 10;
-type t_diskRingsRadii is array ( 0 to max( tbNumBarrelLayers, tbNumEndcapDisks ) - 1 ) of reals ( 0 to tbNumEndcap2SRings - 1 );
+type t_diskRingsRadii is array ( 0 to tbNumEndcapDisks - 1 ) of reals ( 0 to tbNumEndcap2SRings - 1 );
 constant tbEndcap2SRingRaddi: t_diskRingsRadii := (                                                                 -- center radius of outer tracker endcap 2S diks strips
   ( 66.4391, 71.4391, 76.2750, 81.2750, 82.9550, 87.9550, 93.8150, 98.8150, 99.8160, 104.8160 ), -- disk 1
   ( 66.4391, 71.4391, 76.2750, 81.2750, 82.9550, 87.9550, 93.8150, 98.8150, 99.8160, 104.8160 ), -- disk 2
   ( 63.9903, 68.9903, 74.2750, 79.2750, 81.9562, 86.9562, 92.4920, 97.4920, 99.8160, 104.8160 ), -- disk 3
   ( 63.9903, 68.9903, 74.2750, 79.2750, 81.9562, 86.9562, 92.4920, 97.4920, 99.8160, 104.8160 ), -- disk 4
-  ( 63.9903, 68.9903, 74.2750, 79.2750, 81.9562, 86.9562, 92.4920, 97.4920, 99.8160, 104.8160 ), -- disk 5
-  others => ( others => 0.0 )
+  ( 63.9903, 68.9903, 74.2750, 79.2750, 81.9562, 86.9562, 92.4920, 97.4920, 99.8160, 104.8160 )  -- disk 5
 );
 
 constant tbPSDiskLimitR: reals( 0 to tbNumEndcapDisks - 1 ) := ( 0 to 1 => 66.4, others => 64.55 );
@@ -164,30 +176,79 @@ constant tbLimitsChannel: naturals( 0 to tbNumSeedTypes );
 
 constant tbNumLinks: natural := 1 + tbMaxNumProjectionLayers + tbMaxNumSeedingLayer;
 
--- TN
 
-constant tmNumNodes: natural := 1;
-constant tmNumLinks: natural := 1 + numLayers;
+constant widthTBTrackId : natural :=  7;
+constant widthTBStubId  : natural := 10;
+constant widthTBseedType: natural :=  3;
+constant widthTBinv2R   : natural := 14;
+constant widthTBphi0    : natural := 18;
+constant widthTBz0      : natural := 10;
+constant widthTBcot     : natural := 14;
+
+constant baseShiftTBinv2R: integer :=  -9;
+constant baseShiftTBphi0 : integer :=   1;
+constant baseShiftTBcot  : integer := -10;
+constant baseShiftTBz0   : integer :=   0;
+
+constant widthTB2Sr: natural := 4; 
+constant widthsTBr  : naturals( 0 to irNumStubTypes - 1 ) := (  7,  7, 12, 12 );
+constant widthsTBphi: naturals( 0 to irNumStubTypes - 1 ) := ( 12, 12, 12, 12 );
+constant widthsTBz  : naturals( 0 to irNumStubTypes - 1 ) := (  9,  9,  7,  7 );
+constant widthTBstubType: natural := width( irNumStubTypes );
+constant widthTBstubDiksType: natural := widthsIRr( 3 ) - widthTB2Sr;
+subtype r_stubDiskType is natural range widthTBstubDiksType + widthTB2Sr + widthsTBphi( 3 ) + widthsTBz( 3 ) - 1 downto widthTB2Sr + widthsTBphi( 3 ) + widthsTBz( 3 ); 
+
+constant baseShiftsTBr  : naturals( 0 to irNumStubTypes - 1 ) := ( 1, 1, 0, 0 );
+constant baseShiftsTBphi: naturals( 0 to irNumStubTypes - 1 ) := ( 0, 0, 3, 3 );
+constant baseShiftsTBz  : naturals( 0 to irNumStubTypes - 1 ) := ( 0, 4, 0, 0 );
+
+constant widthTBr      : natural := max( widthsTBr   );
+constant widthTBphi    : natural := max( widthsTBphi );
+constant widthTBz      : natural := max( widthsTBz   );
+
+-- TM
+
+constant tmNumLayers: natural := 11;
+constant tmNumNodes : natural := 1;
+constant tmNumLinks : natural := 1 + tmNumLayers;
 
 -- DR
 
-constant drNumNodes            : natural := tmNumNodes;
-constant drNumLinks            : natural := drNumNodes * ( 1 + numLayers );
+constant drNumLinks            : natural := 1 + numLayers;
 constant drMinSharedStubs      : natural :=  3;
 constant drNumComparisonModules: natural := 32;
+
+constant layerIds: naturals( 0 to tmNumLayers - 1 ) := ( 1, 2, 3, 4, 5, 6, 11, 12, 13, 14, 15 );
+type t_layerEncodings is array ( 0 to gpNumBinsZT / 2 - 1 ) of naturals( 0 to numLayers - 1 );
+constant layerEncodings: t_layerEncodings := (
+  ( 1,  2,  3,  4,  5,  6,   0,  0 ), --  0
+  ( 1,  2,  3,  4,  5,  6,   0,  0 ), --  1
+  ( 1,  2,  3,  4,  5,  6,  11,  0 ), --  2
+  ( 1,  2,  3,  4,  5,  6,  11, 12 ), --  3
+  ( 1,  2,  3,  4,  11, 12, 13,  0 ), --  4
+  ( 1,  2,  3,  11, 12, 13, 14,  0 ), --  5
+  ( 1,  2,  3,  11, 12, 13, 14, 15 ), --  6
+  ( 1,  2,  11, 12, 13, 14, 15,  0 ), --  7
+  ( 1,  2,  11, 12, 13, 14, 15,  0 ), --  8
+  ( 1,  2,  11, 12, 13, 14, 15,  0 ), --  9
+  ( 1,  11, 12, 13, 14, 15,  0,  0 ), -- 10
+  ( 1,  11, 12, 13, 14, 15,  0,  0 ), -- 11
+  ( 1,  11, 12, 13, 14, 15,  0,  0 ), -- 12
+  ( 1,  11, 12, 13, 14, 15,  0,  0 ), -- 13
+  ( 1,  11, 12, 13, 14, 15,  0,  0 ), -- 14
+  ( 11, 12, 13, 14, 15,  0,  0,  0 )  -- 15
+);
 
 -- KF
 
 constant kfNumNodes     : natural :=  tmNumNodes; -- number of KF inputs
 constant kfNumSeedLayer : natural :=  2;          -- number of layer building seed
-constant kfMaxSeedLayer : natural :=  3;          -- n first layer to seed in
+constant kfMaxSeedLayer : natural :=  4;          -- n first layer to seed in
 constant kfMinSeedDeltaR: real    :=  1.6;
-constant kfMaxSeedDeltaR: real    := 35.0;
-constant kfBaseShift    : integer :=  0;          -- kf bases are shifted by that power of 2 wrt tfp bases
+constant kfBaseShift    : integer := -1;          -- kf bases are shifted by that power of 2 wrt tfp bases
 constant kfMinStubs     : natural :=  4;          -- minimum number of layers added to a track
 constant kfMaxStubs     : natural :=  8;          -- maximum number of layers added to a track
 constant kfRangeFactor  : real    := 3.0;
-constant kfWidthMatch   : natural :=  1;
 
 
 end;

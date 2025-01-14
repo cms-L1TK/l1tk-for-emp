@@ -20,6 +20,7 @@ constant widthDouble:    natural := 1 + widthDoubleExp + widthDoubleMan;
 constant baseDoubleMan: real    := 2.0 ** widthDoubleMan - 1.0;
 constant biasDoubleExp: natural := 2 ** ( widthDoubleExp - 1 ) - 1;
 
+function digiR( val, base: real ) return real;
 function digi( val, base: real ) return integer;
 function ilog2( r: real ) return integer;
 function ilog2( i: integer ) return integer;
@@ -73,8 +74,11 @@ function overflowed ( std: std_logic_vector ) return boolean;
 function decode( s: std_logic_vector; w: integer ) return std_logic_vector;
 function encode( s: std_logic_vector ) return std_logic_vector;
 
+function count( v: std_logic_vector ) return natural;
 function count( v: std_logic_vector; s: std_logic ) return natural;
-function count( v: std_logic_vector; high, low: natural; s: std_logic ) return natural;
+function count( v: std_logic_vector; low, high: integer ) return natural;
+function count( v: std_logic_vector; low, high: integer; s: std_logic ) return natural;
+function find ( v: std_logic_vector; posFrom, posTo: integer; s: std_logic ) return integer;
 
 function resize( s: std_logic_vector; n: natural ) return std_logic_vector;
 
@@ -108,7 +112,8 @@ end;
 package body hybrid_tools is
 
 
-function digi( val, base: real ) return integer is begin return integer( floor( val / base + 1.0e-11 ) ); end function;
+function digiR( val, base: real ) return real is begin return floor( val / base + 1.0e-11 ); end function;
+function digi( val, base: real ) return integer is begin return integer( digiR( val, base ) ); end function;
 
 function ilog2( r: real ) return integer is variable a: real := abs( r ); begin return integer( ceil( log2( a ) - 1.0e-11 ) ); end function;
 function ilog2( i: integer ) return integer is begin return ilog2( real( i ) ); end function;
@@ -149,8 +154,8 @@ begin
   return stdu( integer( floor( x ) ), w );
 end function;
 
-function stds( x, b:real; w: integer ) return std_logic_vector is begin return stds( digi( x, b ), w ); end function;
-function stdu( x, b:real; w: integer ) return std_logic_vector is begin return stdu( digi( x, b ), w ); end function;
+function stds( x, b:real; w: integer ) return std_logic_vector is begin return stds( digiR( x, b ), w ); end function;
+function stdu( x, b:real; w: integer ) return std_logic_vector is begin return stdu( digiR( x, b ), w ); end function;
 
 function bool( s: std_logic ) return boolean is begin if s = '1' then return true; end if; return false; end function;
 
@@ -303,6 +308,7 @@ begin
   return stdu( n, width( s'length ) );
 end function;
 
+function count( v: std_logic_vector ) return natural is begin return count( v, '1' ); end function;
 function count( v: std_logic_vector; s: std_logic ) return natural is
   variable n: natural := 0;
 begin
@@ -314,8 +320,8 @@ begin
   return n;
 end function;
 
-
-function count( v: std_logic_vector; high, low: natural; s: std_logic ) return natural is
+function count( v: std_logic_vector; low, high: integer ) return natural is begin return count( v, low, high, '1' ); end function;
+function count( v: std_logic_vector; low, high: integer; s: std_logic ) return natural is
   variable n: natural := 0;
 begin
   if low > high then
@@ -327,6 +333,24 @@ begin
     end if;
   end loop;
   return n;
+end function;
+
+function find( v: std_logic_vector; posFrom, posTo: integer; s: std_logic ) return integer is
+begin
+  if posFrom < posTo then
+    for k in v'low to v'high loop
+      if k >= posFrom and k <= posTo and v( k ) = s then
+        return k;
+      end if;
+    end loop;
+  else
+    for k in v'high downto v'low loop
+      if k >= posFrom and k <= posTo and v( k ) = s then
+        return k;
+      end if;
+    end loop;
+  end if;
+  return posTo;
 end function;
 
 function resize( s: std_logic_vector; n: natural ) return std_logic_vector is begin return std_logic_vector( resize( signed( s ), n ) ); end function;

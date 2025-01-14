@@ -39,39 +39,39 @@ architecture rtl of emp_payload is
 
 
 signal in_din: ldata( 4 * N_REGION - 1 downto 0 ) := ( others => nulll );
-signal in_dout: t_channelTM := nulll;
+signal in_dout: t_trackTM := nulll;
 component dr_isolation_in
 port (
   clk: in std_logic;
   in_din: in ldata( 4 * N_REGION - 1 downto 0 );
-  in_dout: out t_channelTM
+  in_dout: out t_trackTM
 );
 end component;
 
-signal dr_din: t_channelTM := nulll;
-signal dr_dout: t_channelDR := nulll;
+signal dr_din: t_trackTM := nulll;
+signal dr_dout: t_trackDR := nulll;
 component dr_top
 port (
   clk: in std_logic;
-  dr_din: in t_channelTM;
-  dr_dout: out t_channelDR
+  dr_din: in t_trackTM;
+  dr_dout: out t_trackDR
 );
 end component;
 
-signal out_packet: t_packets( drNumLinks - 1 downto 0 ) := ( others => ( others => '0' ) );
-signal out_din: t_channelDR := nulll;
+signal out_packet: t_packets( 0 to drNumLinks - 1 ) := ( others => ( others => '0' ) );
+signal out_din: t_trackDR := nulll;
 signal out_dout: ldata( 4 * N_REGION - 1 downto 0 ) := ( others => nulll );
 component dr_isolation_out
 port (
   clk: in std_logic;
-  out_packet: in t_packets( drNumLinks - 1 downto 0 );
-  out_din: in t_channelDR;
+  out_packet: in t_packets( 0 to drNumLinks - 1 );
+  out_din: in t_trackDR;
   out_dout: out ldata( 4 * N_REGION - 1 downto 0 )
 );
 end component;
 
 function conv( l: ldata ) return t_packets is
-  variable s: t_packets( drNumLinks - 1 downto 0 );
+  variable s: t_packets( 0 to drNumLinks - 1 );
 begin
   for k in s'range loop
     s( k ).start_of_orbit := l( k ).start_of_orbit;

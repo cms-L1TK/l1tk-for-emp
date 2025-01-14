@@ -1,0 +1,6 @@
+setup ../ucf/settings.tcl
+src ../ucf/serenity.tcl
+
+include payload.dep
+
+include -c emp-fwk:boards/serenity/dc_vu13p dc_vu13p_so2.dep

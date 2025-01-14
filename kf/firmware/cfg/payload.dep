@@ -1,5 +1,10 @@
 src emp_payload.vhd
 
+src kf_isolation.vhd
 include components.dep
-
 include -c l1tk-for-emp:common components.dep
+
+#include -c emp-fwk:components/links/slink generator.dep
+addrtab -c emp-fwk:components/payload emp_payload.xml
+
+src emp_project_decl.vhd

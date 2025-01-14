@@ -1,3 +1,5 @@
 src dr_top.vhd
-src dr_cm.vhd
+src dr_route.vhd
+src dr_calc.vhd
+src dr_core.vhd
 src dr_data_types.vhd

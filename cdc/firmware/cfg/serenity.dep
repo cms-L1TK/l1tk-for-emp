@@ -1,0 +1,7 @@
+src ../ucf/serenity.tcl
+
+include payload.dep
+src emp_project_decl.vhd
+
+addrtab -c emp-fwk:components/payload emp_payload.xml
+include -c emp-fwk:boards/serenity/dc_vu13p dc_vu13p_so2.dep

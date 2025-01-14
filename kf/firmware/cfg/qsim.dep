@@ -1,0 +1,7 @@
+include -c emp-fwk:boards/testbench top.dep
+
+src tb_decl.vhd
+include payload.dep
+
+include -c emp-fwk:boards/serenity/dc_vu13p packages_so2.dep
+include -c emp-fwk:boards/serenity/dc_vu13p device.dep

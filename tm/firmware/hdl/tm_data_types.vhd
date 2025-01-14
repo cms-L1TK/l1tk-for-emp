@@ -4,159 +4,83 @@ use ieee.math_real.all;
 use work.hybrid_tools.all;
 use work.hybrid_config.all;
 use work.hybrid_data_formats.all;
+use work.hybrid_data_types.all;
 use work.tm_data_formats.all;
 
 
 package tm_data_types is
 
 
-type t_ctrl is
+type t_parameterStubU is
 record
-  reset: std_logic;
-  valid: std_logic;
-end record;
-type t_ctrls is array ( natural range <> ) of t_ctrl;
-
-type t_stubU is
-record
-  reset : std_logic;
-  valid : std_logic;
   pst   : std_logic;
   stubId: std_logic_vector( widthUstubId - 1 downto 0 );
   r     : std_logic_vector( widthUr      - 1 downto 0 );
   phi   : std_logic_vector( widthUphi    - 1 downto 0 );
   z     : std_logic_vector( widthUz      - 1 downto 0 );
 end record;
-type t_stubsU is array ( natural range <> ) of t_stubU;
-function nulll return t_stubU;
+type t_parameterStubsU is array ( natural range <> ) of t_parameterStubU;
+function nulll return t_parameterStubU;
 
-type t_trackU is
+type t_parameterTrackU is
 record
-  reset: std_logic;
-  valid: std_logic;
   inv2R: std_logic_vector( widthUinv2R - 1 downto 0 );
   phiT : std_logic_vector( widthUphiT  - 1 downto 0 );
   cot  : std_logic_vector( widthUcot   - 1 downto 0 );
   zT   : std_logic_vector( widthUzT    - 1 downto 0 );
 end record;
+type t_parameterTracksU is array ( natural range <> ) of t_parameterTrackU;
+function nulll return t_parameterTrackU;
+
+type t_trackU is
+record
+  meta : t_metaTB;
+  track: t_parameterTrackU;
+  stubs: t_parameterStubsU( 0 to tbNumLayers - 1 );
+end record;
 type t_tracksU is array ( natural range <> ) of t_trackU;
 function nulll return t_trackU;
 
-type t_channelU is
+type t_parameterStubH is
 record
-  track: t_trackU;
-  stubs: t_stubsU( tbNumLayers - 1 downto 0 );
-end record;
-type t_channelsU is array ( natural range <> ) of t_channelU;
-function nulll return t_channelU;
-
-type t_stubH is
-record
-  reset : std_logic;
-  valid : std_logic;
   pst   : std_logic;
   stubId: std_logic_vector( widthHstubId - 1 downto 0 );
   r     : std_logic_vector( widthHr      - 1 downto 0 );
   phi   : std_logic_vector( widthHphi    - 1 downto 0 );
   z    :  std_logic_vector( widthHz      - 1 downto 0 );
 end record;
-type t_stubsH is array ( natural range <> ) of t_stubH;
-function nulll return t_stubH;
+type t_parameterStubsH is array ( natural range <> ) of t_parameterStubH;
+function nulll return t_parameterStubH;
 
-type t_trackH is
+type t_parameterTrackH is
 record
-  reset: std_logic;
-  valid: std_logic;
   inv2R: std_logic_vector( widthHinv2R - 1 downto 0 );
   phiT : std_logic_vector( widthHphiT  - 1 downto 0 );
   cot  : std_logic_vector( widthHcot   - 1 downto 0 );
   zT   : std_logic_vector( widthHzT    - 1 downto 0 );
 end record;
+type t_parameterTracksH is array ( natural range <> ) of t_parameterTrackH;
+function nulll return t_parameterTrackH;
+
+type t_trackH is
+record
+  meta : t_metaTB;
+  track: t_parameterTrackH;
+  stubs: t_parameterStubsH( 0 to tbNumLayers - 1 );
+end record;
 type t_tracksH is array ( natural range <> ) of t_trackH;
 function nulll return t_trackH;
 
-type t_channelH is
-record
-  track: t_trackH;
-  stubs: t_stubsH( tbNumLayers - 1 downto 0 );
-end record;
-type t_channelsH is array ( natural range <> ) of t_channelH;
-function nulll return t_channelH;
-
-type t_stubL is
-record
-  reset : std_logic;
-  valid : std_logic;
-  pst   : std_logic;
-  stubId: std_logic_vector( widthLstubId - 1 downto 0 );
-  r     : std_logic_vector( widthLr      - 1 downto 0 );
-  phi   : std_logic_vector( widthLphi    - 1 downto 0 );
-  z     : std_logic_vector( widthLz      - 1 downto 0 );
-end record;
-type t_stubsL is array ( natural range <> ) of t_stubL;
-function nulll return t_stubL;
-
 type t_trackL is
 record
-  reset    : std_logic;
-  valid    : std_logic;
-  inv2R    : std_logic_vector( widthLinv2R     - 1 downto 0 );
-  phiT     : std_logic_vector( widthLphiT      - 1 downto 0 );
-  zT       : std_logic_vector( widthLzT        - 1 downto 0 );
+  meta : t_metaTB;
+  track: t_parameterTrackTM;
+  stubs: t_parameterStubsTM( 0 to tbNumLayers - 1 );
 end record;
 type t_tracksL is array ( natural range <> ) of t_trackL;
 function nulll return t_trackL;
 
-type t_channelL is
-record
-  track: t_trackL;
-  stubs: t_stubsL( tbNumLayers - 1 downto 0 );
-end record;
-type t_channelsL is array ( natural range <> ) of t_channelL;
-function nulll return t_channelL;
-
-type t_trackR is
-record
-  reset : std_logic;
-  valid : std_logic;
-  inv2R : std_logic_vector( widthRinv2R  - 1 downto 0 );
-  phiT  : std_logic_vector( widthRphiT   - 1 downto 0 );
-  zT    : std_logic_vector( widthRzT     - 1 downto 0 );
-end record;
-type t_tracksR is array ( natural range <> ) of t_trackR;
-function nulll return t_trackR;
-
-type t_stubR is
-record
-  reset : std_logic;
-  valid : std_logic;
-  barrel: std_logic;
-  ps    : std_logic;
-  tilt  : std_logic;
-  stubId: std_logic_vector( widthRstubId - 1 downto 0 );
-  layer : std_logic_vector( widthRlayer  - 1 downto 0 );
-  r     : std_logic_vector( widthRr      - 1 downto 0 );
-  phi   : std_logic_vector( widthRphi    - 1 downto 0 );
-  z     : std_logic_vector( widthRz      - 1 downto 0 );
-end record;
-type t_stubsR is array ( natural range <> ) of t_stubR;
-function nulll return t_stubR;
-
-type t_channelRL is
-record
-  track: t_trackR;
-  stubs: t_stubsR( tbNumLayers - 1 downto 0 );
-end record;
-function nulll return t_channelRL;
-
-type t_channelR is
-record
-  track: t_trackR;
-  stubs: t_stubsR( numLayers - 1 downto 0 );
-end record;
-function nulll return t_channelR;
-
-type t_lutSeed is array ( 0 to 2 ** widthAddrBRAM18 - 1 ) of std_logic_vector( widthDSPbu - 1 downto 0 );
+type t_lutSeed is array ( 0 to 2 ** bram18WidthAddr - 1 ) of std_logic_vector( dspWidthBu - 1 downto 0 );
 function init_lutSeed return t_lutSeed;
 subtype r_Scot is natural range widthTBcot - unusedMSBScot - 1 - 1 downto baseShiftScot;
 
@@ -164,18 +88,18 @@ type t_cots is array ( 0 to 2 ** widthTMzT - 1 ) of std_logic_vector( widthHCot 
 function init_cots return t_cots;
 constant cots: t_cots;
 
-constant widthDspSa: natural := widthTBz0 + 1;
-constant widthDspSb: natural := 1 + widthDSPbu + 1;
+constant widthDspSa: natural := widthUzT + 1;
+constant widthDspSb: natural := 1 + dspWidthBu + 1;
 constant widthDspSc: natural := widthuR + 2 + baseShiftUr - baseShiftUz - baseShiftSinvCot;
-constant widthDspSd: natural := widthUzT + 1;
+constant widthDspSd: natural := widthTBz0 + 1;
 constant widthDspSp: natural := max( max( widthDspSa, widthDspSd ) + 1 + widthDspSb, widthDspSc ) + 1;
 type t_dspSeed is
 record
-  A: std_logic_vector( widthDspSa - 1 downto 0 );
-  B: std_logic_vector( widthDspSb - 1 downto 0 );
-  C: std_logic_vector( widthDspSc - 1 downto 0 );
-  D: std_logic_vector( widthDspSd - 1 downto 0 );
-  P: std_logic_vector( widthDspSp - 1 downto 0 );
+  A: std_logic_vector( widthDspSa - 1 downto 0 ); -- disk
+  B: std_logic_vector( widthDspSb - 1 downto 0 ); -- invCot
+  C: std_logic_vector( widthDspSc - 1 downto 0 ); -- chosenRofPhi
+  D: std_logic_vector( widthDspSd - 1 downto 0 ); -- z0
+  P: std_logic_vector( widthDspSp - 1 downto 0 ); -- (disk - z0) * invCot - chosenRofPhi
 end record;
 subtype r_Sr is natural range widthUr + baseShiftUr - baseShiftUz - baseShiftSinvCot + 2 - 1 downto baseShiftUr - baseShiftUz - baseShiftSinvCot + 2;
 
@@ -249,7 +173,7 @@ end record;
 subtype r_Uz is natural range widthUz + 2 - baseShiftTBcot - 1 - 1 downto 2 - baseShiftTBcot - 1;
 
 constant widthDspHinv2Ra: natural := widthUinv2R + 1;
-constant widthDspHinv2Rb: natural := widthDSPportB;
+constant widthDspHinv2Rb: natural := dspWidthPortB;
 constant widthDspHinv2Rp: natural := widthDspHinv2Ra + widthDspHinv2Rb;
 type t_dspHinv2R is
 record
@@ -260,7 +184,7 @@ end record;
 subtype r_Hinv2R is natural range widthDspHinv2Rp - 1 - 1 downto baseShiftTransformHinv2R + 2;
 
 constant widthDspHphiTa: natural := widthUphiT + 1;
-constant widthDspHphiTb: natural := widthDSPportB;
+constant widthDspHphiTb: natural := dspWidthPortB;
 constant widthDspHphiTp: natural := widthDspHphiTa + widthDspHphiTb;
 type t_dspHphiT is
 record
@@ -271,7 +195,7 @@ end record;
 subtype r_HphiT is natural range widthDspHphiTp - 1 - 1 downto baseShiftTransformHphiT + 2;
 
 constant widthDspHcota: natural := widthUcot + 1;
-constant widthDspHcotb: natural := widthDSPportB;
+constant widthDspHcotb: natural := dspWidthPortB;
 constant widthDspHcotp: natural := widthDspHcota + widthDspHcotb;
 type t_dspHcot is
 record
@@ -282,7 +206,7 @@ end record;
 subtype r_Hcot is natural range widthDspHcotp - 1 - 1 downto baseShiftTransformHcot + 2;
 
 constant widthDspHzTa: natural := widthUzT + 1;
-constant widthDspHzTb: natural := widthDSPportB;
+constant widthDspHzTb: natural := dspWidthPortB;
 constant widthDspHzTp: natural := widthDspHzTa + widthDspHzTb;
 type t_dspHzT is
 record
@@ -293,7 +217,7 @@ end record;
 subtype r_HzT is natural range widthDspHzTp - 1 - 1 downto baseShiftTransformHzT + 2;
 
 constant widthDspHra: natural := widthUr + 1;
-constant widthDspHrb: natural := widthDSPportB;
+constant widthDspHrb: natural := dspWidthPortB;
 constant widthDspHrp: natural := widthDspHra + widthDspHrb;
 type t_dspHr is
 record
@@ -304,7 +228,7 @@ end record;
 subtype r_Hr is natural range widthDspHrp - 1 - 1 downto baseShiftTransformHr + 2;
 
 constant widthDspHphia: natural := widthUphi + 1;
-constant widthDspHphib: natural := widthDSPportB;
+constant widthDspHphib: natural := dspWidthPortB;
 constant widthDspHphip: natural := widthDspHphia + widthDspHphib;
 type t_dspHphi is
 record
@@ -315,7 +239,7 @@ end record;
 subtype r_Hphi is natural range widthDspHphip - 1 - 1 downto baseShiftTransformHphi + 2;
 
 constant widthDspHza: natural := widthUz + 1;
-constant widthDspHzb: natural := widthDSPportB;
+constant widthDspHzb: natural := dspWidthPortB;
 constant widthDspHzp: natural := widthDspHza + widthDspHzb;
 type t_dspHz is
 record
@@ -336,7 +260,7 @@ subtype r_LzT    is natural range widthTMzT    + baseShiftHzT    - 1 downto base
 subtype r_Lr     is natural range widthTMr     + baseShiftHr     - 1 downto baseShiftHr;
 
 constant baseShiftLphiT: integer := ilog2( baseHphiT / ( baseHinv2R * baseHr ) );
-constant baseShiftLdphi: integer := ilog2( baseHphi / ( baseHinv2R * baseHr ) );
+constant baseShiftLdphi: integer := -ilog2( ( baseHinv2R * baseHr ) / baseHphi );
 constant widthDspLphia: natural := max( widthLinv2R + baseShiftHinv2R, widthHinv2R ) + 1 + 1;
 constant widthDspLphib: natural := widthHr + 1;
 constant widthDspLphic: natural := widthHphiT + 1 + 2 + baseShiftLphiT;
@@ -373,14 +297,14 @@ subtype r_Ldz is natural range widthDspLzp - 1 downto baseShiftLdz + 2;
 subtype r_Lz is natural range widthLz + baseShiftHz + 1 - 1 downto baseShiftHz + 1;
 subtype r_overLz is natural range widthLdz + 2 - 1 downto widthLz + baseShiftHz + 1 - 1;
 
-constant widthFr  : natural := widthAddrBRAM18 - 1;
-constant baseF: real := baseInv2R * baseR;
-constant baseShiftF: integer := ilog2( baseF / basePhi );
+constant widthFr  : natural := bram18WidthAddr - 1;
+constant baseF: real := baseTMinv2R * baseTMr;
+constant baseShiftF: integer := ilog2( baseF / baseTMphi );
 
 constant maxPitchOverR: real := pitchRowPS / tbInnerRadius;
 constant widthPitchOverR: natural := ilog2( maxPitchOverR / baseF ) + 1;
-constant widthLengthZ: natural := ilog2( rangeTMdZ / baseZ );
-constant widthLengthR: natural := ilog2( pitchCol2S / baseR );
+constant widthLengthZ: natural := ilog2( rangeTMdZ / baseTMz );
+constant widthLengthR: natural := ilog2( pitchCol2S / baseTMr );
 
 constant widthDspFdPhia: natural := 1 + widthLengthR + 1;
 constant widthDspFdPhib: natural := widthTMinv2R + 1;
@@ -398,12 +322,12 @@ record
 end record;
 subtype r_FdPhi is natural range widthTMdPhi + 2 - baseShiftF - 1 downto 2 - baseShiftF;
 
-constant widthAddrLengths: natural := 3 + widthZT - 1;
+constant widthAddrLengths: natural := 3 + widthTMzT - 1;
 type t_ramLengths is array ( 0 to 2 ** widthAddrLengths - 1 ) of std_logic_vector( widthLengthZ + widthLengthR - 1 downto 0 );
 function init_ramLengths return t_ramLengths;
 constant ramLengths: t_ramLengths;
 
-type t_ramPitchOverRs is array ( 0 to 2 ** widthAddrBRAM18 - 1 ) of std_logic_vector( widthPitchOverR - 1 downto 0 ); 
+type t_ramPitchOverRs is array ( 0 to 2 ** bram18WidthAddr - 1 ) of std_logic_vector( widthPitchOverR - 1 downto 0 ); 
 function init_ramPitchOverRs return t_ramPitchOverRs;
 constant ramPitchOverRs: t_ramPitchOverRs;
 
@@ -414,19 +338,13 @@ end;
 package body tm_data_types is
 
 
-function nulll return t_stubU is begin return ( '0', '0', '0', others => ( others => '0' ) ); end function;
-function nulll return t_stubH is begin return ( '0', '0', '0', others => ( others => '0' ) ); end function;
-function nulll return t_stubL is begin return ( '0', '0', '0', others => ( others => '0' ) ); end function;
-function nulll return t_stubR is begin return ( '0', '0', '0', '0', '0', others => ( others => '0' ) ); end function;
-function nulll return t_trackU is begin return ( '0', '0', others => ( others => '0' ) ); end function;
-function nulll return t_trackH is begin return ( '0', '0', others => ( others => '0' ) ); end function;
-function nulll return t_trackL is begin return ( '0', '0', others => ( others => '0' ) ); end function;
-function nulll return t_trackR is begin return ( '0', '0', others => ( others => '0' ) ); end function;
-function nulll return t_channelU is begin return ( nulll, others => ( others => nulll ) ); end function;
-function nulll return t_channelH is begin return ( nulll, others => ( others => nulll ) ); end function;
-function nulll return t_channelL is begin return ( nulll, others => ( others => nulll ) ); end function;
-function nulll return t_channelR is begin return ( nulll, others => ( others => nulll ) ); end function;
-function nulll return t_channelRL is begin return ( nulll, others => ( others => nulll ) ); end function;
+function nulll return t_parameterStubU  is begin return ( '0', others => ( others => '0' ) );  end function;
+function nulll return t_parameterStubH  is begin return ( '0', others => ( others => '0' ) );  end function;
+function nulll return t_parameterTrackU is begin return ( others => ( others => '0' ) );       end function;
+function nulll return t_parameterTrackH is begin return ( others => ( others => '0' ) );       end function;
+function nulll return t_trackU          is begin return ( nulll, nulll, ( others => nulll ) ); end function;
+function nulll return t_trackH          is begin return ( nulll, nulll, ( others => nulll ) ); end function;
+function nulll return t_trackL          is begin return ( nulll, nulll, ( others => nulll ) ); end function;
 
 function init_lutSeed return t_lutSeed is
   variable lut: t_lutSeed;
@@ -434,7 +352,7 @@ function init_lutSeed return t_lutSeed is
 begin
   for k in lut'range loop
     cot := ( real( k ) + 0.5 ) * baseScot;
-    lut( k ) := stdu( 1.0 / cot / baseSinvCot, widthDSPbu );
+    lut( k ) := stdu( 1.0 / cot / baseSinvCot, dspWidthBu );
   end loop;
   return lut;
 end function;
@@ -446,7 +364,7 @@ function init_cots return t_cots is
 begin
   for k in cots'range loop
     std := stdu( k, widthTMzT );
-    zT := ( sreal( std ) + 0.5 ) * baseZT;
+    zT := ( sreal( std ) + 0.5 ) * baseTMzT;
     cots( k ) := stds( digi( zT / chosenRofZ, baseHcot ), widthHcot );
   end loop;
   return cots;
@@ -464,7 +382,7 @@ begin
     barrel := bool( index( index'high ) );
     ps := bool( index( index'high - 1 ) );
     tilt := bool( index( index'high - 2 ) );
-    cot := ( ureal( index( index'high - 3 downto 0 ) ) + 0.5 ) * baseZT / chosenRofZ;
+    cot := ( ureal( index( index'high - 3 downto 0 ) ) + 0.5 ) * baseTMzT / chosenRofZ;
     length := pitchCol2S;
     if ps then
       length := pitchColPS;
@@ -478,12 +396,12 @@ begin
       lengthZ := lengthZ * abs( approxSlope * cot + approxIntercept );
       lengthR := lengthTilt;
     end if;
-    lengthZ := lengthZ + baseZ;
-    if lengthZ < baseZ * 2.0 ** widthLengthZ then
-      ram( k )( widthLengthZ + widthLengthR - 1 downto widthLengthR ) := stdu( digi( lengthZ, baseZ ), widthLengthZ );
+    lengthZ := lengthZ + baseTMz;
+    if lengthZ < baseTMz * 2.0 ** widthLengthZ then
+      ram( k )( widthLengthZ + widthLengthR - 1 downto widthLengthR ) := stdu( digi( lengthZ, baseTMz ), widthLengthZ );
     end if;
-    if lengthR < baseR * 2.0 ** widthLengthR then
-      ram( k )( widthLengthR - 1 downto 0 ) := stdu( digi( lengthR, baseR ), widthLengthR );
+    if lengthR < baseTMr * 2.0 ** widthLengthR then
+      ram( k )( widthLengthR - 1 downto 0 ) := stdu( digi( lengthR, baseTMr ), widthLengthR );
     end if;
   end loop;
   return ram;
@@ -492,21 +410,21 @@ constant ramLengths: t_ramLengths := init_ramLengths;
  
 function init_ramPitchOverRs return t_ramPitchOverRs is
   variable ram: t_ramPitchOverRs := ( others => ( others => '0' ) );
-  variable index: std_logic_vector( widthAddrBRAM18 - 1 downto 0 );
+  variable index: std_logic_vector( bram18WidthAddr - 1 downto 0 );
   variable ps: boolean;
   variable r: real;
   variable pitch: real;
 begin
   for k in ram'range loop
-    index := stdu( k, widthAddrBRAM18 );
+    index := stdu( k, bram18WidthAddr );
     ps := bool( index( index'high ) );
-    r := ( sreal( index( index'high - 1 downto 0 ) ) + 0.5 ) * baseR * 2.0 ** ( widthTMr - widthFr ) + chosenRofPhi;
+    r := ( sreal( index( index'high - 1 downto 0 ) ) + 0.5 ) * baseTMr * 2.0 ** ( widthTMr - widthFr ) + chosenRofPhi;
     pitch := pitchRow2S;
     if ps then
       pitch := pitchRowPS;
     end if;
-    if r > 0.0 and pitch / r < basePhi * 2.0 ** ( baseShiftF + widthPitchOverR ) then
-      ram( k ) := stdu( pitch / r / basePhi / 2.0 ** baseShiftF, widthPitchOverR );
+    if r > 0.0 and pitch / r < baseTMphi * 2.0 ** ( baseShiftF + widthPitchOverR ) then
+      ram( k ) := stdu( pitch / r / baseTMphi / 2.0 ** baseShiftF, widthPitchOverR );
     end if;
   end loop;
   return ram;

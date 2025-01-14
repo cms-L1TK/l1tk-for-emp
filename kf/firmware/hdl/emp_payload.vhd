@@ -21,7 +21,7 @@ port (
   clk_p: in std_logic;
   rst_loc: in std_logic_vector( N_REGION - 1 downto 0 );
   clken_loc: in std_logic_vector( N_REGION - 1 downto 0 );
-  ctrs: in ttc_stuff_array;
+  ctrs: in ttc_stuff_array(N_REGION - 1 downto 0);
   d: in ldata( 4 * N_REGION - 1 downto 0 );
   backpressure: in std_logic_vector( SLINK_MAX_QUADS - 1 downto 0 );
   ipb_out: out ipb_rbus;
@@ -38,39 +38,39 @@ architecture rtl of emp_payload is
 
 
 signal in_din: ldata( 4 * N_REGION - 1 downto 0 ) := ( others => nulll );
-signal in_dout: t_channelsZHT( numNodesKF - 1 downto 0 ) := ( others => nulll );
+signal in_dout: t_trackDR := nulll;
 component kf_isolation_in
 port (
     clk: in std_logic;
     in_din: in ldata( 4 * N_REGION - 1 downto 0 );
-    in_dout: out t_channelsZHT( numNodesKF - 1 downto 0 )
+    in_dout: out t_trackDR
 );
 end component;
 
-signal kf_din: t_channelsZHT( numNodesKF - 1 downto 0 ) := ( others => nulll );
-signal kf_dout: t_channelsKF( numNodesKF - 1 downto 0 ) := ( others => nulll );
+signal kf_din: t_trackDR := nulll;
+signal kf_dout: t_trackKF := nulll;
 component kf_top
 port (
   clk: in std_logic;
-  kf_din: in t_channelsZHT( numNodesKF - 1 downto 0 );
-  kf_dout: out t_channelsKF( numNodesKF - 1 downto 0 )
+  kf_din: in t_trackDR;
+  kf_dout: out t_trackKF
 );
 end component;
 
-signal out_packet: t_packets( numNodesKF * ( numLayers + 1 ) - 1 downto 0 ) := ( others => ( others => '0' ) );
-signal out_din: t_channelsKF( numNodesKF - 1 downto 0 ) := ( others => nulll );
+signal out_packet: t_packets( 0 to numLinksTrack - 1 ) := ( others => ( others => '0' ) );
+signal out_din: t_trackKF := nulll;
 signal out_dout: ldata( 4 * N_REGION - 1 downto 0 ) := ( others => nulll );
 component kf_isolation_out
 port (
   clk: in std_logic;
-  out_packet: in t_packets( numNodesKF * ( numLayers + 1 ) - 1 downto 0 );
-  out_din: in t_channelsKF( numNodesKF - 1 downto 0 );
+  out_packet: in t_packets( 0 to numLinksTrack - 1 );
+  out_din: in t_trackKF;
   out_dout: out ldata( 4 * N_REGION - 1 downto 0 )
 );
 end component;
 
 function conv( l: ldata ) return t_packets is
-  variable s: t_packets( numNodesKF * ( numLayers + 1 ) - 1 downto 0 );
+  variable s: t_packets( 0 to numLinksTrack - 1 );
 begin
   for k in s'range loop
     s( k ).valid := l( k ).valid;
