@@ -41,24 +41,27 @@ END kfout_router;
 -- -------------------------------------------------------------------------
 -- Dummy Skinny Chain router, all tracks same eta sector no routing 
 -- put all tracks on output stream delayed by full router latency to maintain latency in full algo
-
+--
 -- ARCHITECTURE rtl OF kfout_router IS
- 
+--
 -- CONSTANT delay_tracks : INTEGER := 5;
- 
--- SIGNAL Input          : Vector( 0 TO delay_tracks-1 ) := NullVector( delay_tracks );
- 
+--
+-- SIGNAL Input1          : Vector( 0 TO delay_tracks-1 ) := NullVector( delay_tracks );
+-- SIGNAL Input2         : Vector( 0 TO delay_tracks-1 ) := NullVector( delay_tracks );
+--
 -- BEGIN
- 
+--
 -- PROCESS(clk)
 -- BEGIN
 --      IF( RISING_EDGE( clk ) ) THEN
---       Input <= DataIn( 0 ) & Input(0 TO delay_tracks - 2);
---       DataOut( 1 ) <= Input( delay_tracks - 1 );
+--       Input1 <= DataIn( 0 ) & Input1(0 TO delay_tracks - 2);
+--       Input2 <= DataIn( 1 ) & Input2(0 TO delay_tracks - 2);
+--       DataOut( 0 ) <= Input1( delay_tracks - 1 );
+--       DataOut( 1 ) <= Input2( delay_tracks - 1 );
 --      END IF;
 -- END PROCESS;
- 
- 
+--
+--
 -- END rtl;
 
  -------------------------------------------------------------------------
