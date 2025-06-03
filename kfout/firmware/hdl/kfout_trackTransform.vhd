@@ -293,53 +293,53 @@ ARCHITECTURE RTL OF kfout_trackTransform IS
     SIGNAL InvR_array       : InvRARRAY( 0 TO frame_delay - 1 )       := ( OTHERS => ( OTHERS =>'0'));
     SIGNAL EtaSector : INTEGER RANGE 0 TO 16 := 0 ;
 
-    COMPONENT ScaleZT
-      GENERIC ( zdelay : NATURAL );
-      PORT (
-          clk : IN  STD_LOGIC;
-          zT  : IN  SIGNED( widthKFZT - 1 DOWNTO 0 );
-          cot : IN  SIGNED( widthKFcot - 1 DOWNTO 0 );
-          z0  : OUT SIGNED( widthZ0 - 1 DOWNTO 0 )
-      );
-      END COMPONENT;
+    --COMPONENT ScaleZT
+    --  GENERIC ( zdelay : NATURAL );
+    --  PORT (
+    --      clk : IN  STD_LOGIC;
+    --      zT  : IN  SIGNED( widthKFZT - 1 DOWNTO 0 );
+    --      cot : IN  SIGNED( widthKFcot - 1 DOWNTO 0 );
+    --      z0  : OUT SIGNED( widthZ0 - 1 DOWNTO 0 )
+    --  );
+    --  END COMPONENT;
 
-    COMPONENT ScalePhi
-      GENERIC ( phidelay : NATURAL );
-      PORT (
-            clk       : IN STD_LOGIC;
-            phiT      : IN SIGNED( widthKFphiT - 1 DOWNTO 0 );
-            inv2R     : IN SIGNED( widthKFinv2r - 1 DOWNTO 0 );
-            phiSector : IN STD_LOGIC;
-            phi0      : OUT SIGNED( widthPhi0 - 1 DOWNTO 0 )
-      );
-      END COMPONENT;
+    --COMPONENT ScalePhi
+    --  GENERIC ( phidelay : NATURAL );
+    --  PORT (
+    --        clk       : IN STD_LOGIC;
+    --        phiT      : IN SIGNED( widthKFphiT - 1 DOWNTO 0 );
+    --        inv2R     : IN SIGNED( widthKFinv2r - 1 DOWNTO 0 );
+    --        phiSector : IN STD_LOGIC;
+    --        phi0      : OUT SIGNED( widthPhi0 - 1 DOWNTO 0 )
+    --  );
+    --  END COMPONENT;
 
-    COMPONENT CalculateChi
-      PORT (  
-            clk      : IN STD_LOGIC;
-            reset    : IN STD_LOGIC;
-            stubs    : IN t_stubsKF;
-            Chi2Rphi : OUT UNSIGNED( widthChi2RPhi - 1 DOWNTO 0 );
-            Chi2RZ   : OUT UNSIGNED( widthChi2RZ - 1 DOWNTO 0 )
-      );
-      END COMPONENT;
+    --COMPONENT CalculateChi
+    --  PORT (  
+    --        clk      : IN STD_LOGIC;
+    --        reset    : IN STD_LOGIC;
+    --        stubs    : IN t_stubsKF;
+    --        Chi2Rphi : OUT UNSIGNED( widthChi2RPhi - 1 DOWNTO 0 );
+    --        Chi2RZ   : OUT UNSIGNED( widthChi2RZ - 1 DOWNTO 0 )
+    --  );
+    --  END COMPONENT;
 
   BEGIN 
 
-    scaleZentity : ScaleZT GENERIC MAP ( zdelay => frame_delay - 1 - zscaleLatency )
+    scaleZentity : entity work.ScaleZT GENERIC MAP ( zdelay => frame_delay - 1 - zscaleLatency )
                            PORT MAP    ( clk    => clk, 
                                           zT    => zT, 
                                          cot    => cot, 
                                           z0    => z0);
                                        
-    scalePhientity : ScalePhi GENERIC MAP ( phidelay  => frame_delay -1 - phiscaleLatency )
+    scalePhientity : entity work.ScalePhi GENERIC MAP ( phidelay  => frame_delay -1 - phiscaleLatency )
                               PORT MAP    ( clk       => clk, 
                                             phiT      => phiT, 
                                             inv2R     => inv2R, 
                                             phiSector => phiSector, 
                                             phi0      => phi0);
                                          
-    calcChientity : CalculateChi PORT MAP ( clk       => clk, 
+    calcChientity : entity work.CalculateChi PORT MAP ( clk       => clk, 
                                             reset     => reset ( i ),
                                             stubs     => stubs, 
                                             Chi2Rphi  => Chi2Rphi,
